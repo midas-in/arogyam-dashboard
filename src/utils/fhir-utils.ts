@@ -1,0 +1,123 @@
+import { HumanName } from '@smile-cdr/fhirts/dist/FHIR-R4/classes/humanName';
+import type { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
+import { IPractitionerRole } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPractitionerRole';
+import { isEqual } from 'lodash';
+
+/**
+ * retrieve object(s) from an array if it has a given property that has a specified value
+ *
+ * @param objArr - array of objects
+ * @param key - the accessor
+ * @param value - the value the accessor should have
+ * @param all - whether to return all values that are matched or just the first
+ */
+export const getObjLike = <T extends object>(
+  objArr: T[] | undefined,
+  key: string,
+  value: unknown,
+  all = false
+) => {
+  const arr = objArr ?? [];
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    const thisObj = arr[i];
+    const objHasValue = (thisObj as never)[key];
+    if (isEqual(objHasValue, value)) {
+      result.push(thisObj);
+    }
+    if (result.length > 0 && !all) {
+      return result;
+    }
+  }
+  return result;
+};
+
+// fhir constants and  value sets
+// fhir constants
+// https://www.hl7.org/fhir/valueset-identifier-use.html
+export enum IdentifierUseCodes {
+  USUAL = 'usual',
+  OFFICIAL = 'official',
+  TEMP = 'temp',
+  SECONDARY = 'secondary',
+  OLD = 'old',
+}
+
+export enum HumanNameUseCodes {
+  USUAL = 'usual',
+  OFFICIAL = 'official',
+  TEMP = 'temp',
+  NICKNAME = 'nickname',
+  ANONYMOUS = 'anonymous',
+  OLD = 'old',
+  MAIDEN = 'maiden',
+}
+/**
+ *  return a single string representing FHIR human name data type
+ *
+ * @param hName - fhir HumanName object
+ */
+export const parseFhirHumanName = (hName?: HumanName) => {
+  if (!hName) {
+    return;
+  }
+  const { family, given, suffix, prefix } = hName;
+
+  // sanitize variable to make sure its array
+  const confirmArray = (element?: unknown) =>
+    element ? (Array.isArray(element) ? element : [element]) : [];
+
+  const namesArray = [
+    confirmArray(prefix).join(' '),
+    confirmArray(given).join(' '),
+    confirmArray(family).join(' '),
+    confirmArray(suffix).join(' '),
+  ].filter((txt) => !!txt);
+
+  return namesArray.join(' ');
+};
+
+export function getResourcesFromBundle<TResource>(bundle: IBundle) {
+  // eslint-disable-next-line
+  const temp = bundle.entry?.filter((x) => x !== undefined);
+  const rtn = temp?.map((e) => e.resource as TResource) ?? [];
+  return rtn;
+}
+
+// get the code of a practitioner resource type
+// to be used to determine the resource type
+// i.e if it's a practitioner or a supervisor resource type
+// handles multiple codeable concept with multiple codings
+export const getUserTypeCode = (role: IPractitionerRole) =>
+  role.code
+    ?.flatMap((code) => code.coding?.map((coding) => coding.code))
+    .find((code) => code === SUPERVISOR_USER_TYPE_CODE || code === PRACTITIONER_USER_TYPE_CODE);
+
+// get user type from user type code
+export const getUserType = (
+  userTypeCode: typeof PRACTITIONER_USER_TYPE_CODE | typeof SUPERVISOR_USER_TYPE_CODE
+) => {
+  switch (userTypeCode) {
+    case PRACTITIONER_USER_TYPE_CODE:
+      return PRACTITIONER;
+    case SUPERVISOR_USER_TYPE_CODE:
+      return SUPERVISOR;
+  }
+};
+
+export const keycloakIdentifierCoding = {
+  system: 'http://hl7.org/fhir/identifier-type',
+  code: 'KUID',
+  display: 'Keycloak user ID',
+};
+
+export const groupResourceType = 'Group';
+export const compositionResourceType = 'Composition';
+export const practitionerRoleResourceType = 'PractitionerRole';
+
+export const PRACTITIONER = "practitioner";
+export const SUPERVISOR = 'supervisor';
+export const SUPERVISOR_USER_TYPE_CODE = '236321002';
+export const PRACTITIONER_USER_TYPE_CODE = '405623001';
+export const SNOMED_CODEABLE_SYSTEM = 'http://snomed.info/sct';
+export const DEVICE_SETTING_CODEABLE_CODE = '1156600005';
