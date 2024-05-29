@@ -34,13 +34,13 @@ const Sidebar = () => {
       className="relative flex w-full max-w-[20rem] flex-col bg-black bg-clip-border p-4 text-gray-300">
       <div className="p-4 mb-2">
         <Link href={'/'}>
-          <h5 className="text-xl font-medium text-primary-100">Aarogya aarohon</h5>
+          <h5 className="text-xl font-medium text-app_primary">Aarogya aarohan</h5>
         </Link>
       </div>
       <nav className="flex min-w-[240px] flex-col gap-1 p-2 font-sans text-base font-normal text-gray-300">
         {ROUTES.map((route, i) => {
           const activeClass = !route.subRoutes?.length && pathname == route.path
-            ? 'bg-primary-100 text-white'
+            ? 'bg-app_primary text-white'
             : '';
           return <div className="relative block w-full" key={i}>
             <div role="button"
@@ -69,7 +69,7 @@ const Sidebar = () => {
                 <nav className="flex min-w-[240px] flex-col gap-1 p-0 font-sans text-base font-normal text-gray-300">
                   {route.subRoutes.map(subRoute => {
                     const activeClass = pathname.startsWith(subRoute.path)
-                      ? 'bg-primary-100 text-white'
+                      ? 'bg-app_primary text-white'
                       : '';
                     return <Link href={subRoute.path} key={subRoute.label}>
                       <div role="button"

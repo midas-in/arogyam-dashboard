@@ -25,8 +25,8 @@ const confirm = async (id: string, accessToken: string, onSuccess: Function) => 
 const Delete = ({ id, onSuccess }: { id: string, onSuccess: Function }) => {
   const { data: session } = useSession();
   return <Popconfirm
-    title="Delete the task"
-    description="Are you sure to delete this task?"
+    title="Delete the user"
+    description="Are you sure to delete this user?"
     onConfirm={() => confirm(id, session?.accessToken as string, onSuccess)}
     okText="Yes"
     cancelText="No"
@@ -81,10 +81,10 @@ export default function Users() {
 
 
   return (
-    <div className="p-5 bg-gray-100 w-full min-h-[calc(100vh-77px)]	justify-center flex">
+    <div className="p-5 bg-gray-200 w-full min-h-[calc(100vh-65px)]	justify-center flex">
       <div className="p-5 bg-white h-min w-full">
         <div className='flex justify-end'>
-          <Link href='/users/new' className="border px-4 py-1 rounded bg-primary-100 text-white"> + Add user</Link>
+          <Link href='/users/new' className="border px-4 py-1 rounded bg-app_primary text-white"> + Add user</Link>
         </div>
         <div className="h-4" />
         <MyTable

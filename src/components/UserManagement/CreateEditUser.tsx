@@ -369,7 +369,7 @@ export function CreateEditUser({ id }: { id?: string }) {
         ? `Edit User | ${userData.username}`
         : 'Add User';
 
-    return <div className="p-5 bg-gray-100 w-full min-h-[calc(100vh-77px)] justify-center flex-col">
+    return <div className="p-5 bg-gray-200 w-full min-h-[calc(100vh-65px)] justify-center flex-col">
         <h2 className="text-xl font-semibold mb-5">{pageTitle}</h2>
         <div className="p-5 bg-white h-min w-full justify-center flex">
             <div className="">
@@ -441,7 +441,7 @@ export function CreateEditUser({ id }: { id?: string }) {
                 </div>
                 <div className="mt-5 flex justify-center">
                     <button
-                        className="bg-primary-100 disabled:bg-gray-300 text-white font-medium text-sm py-1 px-4 rounded mx-5"
+                        className="bg-app_primary disabled:bg-gray-300 text-white font-medium text-sm py-1 px-4 rounded mx-5"
                         onClick={onSubmit}
                     >
                         Save

@@ -34,11 +34,11 @@ export default function UserGroups() {
 
 
   return (
-    <div className="p-5 bg-gray-100 w-full min-h-[calc(100vh-77px)]	justify-center flex">
+    <div className="p-5 bg-gray-200 w-full min-h-[calc(100vh-65px)]	justify-center flex">
       <div className="p-5 bg-white h-min w-full">
         <div className='flex justify-between items-center'>
           <h2 className="text-xl font-semibold">User Groups</h2>
-          <Link href='/user-groups/new' className="border px-4 py-1 rounded bg-primary-100 text-white"> + Add group</Link>
+          <Link href='/user-groups/new' className="border px-4 py-1 rounded bg-app_primary text-white"> + Add group</Link>
         </div>
         <div className="h-4" />
         <MyTable

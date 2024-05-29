@@ -24,7 +24,7 @@ export function CreateUserGroup() {
         }
     }
 
-    return <div className="p-5 bg-gray-100 w-full min-h-[calc(100vh-77px)] flex-col">
+    return <div className="p-5 bg-gray-200 w-full min-h-[calc(100vh-65px)] flex-col">
         <h2 className="text-xl font-semibold mb-5">Add Group</h2>
         <div className="p-5 bg-white h-min w-full justify-center flex">
             <div className="">
@@ -35,7 +35,7 @@ export function CreateUserGroup() {
                 />
                 <div className="">
                     <button
-                        className="bg-primary-100 disabled:bg-gray-300 text-white font-medium text-sm py-2 px-4 rounded mb-4 mx-5 mt-5"
+                        className="bg-app_primary disabled:bg-gray-300 text-white font-medium text-sm py-2 px-4 rounded mb-4 mx-5 mt-5"
                         onClick={onSubmit}
                         disabled={!name}
                     >

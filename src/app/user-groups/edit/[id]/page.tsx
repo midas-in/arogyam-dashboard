@@ -160,10 +160,10 @@ export default function EditGroup() {
             fetchAllData();
         }
     }, [id, session?.accessToken])
+
     /**
      * Update form initial values when initialValues prop changes, without this
      * the form fields initial values will not change if initialValues is updated
-     *
      */
     React.useEffect(() => {
         form.setFieldsValue({
@@ -203,7 +203,7 @@ export default function EditGroup() {
     }
 
     return (
-        <div className="p-5 bg-gray-100 w-full min-h-[calc(100vh-77px)] flex-col">
+        <div className="p-5 bg-gray-200 w-full min-h-[calc(100vh-65px)] flex-col">
             <h2 className="text-xl font-semibold mb-5">{pageTitle}</h2>
             <div className="p-5 bg-white h-min w-full justify-center flex">
                 <Row className="content-section user-group min-w-[300px]">

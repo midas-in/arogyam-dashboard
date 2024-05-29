@@ -120,7 +120,7 @@ function MyTable({
             </div>
             <div className="h-2" />
             <table className='bg-white border-collapse border w-full'>
-                <thead className='bg-gray-100'>
+                <thead className='bg-gray-200'>
                     {table.getHeaderGroups().map(headerGroup => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => {
