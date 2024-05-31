@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createColumnHelper } from '@tanstack/react-table'
 import { useSession, } from "next-auth/react";
 import Link from 'next/link';
-import type { PopconfirmProps } from 'antd';
-import { Button, message, Popconfirm } from 'antd';
-
+import { Button, message, Popconfirm, Divider, Dropdown } from 'antd';
+import { MoreOutlined } from '@ant-design/icons';
 
 import MyTable from '@/components/MyTable';
 import { fetchUsers, deleteUser } from '@/app/loader';
@@ -38,6 +38,41 @@ const Delete = ({ id, onSuccess }: { id: string, onSuccess: Function }) => {
 const columnHelper = createColumnHelper<any>()
 
 
+const TableAction = ({ info, fetchAllUsers }: { info: any, fetchAllUsers: Function }) => {
+  const router = useRouter();
+  return <div className='flex items-center'>
+    <Link className='text-blue-500' href={`/users/edit/${info.row.original.id}`}>Edit</Link>
+    <Divider type="vertical" />
+    <Dropdown
+      menu={{
+        items: [
+          {
+            key: '1',
+            label: <Button
+              type="link"
+              data-testid="credentials"
+              onClick={() => router.push(`/users/credentials/${info.row.original.id}/${info.row.original.username}`)}
+            >
+              {'Credentials'}
+            </Button>,
+          }, {
+            key: '2',
+            label: <Delete id={info.row.original.id} onSuccess={fetchAllUsers} />
+          }]
+      }}
+      placement="bottomRight"
+      arrow
+      trigger={['click']}
+    >
+      <MoreOutlined
+        data-testid="action-dropdown"
+        className="text-blue-500 text-base"
+      />
+    </Dropdown>
+  </div>
+}
+
+
 export default function Users() {
   const { data: session } = useSession();
   const [users, setUsers] = useState<{}[]>([])
@@ -60,7 +95,7 @@ export default function Users() {
       header: () => <span>email</span>,
     }),
     columnHelper.accessor('Action', {
-      cell: info => <><Link className='text-blue-500' href={`/users/edit/${info.row.original.id}`}>Edit</Link><Delete id={info.row.original.id} onSuccess={fetchAllUsers} /></>,
+      cell: info => <TableAction info={info} fetchAllUsers={fetchAllUsers} />,
       header: () => <span>Action</span>,
     }),
   ]
@@ -81,7 +116,7 @@ export default function Users() {
 
 
   return (
-    <div className="p-5 bg-gray-200 w-full min-h-[calc(100vh-65px)]	justify-center flex">
+    <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)]	justify-center flex">
       <div className="p-5 bg-white h-min w-full">
         <div className='flex justify-end'>
           <Link href='/users/new' className="border px-4 py-1 rounded bg-app_primary text-white"> + Add user</Link>

@@ -186,6 +186,7 @@ export function CreateEditUser({ id }: { id?: string }) {
     const [practitioner, setPractitioner] = useState<IPractitioner>();
     const [practitionerRole, setPractitionerRole] = useState<IPractitionerRole>();
     const [userType, setUserType] = useState<UserTypes>('practitioner');
+    const [errors, setErrors] = useState<{ [key in keyof UserRepresentation]?: boolean }>({});
 
     useEffect(() => {
         if (session?.accessToken) {
@@ -256,6 +257,7 @@ export function CreateEditUser({ id }: { id?: string }) {
             ...prevState,
             [key]: key === 'enabled' ? Boolean(+e.target.value) : e.target.value
         }));
+        setErrors(prev => ({ ...prev, [key]: !e.target.value }));
     }
 
     const onUserTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -269,6 +271,7 @@ export function CreateEditUser({ id }: { id?: string }) {
                 fhir_core_app_id: [value]
             }
         }));
+        setErrors(prev => ({ ...prev, attributes: !value }));
     }
 
     const onGroupSelectionChange = (values: any) => {
@@ -281,6 +284,16 @@ export function CreateEditUser({ id }: { id?: string }) {
                 message.error('Missing session');
                 return;
             }
+            if (!userData.firstName || !userData.lastName || !userData.username || !userData.attributes?.fhir_core_app_id?.length) {
+                setErrors({
+                    firstName: !userData.firstName,
+                    lastName: !userData.lastName,
+                    username: !userData.username,
+                    attributes: !userData.attributes?.fhir_core_app_id?.length
+                })
+                return;
+            }
+
             let userId: string = userData.id || '';
             if (userData.id) {
                 await updateUser(session.accessToken, userData);
@@ -359,7 +372,12 @@ export function CreateEditUser({ id }: { id?: string }) {
             )
             setUserData(defaultUserData);
             message.success(`User ${userData.id ? 'updated' : 'created'} successfully`);
-            router.push('/users');
+            if (userData.id) {
+                router.push('/users');
+            }
+            else {
+                router.push(`/users/credentials/${userId}/${userData.username}`);
+            }
         } catch (error) {
             message.error(`Error ${userData.id ? 'updating' : 'creating'} user`);
         }
@@ -369,28 +387,28 @@ export function CreateEditUser({ id }: { id?: string }) {
         ? `Edit User | ${userData.username}`
         : 'Add User';
 
-    return <div className="p-5 bg-gray-200 w-full min-h-[calc(100vh-65px)] justify-center flex-col">
+    return <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)] justify-center flex-col">
         <h2 className="text-xl font-semibold mb-5">{pageTitle}</h2>
         <div className="p-5 bg-white h-min w-full justify-center flex">
             <div className="">
                 <div className="mt-5 flex">
                     <label className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">First Name<small className="text-red-500">*</small> :</label>
                     <input
-                        className="md:w-[350px] p-2 text-sm font-semilight border border-block rounded"
+                        className={`md:w-[350px] p-2 text-sm font-semilight border border-block rounded ${errors.firstName ? 'border-red-500' : ''}`}
                         value={userData.firstName} onChange={onChange('firstName')}
                     />
                 </div>
                 <div className="mt-5 flex">
                     <label className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">Last Name<small className="text-red-500">*</small> :</label>
                     <input
-                        className="md:w-[350px] p-2 text-sm font-semilight border border-block rounded"
+                        className={`md:w-[350px] p-2 text-sm font-semilight border border-block rounded ${errors.lastName ? 'border-red-500' : ''}`}
                         value={userData.lastName} onChange={onChange('lastName')}
                     />
                 </div>
                 <div className="mt-5 flex">
                     <label className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">Username<small className="text-red-500">*</small> :</label>
                     <input
-                        className="md:w-[350px] p-2 text-sm font-semilight border border-block rounded"
+                        className={`md:w-[350px] p-2 text-sm font-semilight border border-block rounded ${errors.username ? 'border-red-500' : ''}`}
                         value={userData.username} onChange={onChange('username')}
                         disabled={!!userData.id}
                     />
@@ -431,6 +449,7 @@ export function CreateEditUser({ id }: { id?: string }) {
                 <div className="mt-5 flex">
                     <label htmlFor="groups" className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">Application ID<small className="text-red-500">*</small> :</label>
                     <Select
+                        status={errors.attributes ? 'error' : ''}
                         className='md:w-[350px] text-sm font-semilight md:w-[350px]'
                         options={composition?.map((e: any) => {
                             return { value: e.identifier.value, label: `${e.title}(${e.identifier.value})` }

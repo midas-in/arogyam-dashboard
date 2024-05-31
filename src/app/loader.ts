@@ -47,6 +47,11 @@ export async function updateUser(accessToken: string, { id, ...payload }: any) {
     return kcAdminClient.users.update({ id }, payload);
 }
 
+export async function resetUserPassword(accessToken: string, { id, ...credential }: any) {
+    kcAdminClient.setAccessToken(accessToken);
+    return kcAdminClient.users.resetPassword({ id, credential });
+}
+
 export async function deleteUser(accessToken: string, userId: string) {
     kcAdminClient.setAccessToken(accessToken);
     return kcAdminClient.users.del({ id: userId });

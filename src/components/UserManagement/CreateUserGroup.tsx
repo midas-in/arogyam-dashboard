@@ -24,7 +24,7 @@ export function CreateUserGroup() {
         }
     }
 
-    return <div className="p-5 bg-gray-200 w-full min-h-[calc(100vh-65px)] flex-col">
+    return <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)] flex-col">
         <h2 className="text-xl font-semibold mb-5">Add Group</h2>
         <div className="p-5 bg-white h-min w-full justify-center flex">
             <div className="">
