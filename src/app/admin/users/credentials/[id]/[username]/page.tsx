@@ -31,7 +31,7 @@ export const submitForm = (
     })
         .then(() => {
             message.success('Credentials updated successfully');
-            router.push('/users');
+            router.push('/admin/users');
         })
         .catch((e) => {
             message.error(e.description);
@@ -119,7 +119,7 @@ export default function UserCredentials() {
                                     <Button type="primary" htmlType="submit" className="reset-password">
                                         {('Set password')}
                                     </Button>
-                                    <Button onClick={() => router.push('/users')} className="ml-5">
+                                    <Button onClick={() => router.push('/admin/users')} className="ml-5">
                                         {('Cancel')}
                                     </Button>
                                 </Form.Item>

@@ -3,7 +3,7 @@
 import React, { useEffect, useState, Dispatch, SetStateAction } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
-import { Button, Col, Row, Form, Input, Transfer, Spin } from 'antd';
+import { Button, Col, Row, Form, Input, Transfer, Spin, message } from 'antd';
 import type GroupRepresentation from "@keycloak/keycloak-admin-client/lib/defs/groupRepresentation";
 import type RoleRepresentation from "@keycloak/keycloak-admin-client/lib/defs/roleRepresentation";
 
@@ -69,10 +69,10 @@ export const submitForm = async (
 ): Promise<void> => {
     if (values.id) {
         updateUserGroup(accessToken, values)
-            .then(() => console.log(('User Group edited successfully')))
-            .catch((_: Error) => console.log(('There was a problem editing User Group')))
+            .then(() => message.success(('User Group edited successfully')))
+            .catch((_: Error) => message.error(('There was a problem editing User Group')))
             .finally(() => {
-                router.push('/user-groups');
+                router.push('/admin/user-groups');
                 setSubmittingCallback(false);
             });
     } else {
@@ -81,13 +81,13 @@ export const submitForm = async (
             .then((res: any) => {
                 const locationStr = res.headers.get('location')?.split('/') as string[];
                 newUUID = locationStr[locationStr.length - 1];
-                console.log(('User Group created successfully'));
+                message.success(('User Group created successfully'));
             })
-            .catch((_: Error) => console.log(('There was a problem creating User Group')))
+            .catch((_: Error) => message.error(('There was a problem creating User Group')))
             .finally(() => {
                 setSubmittingCallback(false);
                 if (newUUID) {
-                    router.push(`/user-groups/${newUUID}`);
+                    router.push(`/admin/user-groups/${newUUID}`);
                 }
             });
     }
@@ -146,7 +146,7 @@ export default function EditGroup() {
                 await fetchAvailableRoleMappings(session.accessToken, { id }).then(setAvailableRoles)
             }
             catch (e) {
-                console.log('error fetching data', e)
+                message.error('error fetching data')
             }
             finally {
                 setIsLoading(false);
@@ -223,7 +223,7 @@ export default function EditGroup() {
                                     session?.accessToken as string,
                                     setIsSubmitting,
                                     router,
-                                ).catch(() => console.log('There was a problem submitting the form'));
+                                ).catch(() => message.error('There was a problem submitting the form'));
                             }}
                         >
                             <Form.Item
@@ -266,7 +266,7 @@ export default function EditGroup() {
                                 <Button type="primary" htmlType="submit" className="create-group">
                                     {isSubmitting ? ('Saving') : ('Save')}
                                 </Button>
-                                <Button onClick={() => router.push('/user-groups')} className="cancel-group ml-5">
+                                <Button onClick={() => router.push('/admin/user-groups')} className="cancel-group ml-5">
                                     {('Cancel')}
                                 </Button>
                             </Form.Item>

@@ -373,10 +373,10 @@ export function CreateEditUser({ id }: { id?: string }) {
             setUserData(defaultUserData);
             message.success(`User ${userData.id ? 'updated' : 'created'} successfully`);
             if (userData.id) {
-                router.push('/users');
+                router.push('/admin/users');
             }
             else {
-                router.push(`/users/credentials/${userId}/${userData.username}`);
+                router.push(`/admin/users/credentials/${userId}/${userData.username}`);
             }
         } catch (error) {
             message.error(`Error ${userData.id ? 'updating' : 'creating'} user`);
@@ -465,7 +465,7 @@ export function CreateEditUser({ id }: { id?: string }) {
                     >
                         Save
                     </button>
-                    <Link href={'/users'} className="border rounded py-1 px-4" >Cancel</Link>
+                    <Link href={'/admin/users'} className="border rounded py-1 px-4" >Cancel</Link>
                 </div>
             </div>
         </div>

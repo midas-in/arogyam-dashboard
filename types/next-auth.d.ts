@@ -1,4 +1,4 @@
-import { DefaultSession } from 'next-auth'
+import { DefaultSession, TokenSet } from 'next-auth'
 
 declare module 'next-auth' {
     /**
@@ -7,6 +7,7 @@ declare module 'next-auth' {
     interface Session extends DefaultSession {
         refreshToken?: string
         accessToken?: string
+        userType?: string
         permissions?: string[]
     }
 }

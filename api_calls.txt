@@ -1,4 +1,4 @@
-POST https: //auth.aicoe.triveous.tech/admin/realms/fhir/users
+POST https: //auth.aicoe.triveous.tech/admin/realms/fhir/admin/users
 {
     "firstName": "Test",
     "id": "",
@@ -13,7 +13,7 @@ POST https: //auth.aicoe.triveous.tech/admin/realms/fhir/users
     }
 }
 
-PUT https: //auth.aicoe.triveous.tech/admin/realms/fhir/users/525be0e7-0a46-42e6-9491-2cb3a531f30b/groups/867f5611-8381-4f5a-b0ac-2180cb40bdc4
+PUT https: //auth.aicoe.triveous.tech/admin/realms/fhir/admin/users/525be0e7-0a46-42e6-9491-2cb3a531f30b/groups/867f5611-8381-4f5a-b0ac-2180cb40bdc4
 {
     "id": "867f5611-8381-4f5a-b0ac-2180cb40bdc4",
     "name": "Community Health Worker",
@@ -29,7 +29,7 @@ PUT https: //auth.aicoe.triveous.tech/admin/realms/fhir/users/525be0e7-0a46-42e6
     }
 }
   
-PUT https: //auth.aicoe.triveous.tech/admin/realms/fhir/users/525be0e7-0a46-42e6-9491-2cb3a531f30b/groups/5fe1ad9f-9d9f-4478-903f-ba71428023de
+PUT https: //auth.aicoe.triveous.tech/admin/realms/fhir/admin/users/525be0e7-0a46-42e6-9491-2cb3a531f30b/groups/5fe1ad9f-9d9f-4478-903f-ba71428023de
 {
     "id": "5fe1ad9f-9d9f-4478-903f-ba71428023de",
     "name": "Supervisor",
@@ -176,7 +176,7 @@ PUT https: //fhir.aicoe.triveous.tech/fhir/PractitionerRole/34302d33-8b15-4814-a
     ]
 }
 
-PUT https: //auth.aicoe.triveous.tech/admin/realms/fhir/users/525be0e7-0a46-42e6-9491-2cb3a531f30b/reset-password
+PUT https: //auth.aicoe.triveous.tech/admin/realms/fhir/admin/users/525be0e7-0a46-42e6-9491-2cb3a531f30b/reset-password
 {
     "temporary": false,
     "type": "password",
@@ -184,7 +184,7 @@ PUT https: //auth.aicoe.triveous.tech/admin/realms/fhir/users/525be0e7-0a46-42e6
 }
 
 -------- new user --------------
---PUT https://auth.aicoe.triveous.tech/admin/realms/fhir/users/82246998-a1aa-47c7-9910-643e8a0f8775/groups/867f5611-8381-4f5a-b0ac-2180cb40bdc4
+--PUT https://auth.aicoe.triveous.tech/admin/realms/fhir/admin/users/82246998-a1aa-47c7-9910-643e8a0f8775/groups/867f5611-8381-4f5a-b0ac-2180cb40bdc4
 --{"id":"867f5611-8381-4f5a-b0ac-2180cb40bdc4","name":"Community Health Worker","path":"/Community Health Worker","subGroupCount":0,"subGroups":[],"access":{"view":true,"viewMembers":true,"manageMembers":true,"manage":true,"manageMembership":true}}
 
 --PUT https://fhir.aicoe.triveous.tech/fhir/Practitioner/9056559d-6c21-42d9-83e0-b1efe424047b
@@ -222,10 +222,10 @@ PUT https://auth.aicoe.triveous.tech/admin/realms/fhir/groups/867f5611-8381-4f5a
 
 --------- edit user ----- 
 
-PUT https://auth.aicoe.triveous.tech/admin/realms/fhir/users/07a905e5-8ca5-48eb-bea3-c6a72eb82dd9/groups/867f5611-8381-4f5a-b0ac-2180cb40bdc4
+PUT https://auth.aicoe.triveous.tech/admin/realms/fhir/admin/users/07a905e5-8ca5-48eb-bea3-c6a72eb82dd9/groups/867f5611-8381-4f5a-b0ac-2180cb40bdc4
 {"id":"867f5611-8381-4f5a-b0ac-2180cb40bdc4","name":"Community Health Worker","path":"/Community Health Worker","subGroupCount":0,"subGroups":[],"access":{"view":true,"viewMembers":true,"manageMembers":true,"manage":true,"manageMembership":true}}
 
-DELETE https://auth.aicoe.triveous.tech/admin/realms/fhir/users/07a905e5-8ca5-48eb-bea3-c6a72eb82dd9/groups/3faa622c-2a31-4d72-b185-69c76b11da32
+DELETE https://auth.aicoe.triveous.tech/admin/realms/fhir/admin/users/07a905e5-8ca5-48eb-bea3-c6a72eb82dd9/groups/3faa622c-2a31-4d72-b185-69c76b11da32
 
 GET https://fhir.aicoe.triveous.tech/fhir/Group/_search?identifier=07a905e5-8ca5-48eb-bea3-c6a72eb82dd9
 PUT https://fhir.aicoe.triveous.tech/fhir/Practitioner/fc4ccb08-39f8-4ce7-a63b-c5fd26adc210

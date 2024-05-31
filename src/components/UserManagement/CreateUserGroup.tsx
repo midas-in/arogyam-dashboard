@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { createUserGroup } from '@/app/loader';
+import { message } from "antd";
 
 export function CreateUserGroup() {
     const { data: session } = useSession();
@@ -13,12 +14,13 @@ export function CreateUserGroup() {
     const onSubmit = async () => {
         try {
             if (!session?.accessToken) {
-                console.log('Missing session');
+                message.error('Missing session');
                 return;
             }
             await createUserGroup(session.accessToken, { name });
             setName('');
-            router.push('/user-groups');
+            router.push('/admin/user-groups');
+            message.success('Group created successfully');
         } catch (error) {
             console.error('Error fetching roles:', error);
         }
@@ -41,7 +43,7 @@ export function CreateUserGroup() {
                     >
                         Save
                     </button>
-                    <Link href={'/user-groups'} className="border rounded py-2 px-4" >Cancel</Link>
+                    <Link href={'/admin/user-groups'} className="border rounded py-2 px-4" >Cancel</Link>
                 </div>
             </div>
         </div>

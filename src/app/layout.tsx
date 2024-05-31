@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import { getServerSession } from 'next-auth'
+import { authOptions } from './api/auth/[...nextauth]/route';
 import { Providers } from "./Providers";
 import SessionGuard from '@/components/SessionGuard'
 import { Sidebar } from '@/components/Sidebar';
+import { SUPERVISOR, PRACTITIONER } from '@/utils/fhir-utils';
 
 import "./globals.css";
 
@@ -14,11 +17,13 @@ export const metadata: Metadata = {
   description: "Readers app",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const session = await getServerSession(authOptions);
 
   return (
     <html lang="en">
@@ -26,13 +31,13 @@ export default function RootLayout({
         <Providers>
           <SessionGuard>
             <div className="flex flex-1">
-              {/* <Sidebar /> */}
+              {session?.userType === SUPERVISOR && <Sidebar />}
               <div className="flex-1">
                 <header className="bg-white border-b border-gray-100">
                   <nav className="mx-auto flex items-center justify-between p-6 md:px-[60px] py-4" aria-label="Global">
                     <div className="flex lg:flex-1">
                       <Link href={'/'}>
-                        <div className="flex lg:flex-1">
+                        {session?.userType !== SUPERVISOR && <div className="flex lg:flex-1">
                           <Image
                             height={32}
                             width={32}
@@ -41,7 +46,7 @@ export default function RootLayout({
                             alt={"Logo"}
                           />
                           <span className="text-2xl font-medium text-app_primary ml-6">Aarogya Aarohan</span>
-                        </div>
+                        </div>}
                       </Link>
                     </div>
                     <div className="flex flex-1 justify-end">

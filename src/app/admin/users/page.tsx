@@ -41,7 +41,7 @@ const columnHelper = createColumnHelper<any>()
 const TableAction = ({ info, fetchAllUsers }: { info: any, fetchAllUsers: Function }) => {
   const router = useRouter();
   return <div className='flex items-center'>
-    <Link className='text-blue-500' href={`/users/edit/${info.row.original.id}`}>Edit</Link>
+    <Link className='text-blue-500' href={`/admin/users/edit/${info.row.original.id}`}>Edit</Link>
     <Divider type="vertical" />
     <Dropdown
       menu={{
@@ -51,7 +51,7 @@ const TableAction = ({ info, fetchAllUsers }: { info: any, fetchAllUsers: Functi
             label: <Button
               type="link"
               data-testid="credentials"
-              onClick={() => router.push(`/users/credentials/${info.row.original.id}/${info.row.original.username}`)}
+              onClick={() => router.push(`/admin/users/credentials/${info.row.original.id}/${info.row.original.username}`)}
             >
               {'Credentials'}
             </Button>,
@@ -119,7 +119,7 @@ export default function Users() {
     <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)]	justify-center flex">
       <div className="p-5 bg-white h-min w-full">
         <div className='flex justify-end'>
-          <Link href='/users/new' className="border px-4 py-1 rounded bg-app_primary text-white"> + Add user</Link>
+          <Link href='/admin/users/new' className="border px-4 py-1 rounded bg-app_primary text-white"> + Add user</Link>
         </div>
         <div className="h-4" />
         <MyTable

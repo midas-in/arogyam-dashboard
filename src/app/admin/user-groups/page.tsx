@@ -14,7 +14,7 @@ const columns = [
     header: () => <span>Name</span>,
   }),
   columnHelper.accessor('Action', {
-    cell: info => <Link className='text-blue-500' href={`/user-groups/edit/${info.row.original.id}`}>Edit</Link>,
+    cell: info => <Link className='text-blue-500' href={`/admin/user-groups/edit/${info.row.original.id}`}>Edit</Link>,
     header: () => <span>Action</span>,
   }),
 ]
@@ -38,7 +38,7 @@ export default function UserGroups() {
       <div className="p-5 bg-white h-min w-full">
         <div className='flex justify-between items-center'>
           <h2 className="text-xl font-semibold">User Groups</h2>
-          <Link href='/user-groups/new' className="border px-4 py-1 rounded bg-app_primary text-white"> + Add group</Link>
+          <Link href='/admin/user-groups/new' className="border px-4 py-1 rounded bg-app_primary text-white"> + Add group</Link>
         </div>
         <div className="h-4" />
         <MyTable

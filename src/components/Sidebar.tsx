@@ -1,22 +1,28 @@
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
+import { useSession } from "next-auth/react";
+
+import { SUPERVISOR, PRACTITIONER } from '@/utils/fhir-utils';
 
 const ROUTES = [
   {
     label: 'User Management',
     subRoutes: [
-      { label: 'Users', path: '/users' },
-      { label: 'User groups', path: '/user-groups' },
-      { label: 'User roles', path: '/user-roles' }
+      { label: 'Users', path: '/admin/users' },
+      { label: 'User groups', path: '/admin/user-groups' },
+      { label: 'User roles', path: '/admin/user-roles' }
     ],
+    userType: SUPERVISOR
   },
-  { label: 'Tasks', path: '/tasks' }
+  { label: 'Tasks', path: '/tasks', userType: PRACTITIONER }
 ]
 const Sidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session } = useSession();
   const [openUserManagement, setOpenUserManagement] = useState<{ [key: number]: boolean }>({ 0: true });
 
 
@@ -34,11 +40,20 @@ const Sidebar = () => {
       className="relative flex w-full max-w-[20rem] flex-col bg-black bg-clip-border p-4 text-gray-300">
       <div className="p-4 mb-2">
         <Link href={'/'}>
-          <h5 className="text-xl font-medium text-app_primary">Aarogya aarohan</h5>
+          <div className="flex lg:flex-1">
+            <Image
+              height={32}
+              width={32}
+              className={`h-[32px] w-[32px] object-cover`}
+              src={'/images/logo.svg'}
+              alt={"Logo"}
+            />
+            <span className="text-2xl font-medium text-app_primary ml-6">Aarogya Aarohan</span>
+          </div>
         </Link>
       </div>
       <nav className="flex min-w-[240px] flex-col gap-1 p-2 font-sans text-base font-normal text-gray-300">
-        {ROUTES.map((route, i) => {
+        {ROUTES.filter(r => r.userType === session?.userType).map((route, i) => {
           const activeClass = !route.subRoutes?.length && pathname == route.path
             ? 'bg-app_primary text-white'
             : '';
