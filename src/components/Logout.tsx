@@ -2,11 +2,7 @@
 import federatedLogout from "@/utils/federatedLogout";
 
 export default function Logout() {
-    return <>
-        <br />
-        <br />
-        <button onClick={() => federatedLogout()}>
-            Signout
-        </button>
-    </>
+    return <button onClick={() => federatedLogout()}>
+        Logout
+    </button>
 }

@@ -48,3 +48,13 @@ body {
     text-wrap: balance;
   }
 }
+
+.animate-linear {
+  animation: linearLoading 5s infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes linearLoading {
+  from {width: 0px;}
+  to {width: 200px;}
+}

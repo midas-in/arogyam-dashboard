@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState, useRef } from "react";
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchState } from 'react-zoom-pan-pinch';
 
-export default function DiagnosisImage() {
+export function DiagnosisImage() {
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const transformWrapperRef = useRef(null);
 
@@ -26,7 +26,7 @@ export default function DiagnosisImage() {
 
       <>
         {/* zoom */}
-        <div className="absolute right-0 w-[102px] h-8 p-1 bg-white border border-gray-100 justify-center items-center gap-2 inline-flex z-10">
+        <div className="absolute z-10 bottom-[16px] h-8 p-1 bg-white border border-gray-100 justify-center items-center gap-2 inline-flex rounded">
           <div className="w-6 h-6 relative cursor-pointer" onClick={() => zoomOut()}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15.7549 14.2549H14.9649L14.6849 13.9849C15.6649 12.8449 16.2549 11.3649 16.2549 9.75488C16.2549 6.16488 13.3449 3.25488 9.75488 3.25488C6.16488 3.25488 3.25488 6.16488 3.25488 9.75488C3.25488 13.3449 6.16488 16.2549 9.75488 16.2549C11.3649 16.2549 12.8449 15.6649 13.9849 14.6849L14.2549 14.9649V15.7549L19.2549 20.7449L20.7449 19.2549L15.7549 14.2549ZM9.75488 14.2549C7.26488 14.2549 5.25488 12.2449 5.25488 9.75488C5.25488 7.26488 7.26488 5.25488 9.75488 5.25488C12.2449 5.25488 14.2549 7.26488 14.2549 9.75488C14.2549 12.2449 12.2449 14.2549 9.75488 14.2549ZM7.25488 9.25488H12.2549V10.2549H7.25488V9.25488Z" fill="#424141" />
@@ -41,10 +41,10 @@ export default function DiagnosisImage() {
             </svg>
           </div>
         </div>
-        <TransformComponent wrapperClass='!h-full cursor-grab' contentClass='!h-full'>
+        <TransformComponent wrapperClass='!h-full !w-full cursor-grab' contentClass='!w-full !h-full'>
           <Image
-            width={500}
-            height={500}
+            width={700}
+            height={400}
             className={`h-full w-full object-cover`}
             // src={'/images/sample-image.png'}
             src={imgUrl}

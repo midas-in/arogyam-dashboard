@@ -17,7 +17,7 @@ const TaskList = () => {
             <div className="border-b-2 border-blue-500 font-medium text-sm py-2 px-4 cursor-pointer">Pending</div>
             <div className="border-b-2 py-2 px-4 font-light text-sm text-gray-400 cursor-pointer">Completed</div>
         </div>
-        <div className="flex gap-4">
+        {/* <div className="flex gap-4">
             <div className="flex flex-1 items-center rounded border border-gray-100">
                 <span className='material-symbols-outlined text-neutral-600 px-4 placeholder:text-[#A8A8A8]'>search</span>
                 <input
@@ -32,7 +32,7 @@ const TaskList = () => {
                     <option>Recent</option>
                 </select>
             </div>
-        </div>
+        </div> */}
 
         <TaskTable onClick={onClick} />
     </div>
