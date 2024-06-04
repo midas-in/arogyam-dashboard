@@ -2,10 +2,10 @@
 
 import { useRouter } from 'next/navigation';
 
-import { TaskList } from '@/components/Reader/TaskList';
-import { TaskSummary } from '@/components/Reader/TasksSummary';
+import { TaskSummary } from '@/components/RemoteSpecialist/TasksSummary';
+import { TaskList } from '@/components/RemoteSpecialist/TaskList';
 
-export default function Tasks() {
+export default function RemoteSpecialist() {
     const router = useRouter();
 
     const onClick = () => {

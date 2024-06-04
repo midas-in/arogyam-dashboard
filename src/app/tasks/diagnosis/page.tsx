@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { DiagnosisImage } from '@/components/Tasks/DiagnosisImage';
-import { DiagnosisRightBar } from "@/components/Tasks/DiagnosisRightBar";
+import { DiagnosisImage } from '@/components/Reader/DiagnosisImage';
+import { DiagnosisRightBar } from "@/components/Reader/DiagnosisRightBar";
 import { Loader } from "@/components/UI/Loader";
 
 

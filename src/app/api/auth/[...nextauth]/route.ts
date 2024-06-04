@@ -53,7 +53,7 @@ async function fetchRole(accessToken: string, id: string) {
             }
             return userType;
         })
-        .catch(error => console.error("Error fetching userType", error))
+        .catch(error => console.error("Error fetching userType", error.response.data))
 }
 
 export const authOptions: AuthOptions = {

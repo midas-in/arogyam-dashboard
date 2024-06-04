@@ -18,10 +18,10 @@ export function DiagnosisImage() {
     ref={transformWrapperRef}
     initialScale={1}
     minScale={0.5}
-    initialPositionX={0}
-    initialPositionY={0}
     onTransformed={handleZoom}
-    centerZoomedOut={true}>
+    centerZoomedOut={true}
+    centerOnInit={true}
+  >
     {({ zoomIn, zoomOut, resetTransform }) => (
 
       <>
@@ -41,11 +41,11 @@ export function DiagnosisImage() {
             </svg>
           </div>
         </div>
-        <TransformComponent wrapperClass='!h-full !w-full cursor-grab' contentClass='!w-full !h-full'>
+        <TransformComponent wrapperClass='!h-[calc(100vh-185px)] !w-full cursor-grab' contentClass='!h-full'>
           <Image
             width={700}
-            height={400}
-            className={`h-full w-full object-cover`}
+            height={700}
+            className={`h-[700px] w-[700px] bg-gray-100 object-cover`}
             // src={'/images/sample-image.png'}
             src={imgUrl}
             alt={"Image"}

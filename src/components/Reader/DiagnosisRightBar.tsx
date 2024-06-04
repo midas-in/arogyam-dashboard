@@ -41,8 +41,8 @@ export function DiagnosisRightBar({ onSubmit }: { onSubmit: Function }) {
             </button>
         </div>
 
-        <div className={`flex flex-col gap-4 ${!showRightSidebar ? 'hidden' : ''}`}>
-            <div className="mx-6 flex-col justify-start items-start flex">
+        <div className={`flex flex-col gap-4 overflow-y-auto h-[calc(100vh-370px)] ${!showRightSidebar ? 'hidden' : ''}`}>
+            <div className="px-6 flex-col justify-start items-start flex ">
                 <h6 className="text-gray-900 text-base font-medium leading-normal">Provisional Diagnosis</h6>
                 <div className="h-[342px] flex-col justify-start items-start flex mt-1">
                     {diagnosis.map(name => {
@@ -69,7 +69,8 @@ export function DiagnosisRightBar({ onSubmit }: { onSubmit: Function }) {
                     </div>
                 </div>
             </div>
-
+        </div>
+        <div className={`flex flex-col gap-4 ${!showRightSidebar ? 'hidden' : ''}`}>
             <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-center gap-1">
                 <button className="h-12 bg-app_primary disabled:bg-gray-200 rounded justify-center items-center flex flex-1 text-white text-base font-semibold leading-normal" onClick={() => onSubmit()}>
                     {loading

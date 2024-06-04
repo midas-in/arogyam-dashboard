@@ -20,6 +20,7 @@ const config: Config = {
           10: '#F5F8FF',
         },
         gray: {
+          3: '#2F363D1C',
           25: '#F6F6F6',
           100: '#DBDADA',
           200: '#C9C8C8',
