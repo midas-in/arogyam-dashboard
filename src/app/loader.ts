@@ -129,10 +129,16 @@ export function fetchFhirResource(accessToken: string, payload: { resourceType: 
         },
     }).then(({ data }: { data: any }) => data);
     // const fhirClient = createFhirClient(accessToken);
-    // return fhirClient.search(payload).then(({ data }: { data: any }) => data);
+    // return fhirClient.search({ type: resourceType, query }).then(({ data }: { data: any }) => data);
 }
 
-export function createUpdateFhirResource(accessToken: string, payload?: any) {
+export function fetchFhirSingleResource(accessToken: string, payload: { resourceType: string, id: string }) {
+    const { resourceType, id } = payload;
+    const fhirClient = createFhirClient(accessToken);
+    return fhirClient.read({ type: resourceType, id }).then(({ data }: { data: any }) => data);
+}
+
+export function updateFhirResource(accessToken: string, payload?: any) {
     const fhirClient = createFhirClient(accessToken);
     return fhirClient.update({
         type: payload.resourceType,

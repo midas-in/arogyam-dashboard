@@ -77,6 +77,7 @@ export const authOptions: AuthOptions = {
                 token.accessToken = account.access_token
                 token.refreshToken = account.refresh_token
                 token.expiresAt = account.expires_at
+                token.resourceId = account.providerAccountId
                 if (account.access_token) {
                     const decodedToken: any = jwt.decode(account.access_token as string);
                     if (decodedToken) {
@@ -115,6 +116,7 @@ export const authOptions: AuthOptions = {
             session.accessToken = token.accessToken as string;
             session.refreshToken = token.refreshToken as string;
             session.userType = token.userType as string;
+            session.resourceId = token.resourceId as string;
             session.permissions = token.permissions as string[];
             return session
         }

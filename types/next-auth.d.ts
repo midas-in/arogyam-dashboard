@@ -8,6 +8,7 @@ declare module 'next-auth' {
         refreshToken?: string
         accessToken?: string
         userType?: string
+        resourceId?: string
         permissions?: string[]
     }
 }

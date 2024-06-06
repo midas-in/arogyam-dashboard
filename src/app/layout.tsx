@@ -15,8 +15,8 @@ import "./globals.css";
 
 
 export const metadata: Metadata = {
-  title: "Readers app",
-  description: "Readers app",
+  title: "Aarogyam dashboard",
+  description: "Aarogyam dashboard",
 };
 
 export default async function RootLayout({
@@ -72,7 +72,7 @@ export default async function RootLayout({
                                 src={session.user.image ?? ''}
                                 alt={"Profile"}
                               />
-                              : <div className="bg-gray-100 h-[32px] w-[32px] rounded-full object-cover text-center p-1" >
+                              : <div className="bg-gray-100 h-[32px] w-[32px] rounded-full object-cover text-center p-1 cursor-pointer" >
                                 {session.user?.name?.charAt(0)}
                               </div>
                           }

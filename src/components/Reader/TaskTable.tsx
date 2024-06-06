@@ -1,7 +1,7 @@
 import React from 'react';
+import { ITask } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/ITask';
 
-const TaskTable = ({ onClick }: { onClick: Function }) => {
-    const imageIds = Array(10).fill('bc787a9b-e715-4aa6-aca6-f3cc94373dd0');
+const TaskTable = ({ data, onClick }: { data?: ITask[], onClick: Function }) => {
 
     return (
         <div className='mt-4'>
@@ -12,11 +12,11 @@ const TaskTable = ({ onClick }: { onClick: Function }) => {
                         <span className="font-semibold text-base py-2">Action</span>
                     </div>
                 </li>
-                {imageIds.map((id, i) => (
+                {data?.map((task, i) => (
                     <li key={i} className="flex items-center justify-between mb-2 border-b last:border-b-0 border-gray-3 py-2 px-4">
-                        <span className="font-normal text-base">{id}</span>
+                        <span className="font-normal text-base">{task?.id}</span>
                         <div className='w-[100px]'>
-                            <button onClick={() => { onClick(); }} className="bg-app_primary text-white text-sm font-semilight py-1 px-4 rounded">
+                            <button onClick={() => { onClick(task.id); }} className="bg-app_primary text-white text-sm font-semilight py-1 px-4 rounded">
                                 View
                             </button>
                         </div>
@@ -49,4 +49,4 @@ const TaskTable = ({ onClick }: { onClick: Function }) => {
     );
 };
 
-export default TaskTable;
+export { TaskTable };

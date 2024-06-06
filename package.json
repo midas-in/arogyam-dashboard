@@ -1,5 +1,5 @@
 {
-  "name": "readers-app",
+  "name": "aarogyam-dashboard",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -20,6 +20,7 @@
     "fhir-helpers": "^1.0.4",
     "fhir.js": "^0.0.22",
     "i": "^0.3.7",
+    "immutability-helper": "^3.1.1",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "next": "14.2.3",

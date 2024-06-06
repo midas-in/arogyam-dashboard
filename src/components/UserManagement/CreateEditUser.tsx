@@ -25,7 +25,7 @@ import type UserRepresentation from "@keycloak/keycloak-admin-client/lib/defs/us
 import {
     fetchFhirComposition, fetchUserGroups, fetchUserDetail,
     createUser, updateUser, addUserToGroup, removeUserFromGroup, fetchUserAssignedGroups,
-    createUpdateFhirResource, fetchFhirResource
+    updateFhirResource, fetchFhirResource
 } from '@/app/loader';
 
 // interface UserAttributes {
@@ -103,7 +103,7 @@ export const createEditFhirGroupResource = (
             },
         ],
     };
-    return createUpdateFhirResource(accessToken, payload);
+    return updateFhirResource(accessToken, payload);
 };
 
 export const createEditPractitionerRoleResource = (
@@ -171,7 +171,7 @@ export const createEditPractitionerRoleResource = (
     // use update (PUT) for both creating and updating practitioner resource
     // because create (POST) does not honour a supplied resource id
     // and overrides with a server provided one instead
-    return createUpdateFhirResource(accessToken, payload);
+    return updateFhirResource(accessToken, payload);
 };
 
 export function CreateEditUser({ id }: { id?: string }) {
@@ -351,7 +351,7 @@ export function CreateEditUser({ id }: { id?: string }) {
                     },
                 ],
             };
-            const createdPractitioner = await createUpdateFhirResource(session.accessToken, practitionerPayload);
+            const createdPractitioner = await updateFhirResource(session.accessToken, practitionerPayload);
 
             await createEditFhirGroupResource(
                 userData.enabled ?? false,
