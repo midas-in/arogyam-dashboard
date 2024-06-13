@@ -150,7 +150,7 @@ const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
                 width={10}
                 height={10}
                 className={`h-10 w-10 bg-gray-100 object-cover rounded`}
-                src={media ? media?.content?.url ?? '' : '/images/sample-image.png'}
+                src={media ? media?.content?.url?.replace('fhir', 'fhir-temp') ?? '' : ''}
                 alt={"Image"}
                 sizes="100vw"
               />

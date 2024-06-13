@@ -11,9 +11,9 @@ const ROUTES = [
   {
     label: 'User Management',
     subRoutes: [
-      { label: 'Users', path: '/admin/users' },
-      { label: 'User groups', path: '/admin/user-groups' },
-      { label: 'User roles', path: '/admin/user-roles' }
+      { label: 'Users', path: '/admin/users', permission: 'VIEW_KEYCLOAK_USERS' },
+      { label: 'User groups', path: '/admin/user-groups', permission: 'VIEW_KEYCLOAK_USERS' },
+      { label: 'User roles', path: '/admin/user-roles', permission: 'EDIT_KEYCLOAK_USERS' }
     ],
     userType: SUPERVISOR
   },
@@ -81,7 +81,7 @@ const Sidebar = () => {
             {openUserManagement[i] && route.subRoutes?.length && <div className="overflow-hidden">
               <div className="block w-full py-1 font-sans text-sm antialiased font-light leading-normal text-gray-300">
                 <nav className="flex min-w-[240px] flex-col gap-1 p-0 font-sans text-base font-normal text-gray-300">
-                  {route.subRoutes.map(subRoute => {
+                  {route.subRoutes.filter(sr => session?.permissions?.includes(sr.permission)).map(subRoute => {
                     const activeClass = pathname.startsWith(subRoute.path)
                       ? 'bg-app_primary text-white'
                       : '';

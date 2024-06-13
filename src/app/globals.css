@@ -57,6 +57,9 @@ body {
   background-repeat: no-repeat;
   background-position: right .75rem center;
 }
+.custom-select:disabled {
+  background-image: none;
+}
 
 .resize-handle {
   width: 8px;

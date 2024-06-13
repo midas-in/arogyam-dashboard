@@ -18,7 +18,7 @@ const TaskSummary = () => {
 
     useEffect(() => {
         if (session?.accessToken) {
-            const status = ['requested', 'second-opinion', 'completed'];
+            const status = ['requested', 'completed'];
 
             Promise.all([
                 ...status.map(st => fetchFhirResource(session?.accessToken as string, {
@@ -100,7 +100,7 @@ const TaskSummary = () => {
                     </div>
                 </div>
             </div>
-            <div className="flex flex-1 justify-between items-center py-5 px-6 h-[6.125rem] rounded border border-[#dde2ee] bg-white">
+            {/* <div className="flex flex-1 justify-between items-center py-5 px-6 h-[6.125rem] rounded border border-[#dde2ee] bg-white">
                 <div className="flex flex-1 justify-between items-center">
                     <div className="flex flex-col items-start gap-0.5">
                         <div className="text-base text-gray-600">Second opinion</div>
@@ -118,7 +118,7 @@ const TaskSummary = () => {
                         />
                     </div>
                 </div>
-            </div>
+            </div> */}
             <div className="flex flex-1 justify-between items-center py-5 px-6 h-[6.125rem] rounded border border-[#dde2ee] bg-white">
                 <div className="flex flex-1 justify-between items-center">
                     <div className="flex flex-col items-start gap-0.5">

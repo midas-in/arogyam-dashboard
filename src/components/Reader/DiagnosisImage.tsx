@@ -72,7 +72,7 @@ export function DiagnosisImage({ medias, activeMediaIndex = 0, setActiveMediaInd
             width={700}
             height={700}
             className={`h-[700px] w-[700px] bg-gray-100 object-cover`}
-            src={medias && medias?.length ? medias[activeMediaIndex]?.content?.url ?? '' : ''}
+            src={medias && medias?.length ? medias[activeMediaIndex]?.content?.url?.replace('fhir', 'fhir-temp') ?? '' : ''}
             alt={"Image"}
             sizes="100vw"
           />

@@ -2,9 +2,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from './api/auth/[...nextauth]/route';
 
 import ReaderTasks from '@/components/Reader/TasksMain';
-import RemoteSpecialistTasks from '@/components/RemoteSpecialist/TasksMain';
+import RemoteSpecialistTasks from '@/components/Specialist/TasksMain';
 import Login from '@/components/Login';
-import { PRACTITIONER, REMOTE_SPECIALIST } from '@/utils/fhir-utils';
+import { PRACTITIONER, REMOTE_SPECIALIST, SENIOR_SPECIALIST } from '@/utils/fhir-utils';
 
 
 export default async function Home() {
@@ -23,7 +23,7 @@ export default async function Home() {
   // }
 
   // TODO
-  // if (session?.userType === REMOTE_SPECIALIST) {
+  // if (session?.userType === REMOTE_SPECIALIST || session?.userType === SENIOR_SPECIALIST) {
   if (session?.userType === PRACTITIONER) {
     return <RemoteSpecialistTasks />
   }

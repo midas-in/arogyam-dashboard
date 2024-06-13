@@ -13,16 +13,19 @@ const columns = [
     cell: info => info.getValue(),
     header: () => <span>Name</span>,
   }),
-  columnHelper.accessor('Action', {
-    cell: info => <Link className='text-blue-500' href={`/admin/user-groups/edit/${info.row.original.id}`}>Edit</Link>,
-    header: () => <span>Action</span>,
-  }),
-]
 
+]
 
 export default function UserGroups() {
   const { data: session } = useSession();
   const [groups, setGroups] = React.useState<{}[]>([]);
+
+  if (session?.permissions?.includes('EDIT_KEYCLOAK_USERS')) {
+    columnHelper.accessor('Action', {
+      cell: info => <Link className='text-blue-500' href={`/admin/user-groups/edit/${info.row.original.id}`}>Edit</Link>,
+      header: () => <span>Action</span>,
+    })
+  }
 
   useEffect(() => {
     if (session?.accessToken) {
@@ -38,7 +41,7 @@ export default function UserGroups() {
       <div className="p-5 bg-white h-min w-full">
         <div className='flex justify-between items-center'>
           <h2 className="text-xl font-semibold">User Groups</h2>
-          <Link href='/admin/user-groups/new' className="border px-4 py-1 rounded bg-app_primary text-white"> + Add group</Link>
+          {session?.permissions?.includes('EDIT_KEYCLOAK_USERS') && <Link href='/admin/user-groups/new' className="border px-4 py-1 rounded bg-app_primary text-white"> + Add group</Link>}
         </div>
         <div className="h-4" />
         <MyTable

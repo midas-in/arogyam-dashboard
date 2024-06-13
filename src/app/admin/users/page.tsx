@@ -94,11 +94,13 @@ export default function Users() {
     columnHelper.accessor('email', {
       header: () => <span>email</span>,
     }),
-    columnHelper.accessor('Action', {
+  ]
+  if (session?.permissions?.includes('EDIT_KEYCLOAK_USERS')) {
+    columns.push(columnHelper.accessor('Action', {
       cell: info => <TableAction info={info} fetchAllUsers={fetchAllUsers} />,
       header: () => <span>Action</span>,
-    }),
-  ]
+    }))
+  }
 
   const fetchAllUsers = () => {
     if (session?.accessToken) {
@@ -118,9 +120,9 @@ export default function Users() {
   return (
     <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)]	justify-center flex">
       <div className="p-5 bg-white h-min w-full">
-        <div className='flex justify-end'>
+        {session?.permissions?.includes('EDIT_KEYCLOAK_USERS') && <div className='flex justify-end'>
           <Link href='/admin/users/new' className="border px-4 py-1 rounded bg-app_primary text-white"> + Add user</Link>
-        </div>
+        </div>}
         <div className="h-4" />
         <MyTable
           {...{

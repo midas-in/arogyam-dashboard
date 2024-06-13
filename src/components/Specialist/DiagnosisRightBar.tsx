@@ -7,10 +7,11 @@ interface DiagnosisRightBarProps {
     status?: IQuestionnaire['status'] | 'completed' | '';
     onSubmit: (answers: any) => void;
     sendForSecondOpinion: () => void;
+    allowSecondOpinion: boolean
 }
 
 const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
-    const { questionnaires, status, onSubmit, sendForSecondOpinion } = props;
+    const { questionnaires, status, onSubmit, sendForSecondOpinion, allowSecondOpinion } = props;
 
     const [showRightSidebar, setShowRightSidebar] = useState(true);
     const [answers, setAnswers] = useState<{ [key: string]: any }>({});
@@ -93,7 +94,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         <div className="self-stretch h-7 pb-1">
                             <h6 className="self-stretch text-gray-900 text-base font-semibold leading-normal">{question.text}</h6>
                         </div>
-                        <select className="custom-select h-10 self-stretch grow shrink bg-white rounded border text-gray-900 px-4" onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} >
+                        <select className="custom-select h-10 self-stretch grow shrink bg-white rounded border text-gray-900 px-4 disabled:bg-gray-25" onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} >
                             <option disabled>Select</option>
                             {question.answerOption?.map(({ valueCoding }, aIndex) => {
                                 return <option key={aIndex} value={JSON.stringify({ valueCoding })}>{valueCoding?.display}</option>
@@ -104,7 +105,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                 if (question.type === 'text') {
                     return <textarea
                         key={qIndex}
-                        className="p-4 min-h-[100px] self-stretch grow shrink bg-white rounded border text-gray-900 px-4"
+                        className="p-4 min-h-[100px] self-stretch grow shrink bg-white rounded border text-gray-900 px-4 disabled:bg-gray-25"
                         placeholder="Add.."
                         onChange={onTextAnswerChange(qIndex)}
                     />
@@ -137,9 +138,9 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         <p className="text-success text-base font-semibold p-3">Image Label Submitted</p>
                     </>
                     : <>
-                        <button className="h-12 bg-white border border-app_primary disabled:border-gray-400 rounded justify-center items-center flex flex-1 text-app_primary disabled:text-gray-400 text-base font-semibold leading-normal" onClick={sendForSecondOpinion} >
+                        {allowSecondOpinion && <button className="h-12 bg-white border border-app_primary disabled:border-gray-400 rounded justify-center items-center flex flex-1 text-app_primary disabled:text-gray-400 text-base font-semibold leading-normal" onClick={sendForSecondOpinion} >
                             Second Opinion
-                        </button>
+                        </button>}
                         <button
                             className="h-12 bg-app_primary disabled:bg-gray-200 rounded justify-center items-center flex flex-1 text-white text-base font-semibold leading-normal"
                             onClick={() => onSubmit(answers)}

@@ -6,9 +6,9 @@ import { IPractitionerRole } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPr
 import { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
 
 import { fetchFhirResource } from '@/app/loader';
-import { PRACTITIONER_USER_TYPE_CODE, SUPERVISOR_USER_TYPE_CODE, PRACTITIONER, SUPERVISOR, getResourcesFromBundle, getUserTypeCode, getUserType, REMOTE_SPECIALIST_USER_TYPE_CODE, REMOTE_SPECIALIST } from '@/utils/fhir-utils';
+import { PRACTITIONER_USER_TYPE_CODE, SUPERVISOR_USER_TYPE_CODE, PRACTITIONER, SUPERVISOR, getResourcesFromBundle, getUserTypeCode, getUserType, REMOTE_SPECIALIST_USER_TYPE_CODE, REMOTE_SPECIALIST, SENIOR_SPECIALIST } from '@/utils/fhir-utils';
 
-type UserTypes = typeof PRACTITIONER | typeof SUPERVISOR | typeof REMOTE_SPECIALIST;
+type UserTypes = typeof PRACTITIONER | typeof SUPERVISOR | typeof REMOTE_SPECIALIST | typeof SENIOR_SPECIALIST;
 
 function requestRefreshOfAccessToken(token: JWT) {
     if (!process.env.KEYCLOAK_ISSUER || !process.env.KEYCLOAK_CLIENT_ID || !process.env.KEYCLOAK_CLIENT_SECRET) {
@@ -31,6 +31,15 @@ function requestRefreshOfAccessToken(token: JWT) {
         method: "POST",
         cache: "no-store"
     });
+}
+
+async function fetchPractitioner(accessToken: string, id: string) {
+    return fetchFhirResource(accessToken, { resourceType: 'Practitioner', query: { identifier: id } })
+        .then((data: IBundle) => {
+            const practitioner = (getResourcesFromBundle<IPractitionerRole>(data)[0]);
+            return practitioner;
+        })
+        .catch(error => console.error("Error fetching Practitioner", error.response.data))
 }
 
 async function fetchRole(accessToken: string, id: string) {
@@ -77,14 +86,17 @@ export const authOptions: AuthOptions = {
                 token.accessToken = account.access_token
                 token.refreshToken = account.refresh_token
                 token.expiresAt = account.expires_at
-                token.resourceId = account.providerAccountId
                 if (account.access_token) {
                     const decodedToken: any = jwt.decode(account.access_token as string);
                     if (decodedToken) {
                         token.permissions = decodedToken.realm_access?.roles ?? [];
                     }
-                    const userType = await fetchRole(account.access_token as string, account.providerAccountId);
+                    const [userType, practitioner] = await Promise.all([
+                        fetchRole(account.access_token as string, account.providerAccountId),
+                        fetchPractitioner(account.access_token as string, account.providerAccountId)
+                    ])
                     token.userType = userType;
+                    token.resourceId = practitioner?.id;
                 }
             }
             // we take a buffer of one minute(60 * 1000 ms)

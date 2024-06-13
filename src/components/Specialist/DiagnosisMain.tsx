@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import { message } from 'antd';
 import update from 'immutability-helper';
@@ -17,18 +17,19 @@ import { IEncounter } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IEncounter
 import { IObservation } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IObservation';
 
 import { DiagnosisImage } from '@/components/Reader/DiagnosisImage';
-import { DiagnosisLeftBar } from "@/components/RemoteSpecialist/DiagnosisLeftBar";
-import { DiagnosisRightBar } from "@/components/RemoteSpecialist/DiagnosisRightBar";
+import { DiagnosisLeftBar } from "@/components/Specialist/DiagnosisLeftBar";
+import { DiagnosisRightBar } from "@/components/Specialist/DiagnosisRightBar";
 import { Loader } from "@/components/UI/Loader";
 import { fetchFhirResource, fetchFhirSingleResource, updateFhirResource, fetchFhirResourceEverything } from '@/app/loader';
-import { getResourcesFromBundle } from '@/utils/fhir-utils';
+import { getResourcesFromBundle, REMOTE_SPECIALIST } from '@/utils/fhir-utils';
 
 export default function RemoteSpecialistDiagnosis() {
     const { id } = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { data: session } = useSession();
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState<ITask[]>([]);
     const [activeTaskIndex, setActiveTaskIndex] = useState<number>(-1);
     const [questionnaires, setQuestionnaires] = useState<IQuestionnaire[]>([]);
@@ -46,8 +47,8 @@ export default function RemoteSpecialistDiagnosis() {
             const params = {
                 resourceType: 'Task',
                 query: {
-                    // owner: `Practitioner/${session?.resourceId}`, //TODO
-                    status: 'requested'
+                    owner: `Practitioner/${session?.resourceId}`,
+                    status: searchParams.get('status') ?? 'requested'
                 }
             }
             fetchFhirResource(session.accessToken, params)
@@ -64,12 +65,16 @@ export default function RemoteSpecialistDiagnosis() {
         if (tasks?.length && id) {
             const index = tasks.findIndex(task => task.id === id);
             setActiveTaskIndex(index);
+            if (index === -1) {
+                router.push('/');
+                message.error('Case not found');
+            }
         }
     }, [tasks?.length, id])
 
     useEffect(() => {
         // When id/index changes
-        if (session?.accessToken && tasks?.length && activeTaskIndex !== undefined) {
+        if (session?.accessToken && tasks?.length && activeTaskIndex !== undefined && activeTaskIndex !== -1) {
             if (activeTask && activeTask.input && activeTask.input.length > 0) {
                 // Fetch encounter as well
                 const [encounterResourceType, encounterId] = activeTask.focus?.reference?.split('/') ?? []
@@ -238,6 +243,7 @@ export default function RemoteSpecialistDiagnosis() {
                         status={(tasks?.length ? activeTask?.status : '') as IQuestionnaire['status'] | 'completed' | ''}
                         onSubmit={onSubmit}
                         sendForSecondOpinion={sendForSecondOpinion}
+                        allowSecondOpinion={session?.userType === REMOTE_SPECIALIST}
                     />
                 </>
             }

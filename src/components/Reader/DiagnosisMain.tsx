@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import { message } from 'antd';
 import update from 'immutability-helper';
@@ -23,6 +23,7 @@ import { getResourcesFromBundle } from '@/utils/fhir-utils';
 export default function ReaderDiagnosis() {
     const { id } = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { data: session } = useSession();
 
     const [loading, setLoading] = useState(true);
@@ -33,18 +34,14 @@ export default function ReaderDiagnosis() {
     const [patient, setPatient] = useState<IPatient>();
     const [submitting, setSubmitting] = useState(false);
     const activeTask: ITask = tasks[activeTaskIndex]
-    console.log('task', activeTask);
-    console.log('questionnaire', questionnaire);
-    console.log('media', media);
-    console.log('patient', patient);
 
     useEffect(() => {
         if (session?.accessToken && !tasks?.length) {
             const params = {
                 resourceType: 'Task',
                 query: {
-                    owner: `Practitioner/${session?.resourceId}`, //TODO
-                    status: 'requested'
+                    owner: `Practitioner/${session?.resourceId}`,
+                    status: searchParams.get('status') ?? 'requested'
                 }
             }
             fetchFhirResource(session.accessToken, params)
@@ -61,12 +58,16 @@ export default function ReaderDiagnosis() {
         if (tasks?.length && id) {
             const index = tasks.findIndex(task => task.id === id);
             setActiveTaskIndex(index);
+            if (index === -1) {
+                router.push('/');
+                message.error('Image not found');
+            }
         }
     }, [tasks?.length, id])
 
     useEffect(() => {
         // When id/index changes
-        if (session?.accessToken && tasks?.length && activeTaskIndex !== undefined) {
+        if (session?.accessToken && tasks?.length && activeTaskIndex !== undefined && activeTaskIndex !== -1) {
             if (activeTask && activeTask.input && activeTask.input.length > 0 && activeTask.input[0]) {
                 // Fetch Questionnaire
                 const [questionnaireResourceType, questionnaireId] = activeTask.input[0]?.valueReference?.reference?.split('/') ?? []

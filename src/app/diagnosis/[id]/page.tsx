@@ -1,9 +1,9 @@
 'use client';
 import { useSession } from "next-auth/react";
 
-import RemoteSpecialistDiagnosis from '@/components/RemoteSpecialist/DiagnosisMain';
+import RemoteSpecialistDiagnosis from '@/components/Specialist/DiagnosisMain';
 import ReaderDiagnosis from '@/components/Reader/DiagnosisMain';
-import { PRACTITIONER, REMOTE_SPECIALIST } from '@/utils/fhir-utils';
+import { PRACTITIONER, REMOTE_SPECIALIST, SENIOR_SPECIALIST } from '@/utils/fhir-utils';
 
 export default function Diagnosis() {
     const { data: session } = useSession();
@@ -16,7 +16,7 @@ export default function Diagnosis() {
     // }
 
     // TODO
-    // if (session?.userType === REMOTE_SPECIALIST) {
+    // if (session?.userType === REMOTE_SPECIALIST || session?.userType === SENIOR_SPECIALIST) {
     if (session?.userType === PRACTITIONER) {
         return <RemoteSpecialistDiagnosis />
     }
