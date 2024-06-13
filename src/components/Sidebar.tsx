@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
 
-import { SUPERVISOR, PRACTITIONER } from '@/utils/fhir-utils';
+import { SUPERVISOR } from '@/utils/fhir-utils';
 
 const ROUTES = [
   {
@@ -17,7 +17,6 @@ const ROUTES = [
     ],
     userType: SUPERVISOR
   },
-  { label: 'Tasks', path: '/tasks', userType: PRACTITIONER }
 ]
 const Sidebar = () => {
   const pathname = usePathname();

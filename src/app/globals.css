@@ -49,6 +49,32 @@ body {
   }
 }
 
+.custom-select {
+  -moz-appearance:none; /* Firefox */
+  -webkit-appearance:none; /* Safari and Chrome */
+  appearance:none;
+  background-image: url('/images/chevron-down.svg');
+  background-repeat: no-repeat;
+  background-position: right .75rem center;
+}
+
+.resize-handle {
+  width: 8px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 6px;
+  justify-self: flex-end;
+  cursor: col-resize;
+  resize: horizontal;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.resize-handle:hover {
+  width: 8px;
+  background-color: #ad9cff;
+}
+
 /* width */
 ::-webkit-scrollbar {
   width: 4px;

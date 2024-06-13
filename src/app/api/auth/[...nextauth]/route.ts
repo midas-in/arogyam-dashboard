@@ -6,9 +6,9 @@ import { IPractitionerRole } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPr
 import { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
 
 import { fetchFhirResource } from '@/app/loader';
-import { PRACTITIONER_USER_TYPE_CODE, SUPERVISOR_USER_TYPE_CODE, PRACTITIONER, SUPERVISOR, getResourcesFromBundle, getUserTypeCode, getUserType } from '@/utils/fhir-utils';
+import { PRACTITIONER_USER_TYPE_CODE, SUPERVISOR_USER_TYPE_CODE, PRACTITIONER, SUPERVISOR, getResourcesFromBundle, getUserTypeCode, getUserType, REMOTE_SPECIALIST_USER_TYPE_CODE, REMOTE_SPECIALIST } from '@/utils/fhir-utils';
 
-type UserTypes = typeof PRACTITIONER | typeof SUPERVISOR;
+type UserTypes = typeof PRACTITIONER | typeof SUPERVISOR | typeof REMOTE_SPECIALIST;
 
 function requestRefreshOfAccessToken(token: JWT) {
     if (!process.env.KEYCLOAK_ISSUER || !process.env.KEYCLOAK_CLIENT_ID || !process.env.KEYCLOAK_CLIENT_SECRET) {
@@ -46,7 +46,7 @@ async function fetchRole(accessToken: string, id: string) {
                 const userTypeCode = getUserTypeCode(practitionerRole);
                 if (userTypeCode) {
                     userType = getUserType(
-                        userTypeCode as typeof PRACTITIONER_USER_TYPE_CODE | typeof SUPERVISOR_USER_TYPE_CODE
+                        userTypeCode as typeof PRACTITIONER_USER_TYPE_CODE | typeof SUPERVISOR_USER_TYPE_CODE | typeof REMOTE_SPECIALIST_USER_TYPE_CODE
                     );
                     return userType;
                 }

@@ -91,17 +91,19 @@ export function getResourcesFromBundle<TResource>(bundle: IBundle) {
 export const getUserTypeCode = (role: IPractitionerRole) =>
   role.code
     ?.flatMap((code) => code.coding?.map((coding) => coding.code))
-    .find((code) => code === SUPERVISOR_USER_TYPE_CODE || code === PRACTITIONER_USER_TYPE_CODE);
+    .find((code) => code === SUPERVISOR_USER_TYPE_CODE || code === PRACTITIONER_USER_TYPE_CODE || code === REMOTE_SPECIALIST_USER_TYPE_CODE);
 
 // get user type from user type code
 export const getUserType = (
-  userTypeCode: typeof PRACTITIONER_USER_TYPE_CODE | typeof SUPERVISOR_USER_TYPE_CODE
+  userTypeCode: typeof PRACTITIONER_USER_TYPE_CODE | typeof SUPERVISOR_USER_TYPE_CODE | typeof REMOTE_SPECIALIST_USER_TYPE_CODE
 ) => {
   switch (userTypeCode) {
     case PRACTITIONER_USER_TYPE_CODE:
       return PRACTITIONER;
     case SUPERVISOR_USER_TYPE_CODE:
       return SUPERVISOR;
+    case REMOTE_SPECIALIST_USER_TYPE_CODE:
+      return REMOTE_SPECIALIST;
   }
 };
 
@@ -117,7 +119,18 @@ export const practitionerRoleResourceType = 'PractitionerRole';
 
 export const PRACTITIONER = "practitioner";
 export const SUPERVISOR = 'supervisor';
+export const REMOTE_SPECIALIST = 'remote-specialist';
 export const SUPERVISOR_USER_TYPE_CODE = '236321002';
 export const PRACTITIONER_USER_TYPE_CODE = '405623001';
+export const REMOTE_SPECIALIST_USER_TYPE_CODE = '405623001'; //TODO update code
 export const SNOMED_CODEABLE_SYSTEM = 'http://snomed.info/sct';
 export const DEVICE_SETTING_CODEABLE_CODE = '1156600005';
+
+export const OBSERVATION_CODE_LABEL_MAPPING: { [key: string]: string } = {
+  '63638-1': 'Smoking status',
+  '39240-7': 'Tobacco use status',
+  '64004-5': 'Tobacco product',
+  '74205-6': 'Alcohol use',
+  '62559-0': 'Lifetime alcohol exposure',
+  'LP232821-1': 'Open mouth'
+}

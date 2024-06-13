@@ -18,7 +18,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
 
     return <div className="absolute top-0 right-0 flex flex-col gap-4 border border-gray-100 m-[10px] bg-white">
         <div className="min-w-[300px] flex justify-between px-6 py-3 bg-primary-10 shadow border-b border-gray-100">
-            <div className="flex">
+            <div className="flex items-center">
                 <p className="text-gray-900 text-base font-semibold leading-normal ">
                     Diagnosis -
                 </p>
@@ -26,7 +26,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                     {id}
                 </p>
             </div>
-            <button className={`h-8 px-2 py-1 rounded border border-gray-100 justify-start items-center gap-1 inline-flex ${!showRightSidebar ? 'bg-app_primary border-0' : ''}`} onClick={() => setShowRightSidebar(prev => !prev)} >
+            <button className={`h-8 px-2 py-1 rounded border border-gray-100 justify-start items-center gap-1 inline-flex ${!showRightSidebar ? 'bg-app_primary border-0' : 'bg-white'}`} onClick={() => setShowRightSidebar(prev => !prev)} >
                 {/* <div className={`text-base font-normal ${!showRightSidebar ? 'text-white' : ''}`}>Close</div> */}
                 <div className={`w-5 h-5 relative transition-all ${!showRightSidebar ? 'rotate-180' : ''}`} >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -36,20 +36,21 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
             </button>
         </div>
 
-        <div className={`flex flex-col gap-4 overflow-y-auto h-[calc(100vh-370px)] ${!showRightSidebar ? 'hidden' : ''}`}>
-            <div className="px-6 flex-col justify-start items-start flex ">
-                <h6 className="text-gray-900 text-base font-medium leading-normal">{question.text}</h6>
-                <div className="h-[342px] flex-col justify-start items-start flex mt-1">
+        <div className={`flex flex-col gap-4  ${!showRightSidebar ? 'hidden' : ''}`}>
+            <div className="flex-col justify-start items-start flex ">
+                <h6 className="px-6 text-gray-900 text-base font-medium leading-normal">{question.text}</h6>
+                <div className="px-6 w-full flex-col justify-start items-start flex pt-1 overflow-y-auto h-[calc(100vh-524px)]">
                     {question.answerOption?.map(({ valueCoding }, index) => {
-                        return <div key={valueCoding?.code} className="py-1.5 bg-white justify-center items-start  flex">
+                        return <div key={valueCoding?.code} className="py-1.5 bg-white justify-center items-center flex">
                             <input type="radio" className='w-5 h-5 cursor-pointer' id={valueCoding?.code} name="diagnosis" value={valueCoding?.code} onChange={e => { setSelectedOptionIndex(index) }} disabled={status === 'completed'} />
                             <label htmlFor={valueCoding?.code} className="text-gray-900 text-base font-normal leading-normal ml-2 cursor-pointer">{valueCoding?.display}</label>
                         </div>
                     })}
                 </div>
             </div>
-
-            <div className="h-28 p-3 mx-6 bg-gray-25 rounded flex-col justify-start items-start gap-2 flex ">
+        </div>
+        <div className={`flex flex-col p-4 gap-3 border-t border-gray-3 ${!showRightSidebar ? 'hidden' : ''}`}>
+            <div className="h-28 p-3 bg-gray-25 rounded flex-col justify-start items-start gap-2 flex ">
                 <h6 className="text-gray-900 text-base font-semibold leading-normal">Results of diagnosis</h6>
                 <div className="h-14 flex-col justify-start items-start gap-2 flex">
                     <div className="justify-start items-start gap-1 inline-flex">
@@ -60,13 +61,12 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                     <div className="justify-start items-start gap-1 inline-flex">
                         <p className="w-20 text-gray-900 text-base font-normal leading-normal">Suspicion</p>
                         <p className="text-gray-900 text-base font-normal leading-normal">:</p>
-                        <p className="grow shrink basis-0 text-gray-900 text-base font-normal leading-normal">Low risk</p>
+                        <p className="grow shrink basis-0 text-gray-900 text-base font-normal leading-normal">-</p>
                     </div>
                 </div>
             </div>
-        </div>
-        <div className={`flex flex-col gap-4 ${!showRightSidebar ? 'hidden' : ''}`}>
-            <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-center gap-1">
+
+            <div className="flex items-center justify-center gap-1">
                 {status === 'completed'
                     ? <>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">

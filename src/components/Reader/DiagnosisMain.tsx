@@ -12,6 +12,7 @@ import { ITask } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/ITask';
 import { IQuestionnaire } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaire';
 import { IQuestionnaireResponse } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaireResponse';
 import { IMedia } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IMedia';
+import { IPatient } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPatient';
 
 import { DiagnosisImage } from '@/components/Reader/DiagnosisImage';
 import { DiagnosisRightBar } from "@/components/Reader/DiagnosisRightBar";
@@ -19,7 +20,7 @@ import { Loader } from "@/components/UI/Loader";
 import { fetchFhirResource, fetchFhirSingleResource, updateFhirResource } from '@/app/loader';
 import { getResourcesFromBundle } from '@/utils/fhir-utils';
 
-export default function Diagnosis() {
+export default function ReaderDiagnosis() {
     const { id } = useParams();
     const router = useRouter();
     const { data: session } = useSession();
@@ -29,19 +30,20 @@ export default function Diagnosis() {
     const [activeTaskIndex, setActiveTaskIndex] = useState<number>(-1);
     const [questionnaire, setQuestionnaire] = useState<IQuestionnaire>();
     const [media, setMedia] = useState<IMedia>();
+    const [patient, setPatient] = useState<IPatient>();
     const [submitting, setSubmitting] = useState(false);
     const activeTask: ITask = tasks[activeTaskIndex]
     console.log('task', activeTask);
     console.log('questionnaire', questionnaire);
     console.log('media', media);
-
+    console.log('patient', patient);
 
     useEffect(() => {
         if (session?.accessToken && !tasks?.length) {
             const params = {
                 resourceType: 'Task',
                 query: {
-                    // owner: `Practitioner/${session?.resourceId}`, //TODO
+                    owner: `Practitioner/${session?.resourceId}`, //TODO
                     status: 'requested'
                 }
             }
@@ -70,14 +72,18 @@ export default function Diagnosis() {
                 const [questionnaireResourceType, questionnaireId] = activeTask.input[0]?.valueReference?.reference?.split('/') ?? []
                 // Fetch media(images) as well
                 const [mediaResourceType, mediaId] = activeTask.focus?.reference?.split('/') ?? []
+                // Fetch patient as well
+                const [patientResourceType, patientId] = activeTask.for?.reference?.split('/') ?? []
 
                 Promise.all([
                     fetchFhirSingleResource(session?.accessToken, { resourceType: questionnaireResourceType, id: questionnaireId }),
-                    fetchFhirSingleResource(session?.accessToken, { resourceType: mediaResourceType, id: mediaId })
+                    fetchFhirSingleResource(session?.accessToken, { resourceType: mediaResourceType, id: mediaId }),
+                    fetchFhirSingleResource(session?.accessToken, { resourceType: patientResourceType, id: patientId })
                 ])
-                    .then(([ques, mda]: [IQuestionnaire, IMedia]) => {
+                    .then(([ques, mda, patient]: [IQuestionnaire, IMedia, IPatient]) => {
                         setQuestionnaire(ques);
                         setMedia(mda);
+                        setPatient(patient);
                         setLoading(false);
                     })
                     .catch((error: any) => {
@@ -91,14 +97,14 @@ export default function Diagnosis() {
     const onClickPrevious = () => {
         if (activeTaskIndex > 0) {
             // setActiveTaskIndex(prev => (prev ?? 0) - 1);
-            router.push(`/tasks/${tasks[activeTaskIndex - 1].id}/diagnosis`);
+            router.push(`/diagnosis/${tasks[activeTaskIndex - 1].id}`);
         }
     }
 
     const onClickNext = () => {
         if (tasks?.length && activeTaskIndex < tasks?.length - 1) {
             // setActiveTaskIndex(prev => (prev ?? 0) + 1);
-            router.push(`/tasks/${tasks[activeTaskIndex + 1].id}/diagnosis`);
+            router.push(`/diagnosis/${tasks[activeTaskIndex + 1].id}`);
         }
     }
 
@@ -129,7 +135,7 @@ export default function Diagnosis() {
                 ...activeTask,
                 status: 'completed'
             }
-            // await updateFhirResource(session?.accessToken as string, taskPayload);
+            await updateFhirResource(session?.accessToken as string, taskPayload);
             setTasks(update(tasks, { [activeTaskIndex]: { $merge: taskPayload } }));
             onClickNext();
         }
@@ -143,10 +149,10 @@ export default function Diagnosis() {
     }
 
 
-    return <div className="flex flex-1 flex-col gap-3 m-[25px]">
+    return <div className="flex flex-1 flex-col gap-3 m-6">
         <div className="flex align-center justify-between p-3 border-b border-gray-100">
             <div className="flex items-center gap-3">
-                <Link href={'/tasks'}>
+                <Link href={'/'}>
                     <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z" fill="#212121" />
                     </svg>
@@ -179,7 +185,7 @@ export default function Diagnosis() {
             {loading
                 ? <Loader />
                 : <>
-                    <DiagnosisImage media={media} />
+                    <DiagnosisImage medias={media ? [media] : []} />
                     <DiagnosisRightBar
                         id={id as string}
                         questionnaire={questionnaire}

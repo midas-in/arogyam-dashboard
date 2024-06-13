@@ -36,7 +36,7 @@ export default async function RootLayout({
               {session?.userType === SUPERVISOR && <Sidebar />}
               <div className="flex-1">
                 <header className="bg-white border-b border-gray-100">
-                  <nav className="mx-auto flex items-center justify-between p-6 md:px-[60px] py-4" aria-label="Global">
+                  <nav className="mx-auto flex items-center justify-between p-6 md:px-9 py-4" aria-label="Global">
                     <div className="flex lg:flex-1">
                       <Link href={'/'}>
                         {session?.userType !== SUPERVISOR && <div className="flex lg:flex-1">

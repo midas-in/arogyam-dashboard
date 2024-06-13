@@ -132,6 +132,19 @@ export function fetchFhirResource(accessToken: string, payload: { resourceType: 
     // return fhirClient.search({ type: resourceType, query }).then(({ data }: { data: any }) => data);
 }
 
+export function fetchFhirResourceEverything(accessToken: string, payload: any) {
+    const { resourceType, id, query } = payload;
+    return axios({
+        method: 'GET',
+        baseURL: process.env.NEXT_PUBLIC_FHIR_API_BASE_URL,
+        url: `/${resourceType}/${id}/$everything`,
+        params: query,
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        },
+    }).then(({ data }: { data: any }) => data);
+}
+
 export function fetchFhirSingleResource(accessToken: string, payload: { resourceType: string, id: string }) {
     const { resourceType, id } = payload;
     const fhirClient = createFhirClient(accessToken);
