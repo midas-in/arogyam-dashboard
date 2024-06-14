@@ -7,7 +7,15 @@ import { useSession } from "next-auth/react";
 
 import { SUPERVISOR } from '@/utils/fhir-utils';
 
-const ROUTES = [
+interface Route {
+  label: string;
+  path?: string;
+  permission?: string;
+  userType?: string;
+  subRoutes?: Route[];
+}
+
+const ROUTES: Route[] = [
   {
     label: 'User Management',
     subRoutes: [
@@ -30,7 +38,7 @@ const Sidebar = () => {
       setOpenUserManagement(prev => ({ ...prev, [index]: !prev[index] }))
     }
     else {
-      router.push(ROUTES[index].path as string);
+      router.push(ROUTES[index]?.path as string);
     }
   }
 
@@ -53,7 +61,7 @@ const Sidebar = () => {
       </div>
       <nav className="flex min-w-[240px] flex-col gap-1 p-2 font-sans text-base font-normal text-gray-300">
         {ROUTES.filter(r => r.userType === session?.userType).map((route, i) => {
-          const activeClass = !route.subRoutes?.length && pathname == route.path
+          const activeClass = !route.subRoutes?.length && pathname == route?.path
             ? 'bg-app_primary text-white'
             : '';
           return <div className="relative block w-full" key={i}>
@@ -81,11 +89,11 @@ const Sidebar = () => {
             {openUserManagement[i] && route.subRoutes?.length && <div className="overflow-hidden">
               <div className="block w-full py-1 font-sans text-sm antialiased font-light leading-normal text-gray-300">
                 <nav className="flex min-w-[240px] flex-col gap-1 p-0 font-sans text-base font-normal text-gray-300">
-                  {route.subRoutes.filter(sr => session?.permissions?.includes(sr.permission)).map(subRoute => {
-                    const activeClass = pathname.startsWith(subRoute.path)
+                  {route.subRoutes.filter(sr => sr?.permission && session?.permissions?.includes(sr.permission)).map((subRoute: Route) => {
+                    const activeClass = pathname.startsWith(subRoute?.path ?? '')
                       ? 'bg-app_primary text-white'
                       : '';
-                    return <Link href={subRoute.path} key={subRoute.label}>
+                    return <Link href={subRoute?.path ?? ''} key={subRoute.label}>
                       <div role="button"
                         className={"flex items-center w-full p-3 leading-tight transition-all rounded-lg outline-none text-start hover:bg-gray-500 hover:bg-opacity-80  focus:bg-gray-50 focus:bg-opacity-80 focus:text-gray-50 " + activeClass}>
                         <div className="grid mr-4 place-items-center">

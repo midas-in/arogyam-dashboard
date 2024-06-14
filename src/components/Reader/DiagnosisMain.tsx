@@ -32,6 +32,7 @@ export default function ReaderDiagnosis() {
     const [questionnaire, setQuestionnaire] = useState<IQuestionnaire>();
     const [media, setMedia] = useState<IMedia>();
     const [patient, setPatient] = useState<IPatient>();
+    const [questionResponse, setQuestionResponse] = useState<IQuestionnaireResponse>();
     const [submitting, setSubmitting] = useState(false);
     const activeTask: ITask = tasks[activeTaskIndex]
 
@@ -79,12 +80,20 @@ export default function ReaderDiagnosis() {
                 Promise.all([
                     fetchFhirSingleResource(session?.accessToken, { resourceType: questionnaireResourceType, id: questionnaireId }),
                     fetchFhirSingleResource(session?.accessToken, { resourceType: mediaResourceType, id: mediaId }),
-                    fetchFhirSingleResource(session?.accessToken, { resourceType: patientResourceType, id: patientId })
+                    fetchFhirSingleResource(session?.accessToken, { resourceType: patientResourceType, id: patientId }),
+                    fetchFhirResource(session?.accessToken, {
+                        resourceType: 'QuestionnaireResponse',
+                        query: {
+                            questionnaire: questionnaireId,
+                            source: `Practitioner/${session?.resourceId}`,
+                        }
+                    })
                 ])
-                    .then(([ques, mda, patient]: [IQuestionnaire, IMedia, IPatient]) => {
+                    .then(([ques, mda, patient, qResponse]: [IQuestionnaire, IMedia, IPatient, IQuestionnaireResponse]) => {
                         setQuestionnaire(ques);
                         setMedia(mda);
                         setPatient(patient);
+                        setQuestionResponse(getResourcesFromBundle<IQuestionnaireResponse>(qResponse)[0])
                         setLoading(false);
                     })
                     .catch((error: any) => {
@@ -129,7 +138,6 @@ export default function ReaderDiagnosis() {
                 item,
                 authored: new Date().toISOString(),
             }
-            console.log('responsePayload', responsePayload);
             await updateFhirResource(session?.accessToken as string, responsePayload);
             // update status to completed
             const taskPayload: ITask = {
@@ -190,6 +198,7 @@ export default function ReaderDiagnosis() {
                     <DiagnosisRightBar
                         id={id as string}
                         questionnaire={questionnaire}
+                        questionResponse={questionResponse}
                         status={(tasks?.length ? activeTask?.status : '') as IQuestionnaire['status'] | 'completed' | ''}
                         onSubmit={onSubmit}
                     />

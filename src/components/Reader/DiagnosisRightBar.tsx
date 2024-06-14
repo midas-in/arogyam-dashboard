@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { IQuestionnaire } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaire';
+import { IQuestionnaireResponse } from "@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaireResponse";
 
 interface DiagnosisRightBarProps {
     id: string;
     questionnaire?: IQuestionnaire;
+    questionResponse?: IQuestionnaireResponse
     status?: IQuestionnaire['status'] | 'completed' | '';
     onSubmit: (answers: any) => void;
 }
 
 const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
-    const { id, questionnaire, status, onSubmit } = props;
+    const { id, questionnaire, questionResponse, status, onSubmit } = props;
     const question = questionnaire?.item?.length ? questionnaire.item[0] : {};
 
     const [showRightSidebar, setShowRightSidebar] = useState(true);
@@ -41,8 +43,9 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                 <h6 className="px-6 text-gray-900 text-base font-medium leading-normal">{question.text}</h6>
                 <div className="px-6 w-full flex-col justify-start items-start flex pt-1 overflow-y-auto h-[calc(100vh-524px)]">
                     {question.answerOption?.map(({ valueCoding }, index) => {
+                        const isDefaultChecked = questionResponse?.item && questionResponse?.item[0]?.answer && questionResponse?.item[0]?.answer[0]?.valueCoding?.code === valueCoding?.code
                         return <div key={valueCoding?.code} className="py-1.5 bg-white justify-center items-center flex">
-                            <input type="radio" className='w-5 h-5 cursor-pointer' id={valueCoding?.code} name="diagnosis" value={valueCoding?.code} onChange={e => { setSelectedOptionIndex(index) }} disabled={status === 'completed'} />
+                            <input type="radio" className='w-5 h-5 cursor-pointer' id={valueCoding?.code} name="diagnosis" defaultChecked={isDefaultChecked} value={valueCoding?.code} onChange={e => { setSelectedOptionIndex(index) }} disabled={status === 'completed'} />
                             <label htmlFor={valueCoding?.code} className="text-gray-900 text-base font-normal leading-normal ml-2 cursor-pointer">{valueCoding?.display}</label>
                         </div>
                     })}
@@ -72,7 +75,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M9.9997 15.1709L19.1921 5.97852L20.6063 7.39273L9.9997 17.9993L3.63574 11.6354L5.04996 10.2212L9.9997 15.1709Z" fill="#24A148" />
                         </svg>
-                        <p className="text-success text-base font-semibold p-3">Image Label Submitted</p>
+                        <p className="text-success text-base font-semibold p-3">Diagnosis Submitted</p>
                     </>
                     : <button className="h-12 bg-app_primary disabled:bg-gray-200 rounded justify-center items-center flex flex-1 text-white text-base font-semibold leading-normal" onClick={() => onSubmit(question?.answerOption && question?.answerOption[selectedOptionIndex])} disabled={selectedOptionIndex === -1}>
                         Submit

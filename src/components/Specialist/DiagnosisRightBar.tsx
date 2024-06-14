@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { IQuestionnaire } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaire';
+import { IQuestionnaireResponse } from "@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaireResponse";
 
 interface DiagnosisRightBarProps {
     id: string;
     questionnaires?: IQuestionnaire[];
+    questionResponses?: IQuestionnaireResponse[];
     status?: IQuestionnaire['status'] | 'completed' | '';
     onSubmit: (answers: any) => void;
     sendForSecondOpinion: () => void;
@@ -11,13 +13,25 @@ interface DiagnosisRightBarProps {
 }
 
 const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
-    const { questionnaires, status, onSubmit, sendForSecondOpinion, allowSecondOpinion } = props;
+    const { questionnaires, questionResponses, status, onSubmit, sendForSecondOpinion, allowSecondOpinion } = props;
 
     const [showRightSidebar, setShowRightSidebar] = useState(true);
     const [answers, setAnswers] = useState<{ [key: string]: any }>({});
     const [resizing, setResizing] = useState(false);
     const [resizeData, setResizeData] = useState<{ totalWidth: number, left: number }>();
     const [width, setWidth] = useState(320);
+
+    useEffect(() => {
+        if (questionResponses?.length) {
+            const tempQueRes: { [key: string]: any } = {}
+            questionResponses.forEach(qr => {
+                if (qr && qr.questionnaire && qr?.item) {
+                    tempQueRes[qr?.questionnaire?.replace('Questionnaire/', '')] = qr?.item && qr?.item[0]?.answer ? JSON.stringify(qr?.item[0]?.answer[0]) : '';
+                }
+            })
+            setAnswers(tempQueRes);
+        }
+    }, [questionResponses?.length])
 
     const startResizing = React.useCallback((e: any) => {
         setResizing(true);
@@ -97,7 +111,8 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         <select className="custom-select h-10 self-stretch grow shrink bg-white rounded border text-gray-900 px-4 disabled:bg-gray-25" onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} >
                             <option disabled>Select</option>
                             {question.answerOption?.map(({ valueCoding }, aIndex) => {
-                                return <option key={aIndex} value={JSON.stringify({ valueCoding })}>{valueCoding?.display}</option>
+                                const isSelected = questionnaire?.id ? JSON.stringify({ valueCoding }) === answers[questionnaire.id] : false;
+                                return <option key={aIndex} value={JSON.stringify({ valueCoding })} selected={isSelected}>{valueCoding?.display}</option>
                             })}
                         </select>
                     </div>
@@ -108,6 +123,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         className="p-4 min-h-[100px] self-stretch grow shrink bg-white rounded border text-gray-900 px-4 disabled:bg-gray-25"
                         placeholder="Add.."
                         onChange={onTextAnswerChange(qIndex)}
+                        defaultValue={questionnaire?.id && answers[questionnaire.id] ? JSON.parse(answers[questionnaire.id])?.valueString : ''}
                     />
                 }
             })}

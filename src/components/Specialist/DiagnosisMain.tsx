@@ -33,6 +33,7 @@ export default function RemoteSpecialistDiagnosis() {
     const [tasks, setTasks] = useState<ITask[]>([]);
     const [activeTaskIndex, setActiveTaskIndex] = useState<number>(-1);
     const [questionnaires, setQuestionnaires] = useState<IQuestionnaire[]>([]);
+    const [questionResponses, setQuestionResponses] = useState<IQuestionnaireResponse[]>();
     const [encounter, setEncounter] = useState<IEncounter>();
     const [medias, setMedias] = useState<IMedia[]>();
     const [observations, setObservations] = useState<IObservation[]>();
@@ -93,13 +94,29 @@ export default function RemoteSpecialistDiagnosis() {
                         return fetchFhirSingleResource(session?.accessToken as string, { resourceType: questionnaireResourceType, id: questionnaireId })
                     }),
                 ])
-                    .then(([data, patient, ...ques]: [IBundle, IPatient, ...IQuestionnaire[]]) => {
+                    .then(async ([data, patient, ...ques]: [IBundle, IPatient, ...IQuestionnaire[]]) => {
                         const bundledData = getResourcesFromBundle<any>(data);
                         setEncounter(bundledData.filter(bd => bd.resourceType === 'Encounter')[0]);
                         setMedias(bundledData.filter(bd => bd.resourceType === 'Media'));
                         setObservations(bundledData.filter(bd => bd.resourceType === 'Observation'));
                         setQuestionnaires(ques);
                         setPatient(patient);
+                        if (searchParams.get('status') === 'completed' && activeTask.input) {
+                            const qResponses = await Promise.all(activeTask?.input?.map(input => {
+                                // Fetch all Questionnaires
+                                const [questionnaireResourceType, questionnaireId] = input?.valueReference?.reference?.split('/') ?? []
+                                return fetchFhirResource(session?.accessToken as string, {
+                                    resourceType: 'QuestionnaireResponse',
+                                    query: {
+                                        questionnaire: questionnaireId,
+                                        source: `Practitioner/${session?.resourceId}`,
+                                    }
+                                })
+                            }));
+                            setQuestionResponses(qResponses.map(qRes => {
+                                return getResourcesFromBundle<IQuestionnaireResponse>(qRes)[0];
+                            }));
+                        }
                         setLoading(false);
                     })
                     .catch((error: any) => {
@@ -240,6 +257,7 @@ export default function RemoteSpecialistDiagnosis() {
                     <DiagnosisRightBar
                         id={id as string}
                         questionnaires={questionnaires}
+                        questionResponses={questionResponses}
                         status={(tasks?.length ? activeTask?.status : '') as IQuestionnaire['status'] | 'completed' | ''}
                         onSubmit={onSubmit}
                         sendForSecondOpinion={sendForSecondOpinion}
