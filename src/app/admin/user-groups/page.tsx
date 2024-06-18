@@ -8,23 +8,22 @@ import MyTable from '@/components/MyTable';
 import { fetchUserGroups } from '@/app/loader';
 
 const columnHelper = createColumnHelper<any>()
-const columns = [
-  columnHelper.accessor('name', {
-    cell: info => info.getValue(),
-    header: () => <span>Name</span>,
-  }),
-
-]
 
 export default function UserGroups() {
   const { data: session } = useSession();
   const [groups, setGroups] = React.useState<{}[]>([]);
 
+  const columns = [
+    columnHelper.accessor('name', {
+      cell: info => info.getValue(),
+      header: () => <span>Name</span>,
+    }),
+  ]
   if (session?.permissions?.includes('EDIT_KEYCLOAK_USERS')) {
-    columnHelper.accessor('Action', {
+    columns.push(columnHelper.accessor('Action', {
       cell: info => <Link className='text-blue-500' href={`/admin/user-groups/edit/${info.row.original.id}`}>Edit</Link>,
       header: () => <span>Action</span>,
-    })
+    }))
   }
 
   useEffect(() => {
