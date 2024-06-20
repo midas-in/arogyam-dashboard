@@ -30,7 +30,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>
+        <Providers session={session}>
           <SessionGuard>
             <div className="flex flex-1">
               {session?.userType === SUPERVISOR && <Sidebar />}

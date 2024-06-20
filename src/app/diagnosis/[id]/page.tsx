@@ -16,8 +16,8 @@ export default function Diagnosis() {
     // }
 
     // TODO
-    // if (session?.userType === REMOTE_SPECIALIST || session?.userType === SENIOR_SPECIALIST) {
-    if (session?.userType === PRACTITIONER) {
+    if (session?.userType === REMOTE_SPECIALIST || session?.userType === SENIOR_SPECIALIST) {
+    // if (session.userType === PRACTITIONER) {
         return <RemoteSpecialistDiagnosis />
     }
 }
