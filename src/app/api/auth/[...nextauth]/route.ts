@@ -6,9 +6,21 @@ import { IPractitionerRole } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPr
 import { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
 
 import { fetchFhirResource } from '@/app/loader';
-import { PRACTITIONER_USER_TYPE_CODE, SUPERVISOR_USER_TYPE_CODE, PRACTITIONER, SUPERVISOR, getResourcesFromBundle, getUserTypeCode, getUserType, REMOTE_SPECIALIST_USER_TYPE_CODE, REMOTE_SPECIALIST, SENIOR_SPECIALIST } from '@/utils/fhir-utils';
+import {
+    PRACTITIONER_USER_TYPE_CODE,
+    SUPERVISOR_USER_TYPE_CODE,
+    PRACTITIONER,
+    SUPERVISOR,
+    getResourcesFromBundle,
+    getUserTypeCode,
+    getUserType,
+    REMOTE_SPECIALIST_USER_TYPE_CODE,
+    REMOTE_SPECIALIST,
+    SENIOR_SPECIALIST,
+    READER
+} from '@/utils/fhir-utils';
 
-type UserTypes = typeof PRACTITIONER | typeof SUPERVISOR | typeof REMOTE_SPECIALIST | typeof SENIOR_SPECIALIST;
+type UserTypes = typeof PRACTITIONER | typeof SUPERVISOR | typeof REMOTE_SPECIALIST | typeof SENIOR_SPECIALIST | typeof  READER;
 
 function requestRefreshOfAccessToken(token: JWT) {
     if (!process.env.KEYCLOAK_ISSUER || !process.env.KEYCLOAK_CLIENT_ID || !process.env.KEYCLOAK_CLIENT_SECRET) {

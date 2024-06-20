@@ -23,8 +23,7 @@ export default async function Home() {
   // }
 
   // TODO
-  // if (session?.userType === REMOTE_SPECIALIST || session?.userType === SENIOR_SPECIALIST) {
-  if (session?.userType === PRACTITIONER) {
+  if (session?.userType === REMOTE_SPECIALIST || session?.userType === SENIOR_SPECIALIST) {
     return <RemoteSpecialistTasks />
   }
 
