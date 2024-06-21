@@ -1,7 +1,7 @@
 import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { SUPERVISOR, PRACTITIONER, REMOTE_SPECIALIST, SENIOR_SPECIALIST } from './utils/fhir-utils';
+import { SUPERVISOR, READER, REMOTE_SPECIALIST, SENIOR_SPECIALIST } from './utils/fhir-utils';
 
 export async function middleware(req: NextRequest) {
     const session = await getToken({
@@ -19,7 +19,7 @@ export async function middleware(req: NextRequest) {
     }
 
     if (pathname.startsWith('/diagnosis')) {
-        if (!session || ![PRACTITIONER, REMOTE_SPECIALIST, SENIOR_SPECIALIST].includes(session.userType as string)) {
+        if (!session || ![READER, REMOTE_SPECIALIST, SENIOR_SPECIALIST].includes(session.userType as string)) {
             return NextResponse.redirect(new URL('/', req.url));
         }
     }

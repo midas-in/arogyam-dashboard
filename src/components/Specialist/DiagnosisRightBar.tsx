@@ -4,8 +4,8 @@ import { IQuestionnaireResponse } from "@smile-cdr/fhirts/dist/FHIR-R4/interface
 
 interface DiagnosisRightBarProps {
     id: string;
-    questionnaires?: IQuestionnaire[];
-    questionResponses?: IQuestionnaireResponse[];
+    questionnaire?: IQuestionnaire;
+    questionResponse?: IQuestionnaireResponse;
     status?: IQuestionnaire['status'] | 'completed' | '';
     onSubmit: (answers: any) => void;
     sendForSecondOpinion: () => void;
@@ -13,25 +13,25 @@ interface DiagnosisRightBarProps {
 }
 
 const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
-    const { questionnaires, questionResponses, status, onSubmit, sendForSecondOpinion, allowSecondOpinion } = props;
+    const { questionnaire, questionResponse, status, onSubmit, sendForSecondOpinion, allowSecondOpinion } = props;
 
-    const [showRightSidebar, setShowRightSidebar] = useState(true);
+    const [showRightSidebar, setShowRightSidebar] = useState<boolean>(true);
     const [answers, setAnswers] = useState<{ [key: string]: any }>({});
-    const [resizing, setResizing] = useState(false);
+    const [resizing, setResizing] = useState<boolean>(false);
     const [resizeData, setResizeData] = useState<{ totalWidth: number, left: number }>();
-    const [width, setWidth] = useState(320);
+    const [width, setWidth] = useState<number>(320);
 
     useEffect(() => {
-        if (questionResponses?.length) {
+        if (questionResponse?.item?.length) {
             const tempQueRes: { [key: string]: any } = {}
-            questionResponses.forEach(qr => {
-                if (qr && qr.questionnaire && qr?.item) {
-                    tempQueRes[qr?.questionnaire?.replace('Questionnaire/', '')] = qr?.item && qr?.item[0]?.answer ? JSON.stringify(qr?.item[0]?.answer[0]) : '';
+            questionResponse?.item?.forEach(item => {
+                if (item.linkId) {
+                    tempQueRes[item.linkId] = item?.answer ? item?.answer[0] : '';
                 }
             })
             setAnswers(tempQueRes);
         }
-    }, [questionResponses?.length])
+    }, [questionResponse?.item?.length])
 
     const startResizing = React.useCallback((e: any) => {
         setResizing(true);
@@ -63,18 +63,22 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
         };
     }, [resizeHandler, stopResizing]);
 
-    const onSelectAnswerChange = (qIndex: number) => (e: any) => {
-        const questionnaire = questionnaires ? questionnaires[qIndex] : null;
-        if (questionnaire) {
-            setAnswers(prev => ({ ...prev, [questionnaire.id as string]: JSON.parse(e.target.value) }));
+    const onSelectAnswerChange = (itemIndex: number) => (e: any) => {
+        const queItem = questionnaire?.item ? questionnaire.item[itemIndex] : null;
+        if (queItem) {
+            setAnswers(prev => ({ ...prev, [queItem.linkId as string]: JSON.parse(e.target.value) }));
         }
     }
 
-    const onTextAnswerChange = (qIndex: number) => (e: any) => {
-        const questionnaire = questionnaires ? questionnaires[qIndex] : null;
-        if (questionnaire) {
-            setAnswers(prev => ({ ...prev, [questionnaire.id as string]: { valueString: e.target.value } }));
+    const onTextAnswerChange = (itemIndex: number) => (e: any) => {
+        const queItem = questionnaire?.item ? questionnaire.item[itemIndex] : null;
+        if (queItem) {
+            setAnswers(prev => ({ ...prev, [queItem.linkId as string]: { valueString: e.target.value } }));
         }
+    }
+
+    const allowSubmit = () => {
+        return questionnaire?.item?.every(i => i.required ? i.linkId && !!answers[i.linkId] : true)
     }
 
     return <div className="absolute top-0 right-0 flex flex-col gap-4 border border-gray-100 m-[10px] bg-white">
@@ -101,30 +105,64 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
         </div>
 
         <div className={`px-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-501px)] ${!showRightSidebar ? 'hidden' : ''}`}>
-            {questionnaires?.map((questionnaire, qIndex) => {
-                const question = questionnaire?.item?.length ? questionnaire.item[0] : {};
-                if (question.type === 'choice') {
+            {questionnaire?.item?.map((question, qIndex) => {
+                const elementType = question.extension && question.extension[0]?.valueCodeableConcept?.coding && question.extension[0]?.valueCodeableConcept?.coding[0]?.code
+                if (question.type === 'choice' && elementType === 'radio-button') {
                     return <div key={qIndex} className="bg-white flex-col justify-start items-start gap-2 flex">
                         <div className="self-stretch h-7 pb-1">
                             <h6 className="self-stretch text-gray-900 text-base font-semibold leading-normal">{question.text}</h6>
                         </div>
-                        <select className="custom-select h-10 self-stretch grow shrink bg-white rounded border text-gray-900 px-4 disabled:bg-gray-25" onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} >
-                            <option disabled>Select</option>
+                        {question.answerOption?.map(({ valueCoding }, index) => {
+                            const isDefaultChecked = question?.linkId ? JSON.stringify(answers[question.linkId]) === JSON.stringify({ valueCoding }) ?? false : false;
+                            return <div key={valueCoding?.code} className="py-1.5 bg-white justify-center items-center flex">
+                                <input type="radio" className='w-5 h-5 cursor-pointer' id={valueCoding?.code} name="diagnosis" defaultChecked={isDefaultChecked} value={JSON.stringify({ valueCoding })} onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} />
+                                <label htmlFor={valueCoding?.code} className="text-gray-900 text-base font-normal leading-normal ml-2 cursor-pointer">{valueCoding?.display}</label>
+                            </div>
+                        })}
+                    </div>
+                }
+                if (question.type === 'choice' && elementType === 'drop-down') {
+                    return <div key={qIndex} className="bg-white flex-col justify-start items-start gap-2 flex">
+                        <div className="self-stretch h-7 pb-1">
+                            <h6 className="self-stretch text-gray-900 text-base font-semibold leading-normal">{question.text}</h6>
+                        </div>
+                        <select className="custom-select h-10 self-stretch grow shrink bg-white rounded border text-gray-900 px-4 disabled:bg-gray-25" value={question?.linkId ? JSON.stringify(answers[question.linkId]) ?? '' : ''} onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} >
+                            <option value='' disabled hidden>Select</option>
                             {question.answerOption?.map(({ valueCoding }, aIndex) => {
-                                const isSelected = questionnaire?.id ? JSON.stringify({ valueCoding }) === answers[questionnaire.id] : false;
-                                return <option key={aIndex} value={JSON.stringify({ valueCoding })} selected={isSelected}>{valueCoding?.display}</option>
+                                return <option key={aIndex} value={JSON.stringify({ valueCoding })} >{valueCoding?.display}</option>
                             })}
                         </select>
                     </div>
                 }
                 if (question.type === 'text') {
-                    return <textarea
-                        key={qIndex}
-                        className="p-4 min-h-[100px] self-stretch grow shrink bg-white rounded border text-gray-900 px-4 disabled:bg-gray-25"
-                        placeholder="Add.."
-                        onChange={onTextAnswerChange(qIndex)}
-                        defaultValue={questionnaire?.id && answers[questionnaire.id] ? JSON.parse(answers[questionnaire.id])?.valueString : ''}
-                    />
+                    return <div key={qIndex} className="bg-white flex-col justify-start items-start gap-2 flex">
+                        <div className="self-stretch h-7 pb-1">
+                            <h6 className="self-stretch text-gray-900 text-base font-semibold leading-normal">{question.text}</h6>
+                        </div>
+                        <textarea
+                            key={qIndex}
+                            className="p-4 min-h-[100px] self-stretch grow shrink bg-white rounded border text-gray-900 px-4 disabled:bg-gray-25 resize-none"
+                            placeholder="Add.."
+                            onChange={onTextAnswerChange(qIndex)}
+                            defaultValue={question?.linkId ? answers[question.linkId]?.valueString : ''}
+                            disabled={status === 'completed'}
+                        />
+                    </div>
+                }
+                if (question.type === 'string') {
+                    return <div key={qIndex} className="bg-white flex-col justify-start items-start gap-2 flex">
+                        <div className="self-stretch h-7 pb-1">
+                            <h6 className="self-stretch text-gray-900 text-base font-semibold leading-normal">{question.text}</h6>
+                        </div>
+                        <input
+                            key={qIndex}
+                            className="p-4 h-10 self-stretch grow shrink bg-white rounded border text-gray-900 px-4 disabled:bg-gray-25 resize-none"
+                            placeholder="Add.."
+                            onChange={onTextAnswerChange(qIndex)}
+                            defaultValue={question?.linkId ? answers[question.linkId]?.valueString : ''}
+                            disabled={status === 'completed'}
+                        />
+                    </div>
                 }
             })}
         </div>
@@ -151,7 +189,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M9.9997 15.1709L19.1921 5.97852L20.6063 7.39273L9.9997 17.9993L3.63574 11.6354L5.04996 10.2212L9.9997 15.1709Z" fill="#24A148" />
                         </svg>
-                        <p className="text-success text-base font-semibold p-3">Image Label Submitted</p>
+                        <p className="text-success text-base font-semibold p-3">Diagnosis Submitted</p>
                     </>
                     : <>
                         {allowSecondOpinion && <button className="h-12 bg-white border border-app_primary disabled:border-gray-400 rounded justify-center items-center flex flex-1 text-app_primary disabled:text-gray-400 text-base font-semibold leading-normal" onClick={sendForSecondOpinion} >
@@ -160,7 +198,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         <button
                             className="h-12 bg-app_primary disabled:bg-gray-200 rounded justify-center items-center flex flex-1 text-white text-base font-semibold leading-normal"
                             onClick={() => onSubmit(answers)}
-                            disabled={Object.keys(answers).length !== questionnaires?.length}
+                            disabled={!allowSubmit()}
                         >
                             Submit
                         </button>

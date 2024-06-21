@@ -32,8 +32,8 @@ export default function RemoteSpecialistDiagnosis() {
     const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState<ITask[]>([]);
     const [activeTaskIndex, setActiveTaskIndex] = useState<number>(-1);
-    const [questionnaires, setQuestionnaires] = useState<IQuestionnaire[]>([]);
-    const [questionResponses, setQuestionResponses] = useState<IQuestionnaireResponse[]>();
+    const [questionnaire, setQuestionnaire] = useState<IQuestionnaire>();
+    const [questionResponse, setQuestionResponse] = useState<IQuestionnaireResponse>();
     const [encounter, setEncounter] = useState<IEncounter>();
     const [medias, setMedias] = useState<IMedia[]>();
     const [observations, setObservations] = useState<IObservation[]>();
@@ -57,7 +57,10 @@ export default function RemoteSpecialistDiagnosis() {
                     setTasks(getResourcesFromBundle<ITask>(data));
 
                 })
-                .catch((error: any) => { console.log(error); message.error('Error fetching Tasks', error) });
+                .catch((error: any) => {
+                    console.log(error);
+                    message.error('Error fetching Tasks', error);
+                });
 
         }
     }, [session?.accessToken])
@@ -76,54 +79,39 @@ export default function RemoteSpecialistDiagnosis() {
     useEffect(() => {
         // When id/index changes
         if (session?.accessToken && tasks?.length && activeTaskIndex !== undefined && activeTaskIndex !== -1) {
-            if (activeTask && activeTask.input && activeTask.input.length > 0) {
-                // Fetch encounter as well
-                const [encounterResourceType, encounterId] = activeTask.focus?.reference?.split('/') ?? []
-                // Fetch patient as well
-                const [patientResourceType, patientId] = activeTask.for?.reference?.split('/') ?? []
+            // Fetch encounter
+            const [encounterResourceType, encounterId] = activeTask.encounter?.reference?.split('/') ?? []
 
-                Promise.all([
-                    fetchFhirResourceEverything(session?.accessToken, {
-                        resourceType: encounterResourceType,
-                        id: encounterId
-                    }),
-                    fetchFhirSingleResource(session?.accessToken, { resourceType: patientResourceType, id: patientId }),
-                    ...activeTask.input.map(input => {
-                        // Fetch all Questionnaires
-                        const [questionnaireResourceType, questionnaireId] = input?.valueReference?.reference?.split('/') ?? []
-                        return fetchFhirSingleResource(session?.accessToken as string, { resourceType: questionnaireResourceType, id: questionnaireId })
-                    }),
-                ])
-                    .then(async ([data, patient, ...ques]: [IBundle, IPatient, ...IQuestionnaire[]]) => {
-                        const bundledData = getResourcesFromBundle<any>(data);
-                        setEncounter(bundledData.filter(bd => bd.resourceType === 'Encounter')[0]);
-                        setMedias(bundledData.filter(bd => bd.resourceType === 'Media'));
-                        setObservations(bundledData.filter(bd => bd.resourceType === 'Observation'));
-                        setQuestionnaires(ques);
-                        setPatient(patient);
-                        if (searchParams.get('status') === 'completed' && activeTask.input) {
-                            const qResponses = await Promise.all(activeTask?.input?.map(input => {
-                                // Fetch all Questionnaires
-                                const [questionnaireResourceType, questionnaireId] = input?.valueReference?.reference?.split('/') ?? []
-                                return fetchFhirResource(session?.accessToken as string, {
-                                    resourceType: 'QuestionnaireResponse',
-                                    query: {
-                                        questionnaire: questionnaireId,
-                                        source: `Practitioner/${session?.resourceId}`,
-                                    }
-                                })
-                            }));
-                            setQuestionResponses(qResponses.map(qRes => {
-                                return getResourcesFromBundle<IQuestionnaireResponse>(qRes)[0];
-                            }));
-                        }
-                        setLoading(false);
-                    })
-                    .catch((error: any) => {
-                        console.log(error);
-                        message.error('Error fetching Questionnaire/Media', error);
-                    });
-            }
+            fetchFhirResourceEverything(session?.accessToken, {
+                resourceType: encounterResourceType,
+                id: encounterId
+            })
+                .then(async (data: IBundle) => {
+                    const bundledData = getResourcesFromBundle<any>(data);
+                    setEncounter(bundledData.filter(bd => bd.resourceType === 'Encounter')[0]);
+                    setMedias(bundledData.filter(bd => bd.resourceType === 'Media'));
+                    setObservations(bundledData.filter(bd => bd.resourceType === 'Observation'));
+                    setQuestionnaire(bundledData.filter(bd => bd.resourceType === 'Questionnaire')[0]);
+                    setPatient(bundledData.filter(bd => bd.resourceType === 'Patient')[0]);
+                    // Get the submitted question response as well when the task is completed
+                    if (searchParams.get('status') === 'completed' && activeTask.focus) {
+
+                        const [questionnaireResourceType, questionnaireId] = activeTask?.focus?.reference?.split('/') ?? []
+                        const qResponses = await fetchFhirResource(session?.accessToken as string, {
+                            resourceType: 'QuestionnaireResponse',
+                            query: {
+                                questionnaire: questionnaireId,
+                                source: `Practitioner/${session?.resourceId}`,
+                            }
+                        })
+                        setQuestionResponse(getResourcesFromBundle<IQuestionnaireResponse>(qResponses)[0]);
+                    }
+                })
+                .catch((error: any) => {
+                    console.log(error);
+                    message.error('Error fetching Encounter');
+                })
+                .finally(() => setLoading(false));
         }
     }, [id, activeTaskIndex])
 
@@ -165,26 +153,23 @@ export default function RemoteSpecialistDiagnosis() {
         setSubmitting(true);
 
         try {
-            // create a resource QuestionnaireResponse for each question
-            await Promise.all(questionnaires?.map(questionnaire => {
-                const item: any = questionnaire?.item?.map(({ answerOption, ...itm }: any) => {
-                    itm.answer = [answers[questionnaire?.id as string]];
-                    return itm;
-                });
+            // create a resource QuestionnaireResponse
+            const item: any = questionnaire?.item?.map(({ answerOption, ...itm }: any) => {
+                itm.answer = [answers[itm?.linkId as string]];
+                return itm;
+            });
 
-                const responsePayload: IQuestionnaireResponse = {
-                    resourceType: 'QuestionnaireResponse',
-                    id: v4(),
-                    questionnaire: `Questionnaire/${questionnaire.id}`,
-                    status: 'completed',
-                    author: activeTask.for,
-                    source: activeTask.owner,
-                    item,
-                    authored: new Date().toISOString(),
-                }
-                return updateFhirResource(session?.accessToken as string, responsePayload);
-            }))
-
+            const responsePayload: IQuestionnaireResponse = {
+                resourceType: 'QuestionnaireResponse',
+                id: v4(),
+                questionnaire: `Questionnaire/${questionnaire?.id}`,
+                status: 'completed',
+                author: activeTask.for,
+                source: activeTask.owner,
+                item,
+                authored: new Date().toISOString(),
+            }
+            await updateFhirResource(session?.accessToken as string, responsePayload);
 
             // update status to completed
             const taskPayload: ITask = {
@@ -212,7 +197,7 @@ export default function RemoteSpecialistDiagnosis() {
                         <path d="M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z" fill="#212121" />
                     </svg>
                 </Link>
-                <div className="text-gray-900 text-2xl leading-8">{questionnaires && questionnaires[0]?.item ? questionnaires[0]?.item[0]?.text : ''}</div>
+                <div className="text-gray-900 text-2xl leading-8">{questionnaire && questionnaire?.item ? questionnaire?.item[0]?.text : ''}</div>
             </div>
             {/* pagination */}
             <div className="flex items-center justify-center gap-3">
@@ -256,8 +241,8 @@ export default function RemoteSpecialistDiagnosis() {
                     />
                     <DiagnosisRightBar
                         id={id as string}
-                        questionnaires={questionnaires}
-                        questionResponses={questionResponses}
+                        questionnaire={questionnaire}
+                        questionResponse={questionResponse}
                         status={(tasks?.length ? activeTask?.status : '') as IQuestionnaire['status'] | 'completed' | ''}
                         onSubmit={onSubmit}
                         sendForSecondOpinion={sendForSecondOpinion}

@@ -1,7 +1,7 @@
-import {HumanName} from '@smile-cdr/fhirts/dist/FHIR-R4/classes/humanName';
-import type {IBundle} from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
-import {IPractitionerRole} from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPractitionerRole';
-import {isEqual} from 'lodash';
+import { HumanName } from '@smile-cdr/fhirts/dist/FHIR-R4/classes/humanName';
+import type { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
+import { IPractitionerRole } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPractitionerRole';
+import { isEqual } from 'lodash';
 
 /**
  * retrieve object(s) from an array if it has a given property that has a specified value
@@ -62,7 +62,7 @@ export const parseFhirHumanName = (hName?: HumanName) => {
     if (!hName) {
         return;
     }
-    const {family, given, suffix, prefix} = hName;
+    const { family, given, suffix, prefix } = hName;
 
     // sanitize variable to make sure its array
     const confirmArray = (element?: unknown) =>
@@ -141,5 +141,6 @@ export const OBSERVATION_CODE_LABEL_MAPPING: { [key: string]: string } = {
     '64004-5': 'Tobacco product',
     '74205-6': 'Alcohol use',
     '62559-0': 'Lifetime alcohol exposure',
-    'LP232821-1': 'Open mouth'
+    'LP232821-1': 'Open mouth',
+    '62596-2': 'Oral mucosal lesions'
 }
