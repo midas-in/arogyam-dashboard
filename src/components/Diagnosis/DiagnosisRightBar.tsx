@@ -8,12 +8,13 @@ interface DiagnosisRightBarProps {
     questionResponse?: IQuestionnaireResponse;
     status?: IQuestionnaire['status'] | 'completed' | '';
     onSubmit: (answers: any) => void;
-    sendForSecondOpinion: () => void;
-    allowSecondOpinion: boolean
+    sendForSecondOpinion?: () => void;
+    allowSecondOpinion?: boolean
+    isSpecialistUser?: boolean
 }
 
 const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
-    const { questionnaire, questionResponse, status, onSubmit, sendForSecondOpinion, allowSecondOpinion } = props;
+    const { id, questionnaire, questionResponse, status, onSubmit, sendForSecondOpinion, allowSecondOpinion, isSpecialistUser } = props;
 
     const [showRightSidebar, setShowRightSidebar] = useState<boolean>(true);
     const [answers, setAnswers] = useState<{ [key: string]: any }>({});
@@ -78,20 +79,27 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
     }
 
     const allowSubmit = () => {
-        return questionnaire?.item?.every(i => i.required ? i.linkId && !!answers[i.linkId] : true)
+        return questionnaire?.item?.every(i => (
+            i.required
+                ? i.linkId && (!!answers[i.linkId]?.valueCoding || !!answers[i.linkId]?.valueString)
+                : true)
+        )
     }
 
     return <div className="absolute top-0 right-0 flex flex-col gap-4 border border-gray-100 m-[10px] bg-white">
         <div className="flex">
-            <div
+            {isSpecialistUser && <div
                 className='resize-handle'
                 onMouseDown={startResizing}
-            />
+            />}
             <div className="flex-1 min-w-65 mx-w-80 flex justify-between px-6 py-3 bg-primary-10 shadow border-b border-gray-100" style={{ width }}>
                 <div className="flex items-center">
                     <p className="text-gray-900 text-base font-semibold leading-normal ">
                         Diagnosis
                     </p>
+                    {!isSpecialistUser && <p className="truncate text-gray-900 text-base font-semibold leading-normal ml-1" style={{ width: width - 150 }}>
+                        {id}
+                    </p>}
                 </div>
                 <button className={`h-8 px-2 py-1 rounded border border-gray-100 justify-start items-center gap-1 inline-flex ${!showRightSidebar ? 'bg-app_primary border-0' : 'bg-white'}`} onClick={() => setShowRightSidebar(prev => !prev)} >
                     {/* <div className={`text-base font-normal ${!showRightSidebar ? 'text-white' : ''}`}>Close</div> */}

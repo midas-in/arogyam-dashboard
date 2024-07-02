@@ -1,3 +1,5 @@
+// @deprecated
+
 import React, { useEffect, useState } from "react";
 import { IQuestionnaire } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaire';
 import { IQuestionnaireResponse } from "@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaireResponse";

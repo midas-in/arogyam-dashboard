@@ -16,9 +16,9 @@ import { IPatient } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPatient';
 import { IEncounter } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IEncounter';
 import { IObservation } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IObservation';
 
-import { DiagnosisImage } from '@/components/Reader/DiagnosisImage';
+import { DiagnosisImage } from '@/components/Diagnosis/DiagnosisImage';
 import { DiagnosisLeftBar } from "@/components/Specialist/DiagnosisLeftBar";
-import { DiagnosisRightBar } from "@/components/Specialist/DiagnosisRightBar";
+import { DiagnosisRightBar } from "@/components/Diagnosis/DiagnosisRightBar";
 import { Loader } from "@/components/UI/Loader";
 import { fetchFhirResource, fetchFhirSingleResource, updateFhirResource, fetchFhirResourceEverything } from '@/app/loader';
 import { getResourcesFromBundle, REMOTE_SPECIALIST } from '@/utils/fhir-utils';
@@ -101,7 +101,7 @@ export default function RemoteSpecialistDiagnosis() {
                             resourceType: 'QuestionnaireResponse',
                             query: {
                                 questionnaire: questionnaireId,
-                                source: `Practitioner/${session?.resourceId}`,
+                                author: `Practitioner/${session?.resourceId}`,
                             }
                         })
                         setQuestionResponse(getResourcesFromBundle<IQuestionnaireResponse>(qResponses)[0]);
@@ -162,10 +162,10 @@ export default function RemoteSpecialistDiagnosis() {
             const responsePayload: IQuestionnaireResponse = {
                 resourceType: 'QuestionnaireResponse',
                 id: v4(),
-                questionnaire: `Questionnaire/${questionnaire?.id}`,
+                questionnaire: questionnaire?.url,
                 status: 'completed',
-                author: activeTask.for,
-                source: activeTask.owner,
+                subject: activeTask.for,
+                author: activeTask.owner,
                 item,
                 authored: new Date().toISOString(),
             }
@@ -247,6 +247,7 @@ export default function RemoteSpecialistDiagnosis() {
                         onSubmit={onSubmit}
                         sendForSecondOpinion={sendForSecondOpinion}
                         allowSecondOpinion={session?.userType === REMOTE_SPECIALIST}
+                        isSpecialistUser={true}
                     />
                 </>
             }

@@ -20,7 +20,7 @@ import {
     READER
 } from '@/utils/fhir-utils';
 
-type UserTypes = typeof PRACTITIONER | typeof SUPERVISOR | typeof REMOTE_SPECIALIST | typeof SENIOR_SPECIALIST | typeof  READER;
+type UserTypes = typeof PRACTITIONER | typeof SUPERVISOR | typeof REMOTE_SPECIALIST | typeof SENIOR_SPECIALIST | typeof READER;
 
 function requestRefreshOfAccessToken(token: JWT) {
     if (!process.env.KEYCLOAK_ISSUER || !process.env.KEYCLOAK_CLIENT_ID || !process.env.KEYCLOAK_CLIENT_SECRET) {
@@ -117,6 +117,7 @@ export const authOptions: AuthOptions = {
             } else {
                 try {
                     const response = await requestRefreshOfAccessToken(token)
+                    console.log('response', response.json());
 
                     const tokens: TokenSet = await response.json()
 

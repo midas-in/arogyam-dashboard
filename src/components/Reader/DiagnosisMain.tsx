@@ -14,8 +14,8 @@ import { IQuestionnaireResponse } from '@smile-cdr/fhirts/dist/FHIR-R4/interface
 import { IMedia } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IMedia';
 import { IPatient } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPatient';
 
-import { DiagnosisImage } from '@/components/Reader/DiagnosisImage';
-import { DiagnosisRightBar } from "@/components/Reader/DiagnosisRightBar";
+import { DiagnosisImage } from '@/components/Diagnosis/DiagnosisImage';
+import { DiagnosisRightBar } from "@/components/Diagnosis/DiagnosisRightBar";
 import { Loader } from "@/components/UI/Loader";
 import { fetchFhirResource, fetchFhirSingleResource, updateFhirResource } from '@/app/loader';
 import { getResourcesFromBundle } from '@/utils/fhir-utils';
@@ -70,10 +70,10 @@ export default function ReaderDiagnosis() {
         // When id/index changes
         if (session?.accessToken && tasks?.length && activeTaskIndex !== undefined && activeTaskIndex !== -1) {
             if (activeTask && activeTask.input && activeTask.input.length > 0 && activeTask.input[0]) {
+                // Fetch media(images)
+                const [mediaResourceType, mediaId] = activeTask.input[0]?.valueReference?.reference?.split('/') ?? []
                 // Fetch Questionnaire
-                const [questionnaireResourceType, questionnaireId] = activeTask.input[0]?.valueReference?.reference?.split('/') ?? []
-                // Fetch media(images) as well
-                const [mediaResourceType, mediaId] = activeTask.focus?.reference?.split('/') ?? []
+                const [questionnaireResourceType, questionnaireId] = activeTask.focus?.reference?.split('/') ?? []
                 // Fetch patient as well
                 const [patientResourceType, patientId] = activeTask.for?.reference?.split('/') ?? []
 
@@ -85,7 +85,7 @@ export default function ReaderDiagnosis() {
                         resourceType: 'QuestionnaireResponse',
                         query: {
                             questionnaire: questionnaireId,
-                            source: `Practitioner/${session?.resourceId}`,
+                            author: `Practitioner/${session?.resourceId}`,
                         }
                     })
                 ])
@@ -118,23 +118,23 @@ export default function ReaderDiagnosis() {
         }
     }
 
-    const onSubmit = async (answer?: NonNullable<NonNullable<IQuestionnaire['item']>[number]['answerOption']>[number]) => {
+    const onSubmit = async (answers: { [key: string]: NonNullable<NonNullable<IQuestionnaire['item']>[number]['answerOption']>[number] }) => {
         setSubmitting(true);
 
         try {
             // create a resource QuestionnaireResponse
             const item: any = questionnaire?.item?.map(({ answerOption, ...itm }: any) => {
-                itm.answer = [answer];
+                itm.answer = [answers[itm?.linkId as string]];
                 return itm;
             });
 
             const responsePayload: IQuestionnaireResponse = {
                 resourceType: 'QuestionnaireResponse',
                 id: v4(),
-                questionnaire: activeTask.input?.length ? activeTask.input[0].valueReference?.reference : undefined,
+                questionnaire: questionnaire?.url,
                 status: 'completed',
-                author: activeTask.for,
-                source: activeTask.owner,
+                subject: activeTask.for,
+                author: activeTask.owner,
                 item,
                 authored: new Date().toISOString(),
             }
