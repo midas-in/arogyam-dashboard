@@ -117,13 +117,15 @@ export default function RemoteSpecialistDiagnosis() {
 
     const onClickPrevious = () => {
         if (activeTaskIndex > 0) {
-            router.push(`/diagnosis/${tasks[activeTaskIndex - 1].id}`);
+            const params = new URLSearchParams(searchParams.toString());
+            router.push(`/diagnosis/${tasks[activeTaskIndex - 1].id}?${params.toString()}`);
         }
     }
 
     const onClickNext = () => {
         if (tasks?.length && activeTaskIndex < tasks?.length - 1) {
-            router.push(`/diagnosis/${tasks[activeTaskIndex + 1].id}`);
+            const params = new URLSearchParams(searchParams.toString());
+            router.push(`/diagnosis/${tasks[activeTaskIndex + 1].id}?${params.toString()}`);
         }
     }
 
