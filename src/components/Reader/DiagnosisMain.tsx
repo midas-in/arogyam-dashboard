@@ -17,7 +17,10 @@ import { IPatient } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPatient';
 import { DiagnosisImage } from '@/components/Diagnosis/DiagnosisImage';
 import { DiagnosisRightBar } from "@/components/Diagnosis/DiagnosisRightBar";
 import { Loader } from "@/components/UI/Loader";
-import { fetchFhirResource, fetchFhirSingleResource, updateFhirResource } from '@/app/loader';
+import {
+    fetchFhirResource, fetchFhirSingleResource, updateFhirResource,
+    extractQuestionnaireResponse, createMultipleFhirResources
+} from '@/app/loader';
 import { getResourcesFromBundle } from '@/utils/fhir-utils';
 
 export default function ReaderDiagnosis() {
@@ -31,7 +34,7 @@ export default function ReaderDiagnosis() {
     const [activeTaskIndex, setActiveTaskIndex] = useState<number>(-1);
     const [questionnaire, setQuestionnaire] = useState<IQuestionnaire>();
     const [media, setMedia] = useState<IMedia>();
-    const [patient, setPatient] = useState<IPatient>();
+    // const [patient, setPatient] = useState<IPatient>();
     const [questionResponse, setQuestionResponse] = useState<IQuestionnaireResponse>();
     const [submitting, setSubmitting] = useState(false);
     const activeTask: ITask = tasks[activeTaskIndex]
@@ -75,24 +78,24 @@ export default function ReaderDiagnosis() {
                 // Fetch Questionnaire
                 const [questionnaireResourceType, questionnaireId] = activeTask.focus?.reference?.split('/') ?? []
                 // Fetch patient as well
-                const [patientResourceType, patientId] = activeTask.for?.reference?.split('/') ?? []
+                // const [patientResourceType, patientId] = activeTask.for?.reference?.split('/') ?? []
 
                 Promise.all([
                     fetchFhirSingleResource(session?.accessToken, { resourceType: questionnaireResourceType, id: questionnaireId }),
                     fetchFhirSingleResource(session?.accessToken, { resourceType: mediaResourceType, id: mediaId }),
-                    fetchFhirSingleResource(session?.accessToken, { resourceType: patientResourceType, id: patientId }),
+                    // fetchFhirSingleResource(session?.accessToken, { resourceType: patientResourceType, id: patientId }),
                     fetchFhirResource(session?.accessToken, {
                         resourceType: 'QuestionnaireResponse',
                         query: {
                             questionnaire: questionnaireId,
+                            encounter: activeTask.encounter?.reference,
                             author: `Practitioner/${session?.resourceId}`,
                         }
                     })
                 ])
-                    .then(([ques, mda, patient, qResponse]: [IQuestionnaire, IMedia, IPatient, IQuestionnaireResponse]) => {
+                    .then(([ques, mda, qResponse]: [IQuestionnaire, IMedia, IQuestionnaireResponse]) => {
                         setQuestionnaire(ques);
                         setMedia(mda);
-                        setPatient(patient);
                         setQuestionResponse(getResourcesFromBundle<IQuestionnaireResponse>(qResponse)[0])
                         setLoading(false);
                     })
@@ -137,10 +140,29 @@ export default function ReaderDiagnosis() {
                 status: 'completed',
                 subject: activeTask.for,
                 author: activeTask.owner,
+                encounter: activeTask.encounter,
                 item,
                 authored: new Date().toISOString(),
             }
-            await updateFhirResource(session?.accessToken as string, responsePayload);
+            const extractPayload = {
+                resourceType: "Parameters",
+                parameter: [
+                    {
+                        name: "questionnaire-response",
+                        resource: responsePayload
+                    }
+                ]
+            }
+            const extractedResponse = await extractQuestionnaireResponse(session?.accessToken as string, extractPayload);
+            extractedResponse.entry?.push({
+                resource: responsePayload,
+                request: {
+                    method: 'PUT',
+                    url: `${responsePayload.resourceType}/${responsePayload.id}`
+                }
+            });
+            await createMultipleFhirResources(session?.accessToken as string, extractedResponse);
+
             // update status to completed
             const taskPayload: ITask = {
                 ...activeTask,

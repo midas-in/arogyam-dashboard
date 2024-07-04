@@ -1,7 +1,8 @@
 import { HumanName } from '@smile-cdr/fhirts/dist/FHIR-R4/classes/humanName';
 import type { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
 import { IPractitionerRole } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPractitionerRole';
-import { isEqual } from 'lodash';
+import { dequal } from 'dequal';
+
 
 /**
  * retrieve object(s) from an array if it has a given property that has a specified value
@@ -22,7 +23,7 @@ export const getObjLike = <T extends object>(
     for (let i = 0; i < arr.length; i++) {
         const thisObj = arr[i];
         const objHasValue = (thisObj as never)[key];
-        if (isEqual(objHasValue, value)) {
+        if (dequal(objHasValue, value)) {
             result.push(thisObj);
         }
         if (result.length > 0 && !all) {
@@ -136,11 +137,11 @@ export const SNOMED_CODEABLE_SYSTEM = 'http://snomed.info/sct';
 export const DEVICE_SETTING_CODEABLE_CODE = '1156600005';
 
 export const OBSERVATION_CODE_LABEL_MAPPING: { [key: string]: string } = {
-    '63638-1': 'Smoking status',
-    '39240-7': 'Tobacco use status',
-    '64004-5': 'Tobacco product',
-    '74205-6': 'Alcohol use',
+    '63638-1': 'Cigarette/ Bidi',
+    '39240-7': 'Smokeless Tobacco',
+    '64004-5': 'Areca nut',
+    '74205-6': 'Alcohol',
     '62559-0': 'Lifetime alcohol exposure',
-    'LP232821-1': 'Open mouth',
-    '62596-2': 'Oral mucosal lesions'
+    'LP232821-1': 'Mouth open',
+    '62596-2': 'Lesion'
 }

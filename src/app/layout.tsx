@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Dropdown } from 'antd';
 
 import { getServerSession } from 'next-auth'
-import { authOptions } from './api/auth/[...nextauth]/route';
+import { authOptions } from './api/auth/[...nextauth]/authOptions';
 import { Providers } from "./Providers";
 import SessionGuard from '@/components/SessionGuard'
 import { Sidebar } from '@/components/Sidebar';

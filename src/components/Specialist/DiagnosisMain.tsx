@@ -20,7 +20,10 @@ import { DiagnosisImage } from '@/components/Diagnosis/DiagnosisImage';
 import { DiagnosisLeftBar } from "@/components/Specialist/DiagnosisLeftBar";
 import { DiagnosisRightBar } from "@/components/Diagnosis/DiagnosisRightBar";
 import { Loader } from "@/components/UI/Loader";
-import { fetchFhirResource, fetchFhirSingleResource, updateFhirResource, fetchFhirResourceEverything } from '@/app/loader';
+import {
+    fetchFhirResource, updateFhirResource, fetchFhirResourceEverything,
+    extractQuestionnaireResponse, createMultipleFhirResources
+} from '@/app/loader';
 import { getResourcesFromBundle, REMOTE_SPECIALIST } from '@/utils/fhir-utils';
 
 export default function RemoteSpecialistDiagnosis() {
@@ -87,23 +90,26 @@ export default function RemoteSpecialistDiagnosis() {
                 id: encounterId
             })
                 .then(async (data: IBundle) => {
+                    const [questionnaireResourceType, questionnaireId] = activeTask?.focus?.reference?.split('/') ?? []
                     const bundledData = getResourcesFromBundle<any>(data);
                     setEncounter(bundledData.filter(bd => bd.resourceType === 'Encounter')[0]);
                     setMedias(bundledData.filter(bd => bd.resourceType === 'Media'));
                     setObservations(bundledData.filter(bd => bd.resourceType === 'Observation'));
-                    setQuestionnaire(bundledData.filter(bd => bd.resourceType === 'Questionnaire')[0]);
+                    const questionnaireFromEverything = bundledData.filter(bd => bd.resourceType === 'Questionnaire');
+                    const foundQuestionnaire = questionnaireFromEverything.find(q => q.id === questionnaireId);
+                    setQuestionnaire(foundQuestionnaire);
                     setPatient(bundledData.filter(bd => bd.resourceType === 'Patient')[0]);
                     // Get the submitted question response as well when the task is completed
-                    if (searchParams.get('status') === 'completed' && activeTask.focus) {
+                    if (searchParams.get('status') === 'completed' && foundQuestionnaire.url) {
 
-                        const [questionnaireResourceType, questionnaireId] = activeTask?.focus?.reference?.split('/') ?? []
                         const qResponses = await fetchFhirResource(session?.accessToken as string, {
                             resourceType: 'QuestionnaireResponse',
                             query: {
-                                questionnaire: questionnaireId,
+                                questionnaire: foundQuestionnaire.url,
+                                encounter: activeTask.encounter?.reference,
                                 author: `Practitioner/${session?.resourceId}`,
                             }
-                        })
+                        }).catch(e => console.log(''))
                         setQuestionResponse(getResourcesFromBundle<IQuestionnaireResponse>(qResponses)[0]);
                     }
                 })
@@ -168,10 +174,28 @@ export default function RemoteSpecialistDiagnosis() {
                 status: 'completed',
                 subject: activeTask.for,
                 author: activeTask.owner,
+                encounter: activeTask.encounter,
                 item,
                 authored: new Date().toISOString(),
             }
-            await updateFhirResource(session?.accessToken as string, responsePayload);
+            const extractPayload = {
+                resourceType: "Parameters",
+                parameter: [
+                    {
+                        name: "questionnaire-response",
+                        resource: responsePayload
+                    }
+                ]
+            }
+            const extractedResponse = await extractQuestionnaireResponse(session?.accessToken as string, extractPayload);
+            extractedResponse.entry?.push({
+                resource: responsePayload,
+                request: {
+                    method: 'PUT',
+                    url: `${responsePayload.resourceType}/${responsePayload.id}`
+                }
+            });
+            await createMultipleFhirResources(session?.accessToken as string, extractedResponse);
 
             // update status to completed
             const taskPayload: ITask = {

@@ -17,7 +17,7 @@ import { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
 
 import {
     IdentifierUseCodes, getObjLike, keycloakIdentifierCoding, groupResourceType,
-    PRACTITIONER_USER_TYPE_CODE, SUPERVISOR_USER_TYPE_CODE, PRACTITIONER, SUPERVISOR,
+    PRACTITIONER_USER_TYPE_CODE, SUPERVISOR_USER_TYPE_CODE, PRACTITIONER, SUPERVISOR, REMOTE_SPECIALIST, SENIOR_SPECIALIST, READER,
     HumanNameUseCodes, practitionerRoleResourceType, parseFhirHumanName, getResourcesFromBundle,
     getUserTypeCode, getUserType
 } from '@/utils/fhir-utils';
@@ -41,7 +41,8 @@ import {
 //     enabled: boolean,
 //     attributes: UserAttributes
 // }
-type UserTypes = typeof PRACTITIONER | typeof SUPERVISOR;
+type UserTypes = typeof PRACTITIONER | typeof SUPERVISOR | typeof REMOTE_SPECIALIST | typeof SENIOR_SPECIALIST | typeof READER;
+
 
 const defaultUserData = {
     firstName: ``,

@@ -15,7 +15,7 @@ export interface UserCredentialsFormFields {
     temporary: boolean;
 }
 
-export const submitForm = (
+const submitForm = (
     values: UserCredentialsFormFields,
     userId: string,
     accessToken: string,

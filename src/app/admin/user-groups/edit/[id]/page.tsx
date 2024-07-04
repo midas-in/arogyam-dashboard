@@ -14,7 +14,7 @@ import {
 } from '@/app/loader';
 
 /** default form initial values */
-export const defaultInitialValues: GroupRepresentation = {
+const defaultInitialValues: GroupRepresentation = {
     access: {
         view: false,
         manage: false,
@@ -37,7 +37,7 @@ export const defaultInitialValues: GroupRepresentation = {
  * @param {string[]} sourceSelectedKeys - source choice box selected keys
  * @param {RoleRepresentation[]} roles - list of all keycloak realm roles
  */
-export const handleTransferChange = async (
+const handleTransferChange = async (
     initialValues: GroupRepresentation,
     targetSelectedKeys: string[],
     sourceSelectedKeys: string[],
@@ -61,7 +61,7 @@ export const handleTransferChange = async (
     }
 };
 
-export const submitForm = async (
+const submitForm = async (
     values: GroupRepresentation & { roles?: string[] },
     accessToken: string,
     setSubmittingCallback: Dispatch<SetStateAction<boolean>>,

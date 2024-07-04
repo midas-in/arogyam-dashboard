@@ -159,3 +159,27 @@ export function updateFhirResource(accessToken: string, payload?: any) {
         resource: payload
     }).then(({ data }: { data: any }) => data);
 }
+
+export function extractQuestionnaireResponse(accessToken: string, payload: { resourceType: string, parameter: object }) {
+    return axios({
+        method: 'POST',
+        baseURL: process.env.NEXT_PUBLIC_FHIR_API_BASE_URL,
+        url: `/QuestionnaireResponse/$extract`,
+        data: payload,
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        },
+    }).then(({ data }: { data: any }) => data);
+}
+
+export function createMultipleFhirResources(accessToken: string, payload: { resourceType: string, query: object }) {
+    return axios({
+        method: 'POST',
+        baseURL: process.env.NEXT_PUBLIC_FHIR_API_BASE_URL,
+        url: ``,
+        data: payload,
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        },
+    }).then(({ data }: { data: any }) => data);
+}
