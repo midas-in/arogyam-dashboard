@@ -117,7 +117,6 @@ export const authOptions: AuthOptions = {
             } else {
                 try {
                     const response = await requestRefreshOfAccessToken(token)
-                    console.log('response', response.json());
 
                     const tokens: TokenSet = await response.json()
 

@@ -49,7 +49,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
     const resizeHandler = React.useCallback((e: any) => {
         if (resizing && resizeData) {
             const w = resizeData.totalWidth - (e.clientX + 6 - resizeData?.left);
-            if (w >= 260 && w <= 320) {
+            if (w >= 260 && w <= 360) {
                 setWidth(w);
             }
         }
@@ -86,13 +86,13 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
         )
     }
 
-    return <div className="absolute top-0 right-0 flex flex-col gap-4 border border-gray-100 m-[10px] bg-white">
+    return <div className="absolute top-0 right-0 flex flex-col gap-4 border border-gray-100 m-[10px] bg-white min-w-55 max-w-90" style={{ width }}>
         <div className="flex">
-            {isSpecialistUser && <div
-                className='resize-handle'
-                onMouseDown={startResizing}
-            />}
-            <div className="flex-1 min-w-65 mx-w-80 flex justify-between px-6 py-3 bg-primary-10 shadow border-b border-gray-100" style={{ width }}>
+            <div className="relative flex-1 min-w-65 mx-w-80 flex justify-between px-6 py-3 bg-primary-10 shadow border-b border-gray-100" >
+                {isSpecialistUser && <div
+                    className='resize-handle absolute h-full z-10 top-0 left-0'
+                    onMouseDown={startResizing}
+                />}
                 <div className="flex items-center">
                     <p className="text-gray-900 text-base font-semibold leading-normal ">
                         Diagnosis
