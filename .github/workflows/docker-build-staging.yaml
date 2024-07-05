@@ -38,3 +38,5 @@ jobs:
           tags: iisc/arogyam-dashboard:${{steps.vars.outputs.short_commit_id}}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_FHIR_API_BASE_URL=https://staging.arogyam-midas.iisc.ac.in/fhir
