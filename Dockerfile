@@ -27,6 +27,9 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
+ARG NEXT_PUBLIC_FHIR_API_BASE_URL
+RUN echo $NEXT_PUBLIC_FHIR_API_BASE_URL
+
 RUN \
     if [ -f yarn.lock ]; then yarn run build; \
     elif [ -f package-lock.json ]; then npm run build; \
@@ -40,7 +43,7 @@ WORKDIR /app
 
 ENV NODE_ENV production
 ENV NEXTAUTH_SECRET fkwdnwkdnw
-ENV NEXTAUTH_URL http://localhost:3000
+ENV NEXTAUTH_URL https://staging.arogyam-midas.iisc.ac.in
 
 ENV KEYCLOAK_CLIENT_SECRET W6JM9wq8T2BrHSzskdDwYxUjajbp06fZ
 ENV KEYCLOAK_ISSUER https://staging.arogyam-midas.iisc.ac.in/auth/realms/arogyam
@@ -49,8 +52,8 @@ ENV KEYCLOAK_CLIENT_ID arogyam-web
 ENV NEXT_PUBLIC_KEYCLOAK_REALM arogyam
 ENV NEXT_PUBLIC_KEYCLOAK_URL https://staging.arogyam-midas.iisc.ac.in/auth
 
-ARG NEXT_PUBLIC_FHIR_API_BASE_URL
 ENV NEXT_PUBLIC_FHIR_API_BASE_URL=$NEXT_PUBLIC_FHIR_API_BASE_URL
+
 
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED 1
