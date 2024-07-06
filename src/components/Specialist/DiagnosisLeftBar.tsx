@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback } from "react";
-import Image from "next/image";
+import React, { useState, } from "react";
 import { IPatient } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPatient';
 import { IEncounter } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IEncounter';
 import { IObservation } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IObservation';
 import { IMedia } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IMedia';
 
+import { NextImage } from "@/components/UI/NextImage";
 import { getAge } from "@/utils";
 import { OBSERVATION_CODE_LABEL_MAPPING } from "@/utils/fhir-utils";
 
@@ -146,7 +146,7 @@ const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
               key={i}
               className={`cursor-pointer relative bg-white rounded ${i === activeMediaIndex ? 'outline outline-offset-[-2px] outline-2 outline-app_primary' : ''}`}
               onClick={() => setActiveMediaIndex(i)}>
-              <Image
+              <NextImage
                 width={10}
                 height={10}
                 className={`h-10 w-10 bg-gray-100 object-cover rounded`}

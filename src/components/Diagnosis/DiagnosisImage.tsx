@@ -1,9 +1,9 @@
 'use client';
 
-import Image from "next/image";
 import { useState, useRef } from "react";
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchState } from 'react-zoom-pan-pinch';
 import { IMedia } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IMedia';
+import { NextImage } from "@/components/UI/NextImage";
 
 export function DiagnosisImage({ medias, activeMediaIndex = 0, setActiveMediaIndex }: { medias?: IMedia[], activeMediaIndex?: number, setActiveMediaIndex?: Function }) {
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -68,7 +68,7 @@ export function DiagnosisImage({ medias, activeMediaIndex = 0, setActiveMediaInd
           </div>
         </div>
         <TransformComponent wrapperClass='!h-[calc(100vh-185px)] !w-full cursor-grab' contentClass='!h-full'>
-          <Image
+          <NextImage
             width={700}
             height={700}
             className={`h-[700px] w-[700px] bg-gray-100 object-cover`}

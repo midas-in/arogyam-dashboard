@@ -20,9 +20,11 @@ export default function ReaderTasks() {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [limit, setLimit] = useState<number>(10);
     const [totalItems, setTotalItems] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         if (session?.accessToken) {
+            setLoading(true);
             const params = {
                 resourceType: 'Task',
                 query: {
@@ -37,7 +39,8 @@ export default function ReaderTasks() {
                     setTasks(getResourcesFromBundle<ITask>(data));
                     setTotalItems(data.total || 0);
                 })
-                .catch((error: any) => { console.log(error); message.error('Error fetching Tasks', error) });
+                .catch((error: any) => { console.log(error); message.error('Error fetching Tasks', error) })
+                .finally(() => setLoading(false));
         }
     }, [session?.accessToken, activeTabIndex, currentPage, limit]);
 
@@ -59,7 +62,7 @@ export default function ReaderTasks() {
             <div className="flex justify-between items-center pb-4 border-b border-gray-3">
                 <h2 className='text-[40px] text-gray-900 font-normal leading-[48px]'>Tasks</h2>
                 <button
-                    className='bg-app_primary disabled:bg-gray-200 flex justify-center items-center px-4 py-2.5 text-white  text-base font-bold leading-6 rounded'
+                    className='bg-app_primary disabled:bg-gray-200 flex justify-center items-center px-4 py-2.5 text-white  text-base font-semibold leading-6 rounded'
                     onClick={() => tasks?.length && onClick(tasks[0]?.id)}
                     disabled={!tasks?.length}
                 >
@@ -80,6 +83,7 @@ export default function ReaderTasks() {
                     itemsPerPage={limit}
                     totalItems={totalItems}
                     onPageChange={handlePageChange}
+                    loading={loading}
                 />
             </div>
         </div>

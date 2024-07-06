@@ -5,7 +5,7 @@ import { IQuestionnaireResponse } from "@smile-cdr/fhirts/dist/FHIR-R4/interface
 interface DiagnosisRightBarProps {
     id: string;
     questionnaire?: IQuestionnaire;
-    questionResponse?: IQuestionnaireResponse;
+    questionResponse?: Partial<IQuestionnaireResponse>;
     status?: IQuestionnaire['status'] | 'completed' | '';
     onSubmit: (answers: any) => void;
     sendForSecondOpinion?: () => void;
@@ -114,16 +114,18 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
 
         <div className={`px-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-501px)] ${!showRightSidebar ? 'hidden' : ''}`}>
             {questionnaire?.item?.map((question, qIndex) => {
+                // media-id question will be hidden
+                if (question.linkId === 'media-id') return;
                 const elementType = question.extension && question.extension[0]?.valueCodeableConcept?.coding && question.extension[0]?.valueCodeableConcept?.coding[0]?.code
                 if (question.type === 'choice' && elementType === 'radio-button') {
                     return <div key={qIndex} className="bg-white flex-col justify-start items-start gap-2 flex">
                         <div className="self-stretch h-7 pb-1">
                             <h6 className="self-stretch text-gray-900 text-base font-semibold leading-normal">{question.text}</h6>
                         </div>
-                        {question.answerOption?.map(({ valueCoding }, index) => {
+                        {question.answerOption?.map(({ valueCoding }) => {
                             const isDefaultChecked = question?.linkId ? JSON.stringify(answers[question.linkId]) === JSON.stringify({ valueCoding }) ?? false : false;
                             return <div key={valueCoding?.code} className="py-1.5 bg-white justify-center items-center flex">
-                                <input type="radio" className='w-5 h-5 cursor-pointer' id={valueCoding?.code} name="diagnosis" defaultChecked={isDefaultChecked} value={JSON.stringify({ valueCoding })} onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} />
+                                <input type="radio" className='w-5 h-5 cursor-pointer' id={valueCoding?.code} name="diagnosis" checked={isDefaultChecked} value={JSON.stringify({ valueCoding })} onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} />
                                 <label htmlFor={valueCoding?.code} className="text-gray-900 text-base font-normal leading-normal ml-2 cursor-pointer">{valueCoding?.display}</label>
                             </div>
                         })}

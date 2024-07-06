@@ -102,20 +102,20 @@ export default function RemoteSpecialistDiagnosis() {
                     // Get the submitted question response as well when the task is completed
                     if (searchParams.get('status') === 'completed' && foundQuestionnaire.url) {
 
-                        const qResponses = await fetchFhirResource(session?.accessToken as string, {
+                        const qResponse = await fetchFhirResource(session?.accessToken as string, {
                             resourceType: 'QuestionnaireResponse',
                             query: {
                                 questionnaire: foundQuestionnaire.url,
                                 encounter: activeTask.encounter?.reference,
                                 author: `Practitioner/${session?.resourceId}`,
                             }
-                        }).catch(e => console.log(''))
-                        setQuestionResponse(getResourcesFromBundle<IQuestionnaireResponse>(qResponses)[0]);
+                        }).catch(e => console.log('Error fetching QuestionnaireResponse'));
+                        setQuestionResponse(getResourcesFromBundle<IQuestionnaireResponse>(qResponse)[0]);
                     }
                 })
                 .catch((error: any) => {
                     console.log(error);
-                    message.error('Error fetching Encounter');
+                    message.error('Error fetching Everything');
                 })
                 .finally(() => setLoading(false));
         }

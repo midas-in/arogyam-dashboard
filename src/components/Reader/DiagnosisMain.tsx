@@ -35,7 +35,7 @@ export default function ReaderDiagnosis() {
     const [questionnaire, setQuestionnaire] = useState<IQuestionnaire>();
     const [media, setMedia] = useState<IMedia>();
     // const [patient, setPatient] = useState<IPatient>();
-    const [questionResponse, setQuestionResponse] = useState<IQuestionnaireResponse>();
+    const [questionResponse, setQuestionResponse] = useState<Partial<IQuestionnaireResponse>>();
     const [submitting, setSubmitting] = useState(false);
     const activeTask: ITask = tasks[activeTaskIndex]
 
@@ -68,6 +68,7 @@ export default function ReaderDiagnosis() {
             }
         }
     }, [tasks?.length, id])
+    console.log('ques', questionnaire?.item?.some(item => item.linkId === 'media-id'));
 
     useEffect(() => {
         // When id/index changes
@@ -84,19 +85,29 @@ export default function ReaderDiagnosis() {
                     fetchFhirSingleResource(session?.accessToken, { resourceType: questionnaireResourceType, id: questionnaireId }),
                     fetchFhirSingleResource(session?.accessToken, { resourceType: mediaResourceType, id: mediaId }),
                     // fetchFhirSingleResource(session?.accessToken, { resourceType: patientResourceType, id: patientId }),
-                    fetchFhirResource(session?.accessToken, {
-                        resourceType: 'QuestionnaireResponse',
-                        query: {
-                            questionnaire: questionnaireId,
-                            encounter: activeTask.encounter?.reference,
-                            author: `Practitioner/${session?.resourceId}`,
-                        }
-                    })
                 ])
-                    .then(([ques, mda, qResponse]: [IQuestionnaire, IMedia, IQuestionnaireResponse]) => {
+                    .then(async ([ques, mda]: [IQuestionnaire, IMedia]) => {
                         setQuestionnaire(ques);
                         setMedia(mda);
-                        setQuestionResponse(getResourcesFromBundle<IQuestionnaireResponse>(qResponse)[0])
+                        // For reader, there will be media-id question, which will be hidden and submitted in background
+                        if (ques?.item?.some(item => item.linkId === 'media-id')) {
+                            const mediaIdItem = ques?.item?.find(item => item.linkId === 'media-id');
+                            if (mediaIdItem) {
+                                setQuestionResponse({ item: [{ ...mediaIdItem, answer: [{ valueString: `Media/${mda?.id}` }] }] });
+                            }
+                        }
+                        if (searchParams.get('status') === 'completed' && ques && ques?.url) {
+                            const qResponse = await fetchFhirResource(session?.accessToken as string, {
+                                resourceType: 'QuestionnaireResponse',
+                                query: {
+                                    questionnaire: ques.url,
+                                    encounter: activeTask.encounter?.reference,
+                                    author: `Practitioner/${session?.resourceId}`,
+                                }
+                            }).catch(e => console.log('Error fetching QuestionnaireResponse'));
+                            setQuestionResponse(getResourcesFromBundle<IQuestionnaireResponse>(qResponse)[0])
+
+                        }
                         setLoading(false);
                     })
                     .catch((error: any) => {

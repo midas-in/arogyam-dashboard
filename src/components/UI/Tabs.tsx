@@ -5,7 +5,7 @@ export function Tabs({ tabs, activeIndex, onTabChange }: { tabs: String[], activ
       tabs.map((tab, index) => {
         return <div
           key={index}
-          className={`border-b-2 text-sm py-2 px-4 cursor-pointer ${index === activeIndex ? 'border-blue-500 font-medium' : 'text-gray-400 font-light'}`}
+          className={`border-b-2 text-gray-900 text-sm py-2 px-4 cursor-pointer ${index === activeIndex ? 'border-blue-500 font-medium' : 'text-gray-400 font-light'}`}
           onClick={() => onTabChange(index)}
         >
           {tab}
