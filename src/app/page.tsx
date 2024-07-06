@@ -37,13 +37,12 @@ export default async function Home() {
           </div>
           <div className='flex items-center'>
             <label className='w-[100px] text-gray-900'>Role:</label>
-            <p className='text-gray-900'>{session?.userType}</p>
+            <p className='text-gray-900 capitalize'>{session?.userType}</p>
           </div>
         </div>
 
-        <p className='my-10 text-gray-900'>You do not have enough permission to perform any action</p>
-        <p className='my-10 text-gray-900'>Please reach out to support team if you have any questions</p>
-
+        <p className='mt-10 text-gray-900'>You do not have enough permission to perform any action</p>
+        <p className='mt-2 text-sm mb-10 text-gray-900'>Please reach out to support team if you have any questions</p>
       </div>
     </div>
   </div>
