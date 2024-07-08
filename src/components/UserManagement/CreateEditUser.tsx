@@ -193,12 +193,12 @@ export function CreateEditUser({ id }: { id?: string }) {
         if (session?.accessToken) {
             fetchUserGroups(session.accessToken)
                 .then((data) => setGroups(data))
-                .catch(error => message.error('Error fetching groups:', error));
+                .catch(error => message.error('Error fetching groups'));
             fetchFhirComposition(session.accessToken)
                 .then((data: any) => {
                     setComposition(getResourcesFromBundle(data));
                 })
-                .catch((error: any) => message.error('Error fetching groups:', error));
+                .catch((error: any) => message.error('Error fetching groups'));
         }
     }, [session?.accessToken]);
 
@@ -210,7 +210,7 @@ export function CreateEditUser({ id }: { id?: string }) {
                         setUserData(data);
                     }
                 })
-                .catch(error => message.error('Error fetching user detail:', error));
+                .catch(error => message.error('Error fetching user detail'));
             fetchUserAssignedGroups(session.accessToken, { id })
                 .then(data => {
                     if (data) {
@@ -218,17 +218,17 @@ export function CreateEditUser({ id }: { id?: string }) {
                         setPreviousUserGroupIds(data.map((group: any) => group.id))
                     }
                 })
-                .catch(error => message.error('Error fetching user assigned groups:', error));
+                .catch(error => message.error('Error fetching user assigned groups'));
             fetchFhirResource(session.accessToken, { resourceType: 'Group', query: { identifier: id } })
                 .then((data: IBundle) => {
                     setGroup(getResourcesFromBundle<IGroup>(data)[0]);
                 })
-                .catch((error: any) => message.error('Error fetching Group:', error));
+                .catch((error: any) => message.error('Error fetching Group'));
             fetchFhirResource(session.accessToken, { resourceType: 'Practitioner', query: { identifier: id } })
                 .then((data: IBundle) => {
                     setPractitioner(getResourcesFromBundle<IPractitioner>(data)[0]);
                 })
-                .catch((error: any) => message.error('Error fetching Practitioner:', error));
+                .catch((error: any) => message.error('Error fetching Practitioner'));
             fetchFhirResource(session.accessToken, { resourceType: 'PractitionerRole', query: { identifier: id } })
                 .then((data: IBundle) => {
                     const practitionerRole = (getResourcesFromBundle<IPractitionerRole>(data)[0]);
@@ -248,7 +248,7 @@ export function CreateEditUser({ id }: { id?: string }) {
                     }
                     setUserType(userType);
                 })
-                .catch((error: any) => message.error('Error fetching PractitionerRole:', error));
+                .catch((error: any) => message.error('Error fetching PractitionerRole'));
         }
     }, [id, session?.accessToken]);
 

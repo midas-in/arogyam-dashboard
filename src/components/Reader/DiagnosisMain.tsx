@@ -53,7 +53,7 @@ export default function ReaderDiagnosis() {
                     setTasks(getResourcesFromBundle<ITask>(data));
 
                 })
-                .catch((error: any) => { console.log(error); message.error('Error fetching Tasks', error) });
+                .catch((error: any) => { console.log(error); message.error('Error fetching Tasks') });
 
         }
     }, [session?.accessToken])
@@ -68,7 +68,6 @@ export default function ReaderDiagnosis() {
             }
         }
     }, [tasks?.length, id])
-    console.log('ques', questionnaire?.item?.some(item => item.linkId === 'media-id'));
 
     useEffect(() => {
         // When id/index changes
@@ -112,7 +111,7 @@ export default function ReaderDiagnosis() {
                     })
                     .catch((error: any) => {
                         console.log(error);
-                        message.error('Error fetching Questionnaire/Media', error);
+                        message.error('Error fetching Questionnaire/Media');
                     });
             }
         }
@@ -172,14 +171,19 @@ export default function ReaderDiagnosis() {
                     url: `${responsePayload.resourceType}/${responsePayload.id}`
                 }
             });
-            await createMultipleFhirResources(session?.accessToken as string, extractedResponse);
-
             // update status to completed
             const taskPayload: ITask = {
                 ...activeTask,
                 status: 'completed'
             }
-            await updateFhirResource(session?.accessToken as string, taskPayload);
+            extractedResponse.entry?.push({
+                resource: taskPayload,
+                request: {
+                    method: 'PUT',
+                    url: `${taskPayload.resourceType}/${taskPayload.id}`
+                }
+            });
+            await createMultipleFhirResources(session?.accessToken as string, extractedResponse);
             setTasks(update(tasks, { [activeTaskIndex]: { $merge: taskPayload } }));
             onClickNext();
         }

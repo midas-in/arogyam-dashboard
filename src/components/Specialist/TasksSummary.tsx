@@ -47,7 +47,7 @@ const TaskSummary = () => {
                 })
                 .catch((error: any) => {
                     console.log(error);
-                    message.error('Error fetching tasks summary', error);
+                    message.error('Error fetching tasks summary');
                 });
         }
     }, [session?.accessToken])

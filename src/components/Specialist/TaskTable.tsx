@@ -41,7 +41,7 @@ const TaskTable = (props: TaskTableProps) => {
                     {showLabelledOn && <span className="w-[200px] font-semibold text-gray-900 text-base py-2">Labelled on</span>}
                     <span className="w-[100px] font-semibold text-gray-900 text-base py-2 pl-1">Action</span>
                 </li>
-                <div className='relative min-h-[300px]'>
+                <div className='relative'>
                     {loading
                         ? <div className='relative min-h-[300px]'><Loader /></div>
                         : data && data?.length > 0

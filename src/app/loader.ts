@@ -183,3 +183,15 @@ export function createMultipleFhirResources(accessToken: string, payload: { reso
         },
     }).then(({ data }: { data: any }) => data);
 }
+
+export function executeFhirCqlQuery(accessToken: string, payload: { resourceType: string, parameter: object }) {
+    return axios({
+        method: 'POST',
+        baseURL: process.env.NEXT_PUBLIC_FHIR_API_BASE_URL,
+        url: `/$cql`,
+        data: payload,
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        },
+    }).then(({ data }: { data: any }) => data);
+}

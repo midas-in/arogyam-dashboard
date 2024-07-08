@@ -22,7 +22,7 @@ import { DiagnosisRightBar } from "@/components/Diagnosis/DiagnosisRightBar";
 import { Loader } from "@/components/UI/Loader";
 import {
     fetchFhirResource, updateFhirResource, fetchFhirResourceEverything,
-    extractQuestionnaireResponse, createMultipleFhirResources
+    extractQuestionnaireResponse, createMultipleFhirResources, executeFhirCqlQuery
 } from '@/app/loader';
 import { getResourcesFromBundle, REMOTE_SPECIALIST } from '@/utils/fhir-utils';
 
@@ -62,9 +62,8 @@ export default function RemoteSpecialistDiagnosis() {
                 })
                 .catch((error: any) => {
                     console.log(error);
-                    message.error('Error fetching Tasks', error);
+                    message.error('Error fetching Tasks');
                 });
-
         }
     }, [session?.accessToken])
 
@@ -138,13 +137,44 @@ export default function RemoteSpecialistDiagnosis() {
     const sendForSecondOpinion = async () => {
         setSubmitting(true);
         try {
-            // TODO
-            // // update status to completed
-            // const taskPayload: ITask = {
-            //     ...activeTask,
-            //     status: 'in-progress'
-            // }
-            // await updateFhirResource(session?.accessToken as string, taskPayload);
+            if (!questionnaire?.id) {
+                message.error('Questionnaire ID not found');
+                return;
+            }
+            const payload = {
+                resourceType: "Parameters",
+                parameter: [
+                    {
+                        "name": "expression",
+                        "valueString": `${questionnaire?.id}.\"Available Senior Specialist Reference\"`
+                    },
+                    {
+                        "name": "library",
+                        "resource": {
+                            "resourceType": "Parameters",
+                            "parameter": [
+                                {
+                                    "name": "url",
+                                    "valueUrl": `https://midas.iisc.ac.in/fhir/Library/${questionnaire?.id}`
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+            const response = await executeFhirCqlQuery(session?.accessToken as string, payload);
+            const foundParameter = response?.parameter?.find((p: { name: string }) => p.name === 'return');
+            if (!foundParameter || !foundParameter.valueReference) {
+                message.error('There are no senior specialist available for the second opinion');
+            }
+            else {
+                // update status to completed
+                const taskPayload: ITask = {
+                    ...activeTask,
+                    owner: foundParameter.valueReference
+                }
+                await updateFhirResource(session?.accessToken as string, taskPayload);
+            }
 
             onClickNext();
         }
@@ -195,14 +225,20 @@ export default function RemoteSpecialistDiagnosis() {
                     url: `${responsePayload.resourceType}/${responsePayload.id}`
                 }
             });
-            await createMultipleFhirResources(session?.accessToken as string, extractedResponse);
-
             // update status to completed
             const taskPayload: ITask = {
                 ...activeTask,
                 status: 'completed'
             }
-            await updateFhirResource(session?.accessToken as string, taskPayload);
+            extractedResponse.entry?.push({
+                resource: taskPayload,
+                request: {
+                    method: 'PUT',
+                    url: `${taskPayload.resourceType}/${taskPayload.id}`
+                }
+            });
+            await createMultipleFhirResources(session?.accessToken as string, extractedResponse);
+
             setTasks(update(tasks, { [activeTaskIndex]: { $merge: taskPayload } }));
             onClickNext();
         }

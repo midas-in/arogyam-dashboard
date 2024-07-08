@@ -39,7 +39,7 @@ export default function ReaderTasks() {
                     setTasks(getResourcesFromBundle<ITask>(data));
                     setTotalItems(data.total || 0);
                 })
-                .catch((error: any) => { console.log(error); message.error('Error fetching Tasks', error) })
+                .catch((error: any) => { console.log(error); message.error('Error fetching Tasks') })
                 .finally(() => setLoading(false));
         }
     }, [session?.accessToken, activeTabIndex, currentPage, limit]);

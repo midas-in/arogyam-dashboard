@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { message } from 'antd';
 import { IQuestionnaire } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaire';
 import { IQuestionnaireResponse } from "@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaireResponse";
+import { executeFhirCqlQuery } from '@/app/loader';
 
 interface DiagnosisRightBarProps {
     id: string;
@@ -15,6 +18,7 @@ interface DiagnosisRightBarProps {
 
 const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
     const { id, questionnaire, questionResponse, status, onSubmit, sendForSecondOpinion, allowSecondOpinion, isSpecialistUser } = props;
+    const { data: session } = useSession();
 
     const [showRightSidebar, setShowRightSidebar] = useState<boolean>(true);
     const [answers, setAnswers] = useState<{ [key: string]: any }>({});
@@ -33,6 +37,36 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
             setAnswers(tempQueRes);
         }
     }, [questionResponse?.item?.length])
+
+    // useEffect(() => {
+    // Fetch results of diagnosis
+    //     if (session?.accessToken && allowSubmit()) {
+    //         const payload = {
+    //             resourceType: "Parameters",
+    //             parameter: [
+    //                 {
+    //                     "name": "expression",
+    //                     "valueString": `${questionnaire?.id}.\"Available Senior Specialist Reference\"`
+    //                 },
+    //                 {
+    //                     "name": "library",
+    //                     "resource": {
+    //                         "resourceType": "Parameters",
+    //                         "parameter": [
+    //                             {
+    //                                 "name": "url",
+    //                                 "valueUrl": `https://midas.iisc.ac.in/fhir/Library/${questionnaire?.id}`
+    //                             }
+    //                         ]
+    //                     }
+    //                 }
+    //             ]
+    //         }
+    //         executeFhirCqlQuery(session?.accessToken, payload)
+    //             .then((data) => console.log('data', data))
+    //             .catch(error => message.error('Error fetching results of diagnosis'))
+    //     }
+    // }, [Object.values(answers).length])
 
     const startResizing = React.useCallback((e: any) => {
         setResizing(true);

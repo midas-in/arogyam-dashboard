@@ -24,6 +24,7 @@ function sendEndSessionEndpointToURL(token: JWT) {
     const response = { url: `${endSessionEndPoint.href}/?${endSessionParams}` };
     return NextResponse.json(response);
 }
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
     try {
