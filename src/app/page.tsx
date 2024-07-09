@@ -5,7 +5,7 @@ import AdminMain from '@/components/Admin/AdminMain';
 import ReaderTasks from '@/components/Reader/TasksMain';
 import RemoteSpecialistTasks from '@/components/Specialist/TasksMain';
 import Login from '@/components/Login';
-import { SUPERVISOR_USER_TYPE_CODE, READER_USER_TYPE_CODE, REMOTE_SPECIALIST_USER_TYPE_CODE, SENIOR_SPECIALIST_USER_TYPE_CODE } from '@/utils/fhir-utils';
+import { SUPERVISOR_USER_TYPE_CODE, SITE_COORDINATOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE, READER_USER_TYPE_CODE, REMOTE_SPECIALIST_USER_TYPE_CODE, SENIOR_SPECIALIST_USER_TYPE_CODE } from '@/utils/fhir-utils';
 
 
 export default async function Home() {
@@ -19,7 +19,7 @@ export default async function Home() {
     </div >
   }
 
-  if (session?.userType === SUPERVISOR_USER_TYPE_CODE) {
+  if (session?.userType && [SUPERVISOR_USER_TYPE_CODE, SITE_COORDINATOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE].includes(session.userType)) {
     return <AdminMain />
   }
 

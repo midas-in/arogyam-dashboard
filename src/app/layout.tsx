@@ -8,7 +8,7 @@ import { authOptions } from './api/auth/[...nextauth]/authOptions';
 import { Providers } from "./Providers";
 import SessionGuard from '@/components/SessionGuard'
 import { Sidebar } from '@/components/Sidebar';
-import { SUPERVISOR_USER_TYPE_CODE } from '@/utils/fhir-utils';
+import { SUPERVISOR_USER_TYPE_CODE, SITE_COORDINATOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE, } from '@/utils/fhir-utils';
 import Logout from '@/components/Logout';
 
 import "./globals.css";
@@ -77,12 +77,14 @@ export default async function RootLayout({
                 </div>
               </nav>
             </header>
-            <div className="flex flex-1">
-              {session?.userType === SUPERVISOR_USER_TYPE_CODE && <Sidebar />}
-              {session?.userType === SUPERVISOR_USER_TYPE_CODE
-                ? <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)] justify-center flex">{children}</div>
-                : children}
-            </div>
+            {session?.userType && [SUPERVISOR_USER_TYPE_CODE, SITE_COORDINATOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE].includes(session.userType)
+              ? <div className="flex flex-1">
+                <Sidebar />
+                <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)] justify-center flex">
+                  {children}
+                </div>
+              </div>
+              : children}
           </SessionGuard>
         </Providers>
       </body>

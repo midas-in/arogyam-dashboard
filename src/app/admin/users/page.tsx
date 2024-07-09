@@ -11,16 +11,16 @@ import { MoreOutlined } from '@ant-design/icons';
 import MyTable from '@/components/MyTable';
 import { fetchUsers, deleteUser } from '@/app/loader';
 
-const confirm = async (id: string, accessToken: string, onSuccess: Function) => {
-  try {
-    await deleteUser(accessToken, id);
-    onSuccess();
-    message.success('User deleted successfully');
-  }
-  catch (e) {
-    message.error('Error deleting User');
-  }
-};
+// const confirm = async (id: string, accessToken: string, onSuccess: Function) => {
+//   try {
+//     await deleteUser(accessToken, id);
+//     onSuccess();
+//     message.success('User deleted successfully');
+//   }
+//   catch (e) {
+//     message.error('Error deleting User');
+//   }
+// };
 
 // const Delete = ({ id, onSuccess }: { id: string, onSuccess: Function }) => {
 //   const { data: session } = useSession();
@@ -43,7 +43,8 @@ const TableAction = ({ info, fetchAllUsers }: { info: any, fetchAllUsers: Functi
   return <div className='flex items-center'>
     <Link className='text-blue-500' href={`/admin/users/edit/${info.row.original.id}`}>Edit</Link>
     <Divider type="vertical" />
-    <Dropdown
+    <Link className='text-blue-500' href={`/admin/users/credentials/${info.row.original.id}/${info.row.original.username}`}>Credential</Link>
+    {/* <Dropdown
       menu={{
         items: [
           {
@@ -68,7 +69,7 @@ const TableAction = ({ info, fetchAllUsers }: { info: any, fetchAllUsers: Functi
         data-testid="action-dropdown"
         className="text-blue-500 text-base"
       />
-    </Dropdown>
+    </Dropdown> */}
   </div>
 }
 
@@ -93,6 +94,11 @@ export default function Users() {
     }),
     columnHelper.accessor('email', {
       header: () => <span>email</span>,
+    }),
+    columnHelper.accessor(row => row.enabled, {
+      id: 'status',
+      cell: info => info.getValue() ? 'Active' : 'Inactive',
+      header: () => <span>Status</span>,
     }),
   ]
   if (session?.permissions?.includes('EDIT_KEYCLOAK_USERS') || session?.permissions?.includes('FHIR_ALL_WRITE')) {
@@ -122,7 +128,7 @@ export default function Users() {
       <div className='flex justify-between items-center'>
         <h2 className="text-xl font-semibold">Users</h2>
         {(session?.permissions?.includes('EDIT_KEYCLOAK_USERS') || session?.permissions?.includes('FHIR_ALL_WRITE')) && <div className='flex justify-end'>
-          <Link href='/admin/users/new' className="border px-4 py-1 rounded bg-primary-400 text-white"> + Add user</Link>
+          <Link href='/admin/users/new' className="border border-primary-400 px-4 py-1 rounded bg-primary-400 text-white"> + Add user</Link>
         </div>}
       </div>
       <div className="h-4" />

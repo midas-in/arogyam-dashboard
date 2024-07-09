@@ -159,8 +159,8 @@ export function CreateEditUser({ id }: { id?: string }) {
     const [group, setGroup] = useState<IGroup>();
     const [practitioner, setPractitioner] = useState<IPractitioner>();
     const [practitionerRole, setPractitionerRole] = useState<IPractitionerRole>();
-    const [userTypeCode, setUserTypeCode] = useState<UserTypeCodes>(PRACTITIONER_USER_TYPE_CODE);
-    const [errors, setErrors] = useState<{ [key in keyof UserRepresentation | 'userTpeCode']?: boolean }>({});
+    const [userTypeCode, setUserTypeCode] = useState<UserTypeCodes>();
+    const [errors, setErrors] = useState<{ [key in keyof UserRepresentation | 'userTypeCode']?: boolean }>({});
     const [practitionerRoles, setPractitionerRoles] = useState<PractitionerRoleType[]>([]);
 
     useEffect(() => {
@@ -266,11 +266,12 @@ export function CreateEditUser({ id }: { id?: string }) {
                 message.error('Missing session');
                 return;
             }
-            if (!userData.firstName || !userData.lastName || !userData.username || !userData.attributes?.fhir_core_app_id?.length) {
+            if (!userData.firstName || !userData.lastName || !userData.username || !userData.attributes?.fhir_core_app_id?.length || !userTypeCode) {
                 setErrors({
                     firstName: !userData.firstName,
                     lastName: !userData.lastName,
                     username: !userData.username,
+                    userTypeCode: !userTypeCode,
                     attributes: !userData.attributes?.fhir_core_app_id?.length
                 })
                 return;
@@ -406,7 +407,7 @@ export function CreateEditUser({ id }: { id?: string }) {
                 <div className="mt-5 flex">
                     <label htmlFor="role" className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">User Type<small className="text-red-500">*</small>:</label>
                     <Select
-                        status={errors.userTpeCode ? 'error' : ''}
+                        status={errors.userTypeCode ? 'error' : ''}
                         className='md:w-[350px] text-sm font-semilight md:w-[350px]'
                         options={practitionerRoles?.map((role: any) => {
                             return { value: role.code, label: role.display }

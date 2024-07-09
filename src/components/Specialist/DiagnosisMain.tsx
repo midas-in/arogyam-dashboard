@@ -99,7 +99,7 @@ export default function RemoteSpecialistDiagnosis() {
                     setQuestionnaire(foundQuestionnaire);
                     setPatient(bundledData.filter(bd => bd.resourceType === 'Patient')[0]);
                     // Get the submitted question response as well when the task is completed
-                    if (searchParams.get('status') === 'completed' && foundQuestionnaire.url) {
+                    if (searchParams.get('status') === 'completed' && foundQuestionnaire?.url) {
 
                         const qResponse = await fetchFhirResource(session?.accessToken as string, {
                             resourceType: 'QuestionnaireResponse',
