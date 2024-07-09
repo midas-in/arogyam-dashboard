@@ -41,28 +41,26 @@ const TaskTable = (props: TaskTableProps) => {
                     {showLabelledOn && <span className="w-[200px] font-semibold text-gray-900 text-base py-2">Labelled on</span>}
                     <span className="w-[100px] font-semibold text-gray-900 text-base py-2 pl-1">Action</span>
                 </li>
-                <div className='relative'>
-                    {loading
-                        ? <div className='relative min-h-[300px]'><Loader /></div>
-                        : data && data?.length > 0
-                            ? data?.map((task, i) => (
-                                <li key={i} className="flex items-center justify-between mb-2 border-b last:border-b-0 border-gray-3 py-2 px-4">
-                                    <span className="flex-1 font-normal text-gray-900 text-base">{task?.id}</span>
-                                    <span className="w-[140px] font-normal text-gray-900 text-base">-</span> {/* TODO */}
-                                    <span className="w-[140px] font-normal text-gray-900 text-base">-</span>{/* TODO */}
-                                    <span className="w-[140px] font-normal text-gray-900 text-base">-</span> {/* TODO */}
-                                    {showLabelledOn && <span className="w-[200px] font-normal text-gray-900 text-base">-</span>}{/* TODO */}
-                                    <div className='w-[100px]'>
-                                        <button onClick={() => { onClick(task.id as string); }} className="ml-1 bg-app_primary text-white text-sm font-semilight py-1 px-4 rounded">
-                                            View
-                                        </button>
-                                    </div>
-                                </li>
-                            ))
-                            : <div className='min-h-[300px] absolute inset-0 flex items-center justify-center'>
-                                <p className='text-gray-900'>There are no tasks</p>
-                            </div>}
-                </div>
+                {loading
+                    ? <div className='relative min-h-[200px]'><Loader /></div>
+                    : data && data?.length > 0
+                        ? data?.map((task, i) => (
+                            <li key={i} className="flex items-center justify-between mb-2 border-b last:border-b-0 border-gray-3 py-2 px-4">
+                                <span className="flex-1 font-normal text-gray-900 text-base">{task?.id}</span>
+                                <span className="w-[140px] font-normal text-gray-900 text-base">-</span> {/* TODO */}
+                                <span className="w-[140px] font-normal text-gray-900 text-base">-</span>{/* TODO */}
+                                <span className="w-[140px] font-normal text-gray-900 text-base">-</span> {/* TODO */}
+                                {showLabelledOn && <span className="w-[200px] font-normal text-gray-900 text-base">-</span>}{/* TODO */}
+                                <div className='w-[100px]'>
+                                    <button onClick={() => { onClick(task.id as string); }} className="ml-1 bg-primary-400 text-white text-sm font-semilight py-1 px-4 rounded">
+                                        View
+                                    </button>
+                                </div>
+                            </li>
+                        ))
+                        : <div className='min-h-[200px] flex items-center justify-center'>
+                            <p className='text-gray-900'>There are no tasks</p>
+                        </div>}
             </ul>
             {data && data.length > 0 && <div className="flex justify-between items-center mt-4 bg-primary-10 border border-gray-3 rounded text-gray-600">
                 <span className="font-light text-sm py-2 px-4">

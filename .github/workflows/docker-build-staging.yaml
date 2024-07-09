@@ -40,3 +40,5 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NEXT_PUBLIC_FHIR_API_BASE_URL=https://staging.arogyam-midas.iisc.ac.in/fhir
+            NEXT_PUBLIC_KEYCLOAK_URL=https://staging.arogyam-midas.iisc.ac.in/auth
+            NEXT_PUBLIC_KEYCLOAK_REALM=arogyam

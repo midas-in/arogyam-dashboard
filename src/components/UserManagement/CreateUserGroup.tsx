@@ -22,11 +22,11 @@ export function CreateUserGroup() {
             router.push('/admin/user-groups');
             message.success('Group created successfully');
         } catch (error) {
-            console.error('Error fetching roles:', error);
+            message.error('Error fetching roles');
         }
     }
 
-    return <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)] flex-col">
+    return <div className="p-5 bg-white h-min w-full">
         <h2 className="text-xl font-semibold mb-5">Add Group</h2>
         <div className="p-5 bg-white h-min w-full justify-center flex">
             <div className="">
@@ -37,7 +37,7 @@ export function CreateUserGroup() {
                 />
                 <div className="">
                     <button
-                        className="bg-app_primary disabled:bg-gray-300 text-white font-medium text-sm py-2 px-4 rounded mb-4 mx-5 mt-5"
+                        className="bg-primary-400 disabled:bg-gray-300 text-white font-medium text-sm py-2 px-4 rounded mb-4 mx-5 mt-5"
                         onClick={onSubmit}
                         disabled={!name}
                     >

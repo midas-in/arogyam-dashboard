@@ -17,32 +17,23 @@ import { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
 
 import {
     IdentifierUseCodes, getObjLike, keycloakIdentifierCoding, groupResourceType,
-    PRACTITIONER_USER_TYPE_CODE, SUPERVISOR_USER_TYPE_CODE, PRACTITIONER, SUPERVISOR, REMOTE_SPECIALIST, SENIOR_SPECIALIST, READER,
+    PRACTITIONER_USER_TYPE_CODE, getUserTypeCode,
     HumanNameUseCodes, practitionerRoleResourceType, parseFhirHumanName, getResourcesFromBundle,
-    getUserTypeCode, getUserType
 } from '@/utils/fhir-utils';
 import type UserRepresentation from "@keycloak/keycloak-admin-client/lib/defs/userRepresentation";
 import {
-    fetchFhirComposition, fetchUserGroups, fetchUserDetail,
+    fetchFhirComposition, fetchUserGroups, fetchUserDetail, fetchFhirSingleResource,
     createUser, updateUser, addUserToGroup, removeUserFromGroup, fetchUserAssignedGroups,
-    updateFhirResource, fetchFhirResource
+    updateFhirResource, fetchFhirResource,
 } from '@/app/loader';
 
-// interface UserAttributes {
-//     fhir_core_app_id: string[];
-// }
-// interface UserData {
-//     practitioner?: IPractitioner,
-//     practitionerRole?: IPractitionerRole,
-//     firstName: string,
-//     lastName: string,
-//     username: string,
-//     email: string,
-//     enabled: boolean,
-//     attributes: UserAttributes
-// }
-type UserTypes = typeof PRACTITIONER | typeof SUPERVISOR | typeof REMOTE_SPECIALIST | typeof SENIOR_SPECIALIST | typeof READER;
-
+import type { UserTypeCodes } from '@/utils/fhir-utils';
+interface PractitionerRoleType {
+    code: string;
+    display: string;
+    system: string;
+    definition?: string;
+}
 
 const defaultUserData = {
     firstName: ``,
@@ -108,7 +99,7 @@ export const createEditFhirGroupResource = (
 };
 
 export const createEditPractitionerRoleResource = (
-    userType: UserTypes,
+    userTypeCoding: PractitionerRoleType,
     keycloakID: string,
     keycloakUserEnabled: boolean,
     practitionerID: string,
@@ -121,28 +112,10 @@ export const createEditPractitionerRoleResource = (
     let practitionerRoleResourceCode: IPractitionerRole['code'] = [
         {
             coding: [
-                {
-                    system: 'http://snomed.info/sct',
-                    code: PRACTITIONER_USER_TYPE_CODE,
-                    display: 'Assigned practitioner',
-                },
+                userTypeCoding
             ],
         },
     ];
-
-    if (userType === 'supervisor') {
-        practitionerRoleResourceCode = [
-            {
-                coding: [
-                    {
-                        system: 'http://snomed.info/sct',
-                        code: SUPERVISOR_USER_TYPE_CODE,
-                        display: 'Supervisor (occupation)',
-                    },
-                ],
-            },
-        ];
-    }
 
     const practitionerDisplayName = getObjLike(
         practitionerName,
@@ -186,19 +159,31 @@ export function CreateEditUser({ id }: { id?: string }) {
     const [group, setGroup] = useState<IGroup>();
     const [practitioner, setPractitioner] = useState<IPractitioner>();
     const [practitionerRole, setPractitionerRole] = useState<IPractitionerRole>();
-    const [userType, setUserType] = useState<UserTypes>('practitioner');
-    const [errors, setErrors] = useState<{ [key in keyof UserRepresentation]?: boolean }>({});
+    const [userTypeCode, setUserTypeCode] = useState<UserTypeCodes>(PRACTITIONER_USER_TYPE_CODE);
+    const [errors, setErrors] = useState<{ [key in keyof UserRepresentation | 'userTpeCode']?: boolean }>({});
+    const [practitionerRoles, setPractitionerRoles] = useState<PractitionerRoleType[]>([]);
 
     useEffect(() => {
         if (session?.accessToken) {
             fetchUserGroups(session.accessToken)
                 .then((data) => setGroups(data))
                 .catch(error => message.error('Error fetching groups'));
+
             fetchFhirComposition(session.accessToken)
                 .then((data: any) => {
                     setComposition(getResourcesFromBundle(data));
                 })
                 .catch((error: any) => message.error('Error fetching groups'));
+
+            fetchFhirSingleResource(session.accessToken, { resourceType: 'CodeSystem', id: 'practitioner-role-type' })
+                .then((data: any) => {
+                    setPractitionerRoles(data.concept.map((c: PractitionerRoleType) => {
+                        delete c.definition;
+                        c.system = data.url;
+                        return c;
+                    }));
+                })
+                .catch((error: any) => message.error('Error fetching UserTypes'));
         }
     }, [session?.accessToken]);
 
@@ -233,20 +218,16 @@ export function CreateEditUser({ id }: { id?: string }) {
                 .then((data: IBundle) => {
                     const practitionerRole = (getResourcesFromBundle<IPractitionerRole>(data)[0]);
                     setPractitionerRole(practitionerRole);
-                    let userType: UserTypes = 'practitioner';
+                    let defaultUserType: UserTypeCodes = PRACTITIONER_USER_TYPE_CODE;
                     if (practitionerRole) {
                         // getting the user type to default to when editing a user
                         // by comparing practitioner resource user type codes
-                        // this is probably not the best way because these codes are constants
-                        // but it's the best for now
-                        const userTypeCode = getUserTypeCode(practitionerRole);
-                        if (userTypeCode) {
-                            userType = getUserType(
-                                userTypeCode as typeof PRACTITIONER_USER_TYPE_CODE | typeof SUPERVISOR_USER_TYPE_CODE
-                            );
+                        const foundUserTypeCode: UserTypeCodes = getUserTypeCode(practitionerRole);
+                        if (foundUserTypeCode) {
+                            defaultUserType = foundUserTypeCode;
                         }
                     }
-                    setUserType(userType);
+                    setUserTypeCode(defaultUserType);
                 })
                 .catch((error: any) => message.error('Error fetching PractitionerRole'));
         }
@@ -261,8 +242,8 @@ export function CreateEditUser({ id }: { id?: string }) {
         setErrors(prev => ({ ...prev, [key]: !e.target.value }));
     }
 
-    const onUserTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setUserType(e.target.value as 'practitioner' | 'supervisor');
+    const onUserTypeChange = (value: string) => {
+        setUserTypeCode(value as UserTypeCodes);
     };
 
     const onAppIdChange = (value: string) => {
@@ -362,8 +343,9 @@ export function CreateEditUser({ id }: { id?: string }) {
                 group?.id,
                 session.accessToken as string
             );
+            const userTypeCoding: PractitionerRoleType = practitionerRoles?.find(p => p.code === userTypeCode) as PractitionerRoleType;
             await createEditPractitionerRoleResource(
-                userType,
+                userTypeCoding,
                 userId,
                 userData.enabled ?? false,
                 practitionerPayload.id ?? '',
@@ -388,7 +370,7 @@ export function CreateEditUser({ id }: { id?: string }) {
         ? `Edit User | ${userData.username}`
         : 'Add User';
 
-    return <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)] justify-center flex-col">
+    return <div className="p-5 bg-white h-min w-full">
         <h2 className="text-xl font-semibold mb-5">{pageTitle}</h2>
         <div className="p-5 bg-white h-min w-full justify-center flex">
             <div className="">
@@ -422,11 +404,16 @@ export function CreateEditUser({ id }: { id?: string }) {
                     />
                 </div>
                 <div className="mt-5 flex">
-                    <label className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">User Type :</label>
-                    <input className="" type="radio" id="practitioner" name="usertype" value="practitioner" checked={userType === 'practitioner'} onChange={onUserTypeChange} />
-                    <label className="ml-1" htmlFor="practitioner">Practitioner</label>
-                    <input className="ml-5" type="radio" id="supervisor" name="usertype" value="supervisor" checked={userType === 'supervisor'} onChange={onUserTypeChange} />
-                    <label className="ml-1" htmlFor="supervisor">Supervisor</label>
+                    <label htmlFor="role" className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">User Type<small className="text-red-500">*</small>:</label>
+                    <Select
+                        status={errors.userTpeCode ? 'error' : ''}
+                        className='md:w-[350px] text-sm font-semilight md:w-[350px]'
+                        options={practitionerRoles?.map((role: any) => {
+                            return { value: role.code, label: role.display }
+                        }) ?? []}
+                        value={userTypeCode}
+                        onChange={onUserTypeChange}
+                    />
                 </div>
                 <div className="mt-5 flex">
                     <label className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">Enable User :</label>
@@ -436,7 +423,7 @@ export function CreateEditUser({ id }: { id?: string }) {
                     <label className="ml-1" htmlFor="no">No</label>
                 </div>
                 <div className="mt-5 flex">
-                    <label htmlFor="groups" className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">Keycloak User Group:</label>
+                    <label htmlFor="groups" className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">User Group:</label>
                     <ReactSelect
                         className='md:w-[350px] text-sm font-semilight md:w-[350px]'
                         options={groups.map((group: any) => {
@@ -461,7 +448,7 @@ export function CreateEditUser({ id }: { id?: string }) {
                 </div>
                 <div className="mt-5 flex justify-center">
                     <button
-                        className="bg-app_primary disabled:bg-gray-300 text-white font-medium text-sm py-1 px-4 rounded mx-5"
+                        className="bg-primary-400 disabled:bg-gray-300 text-white font-medium text-sm py-1 px-4 rounded mx-5"
                         onClick={onSubmit}
                     >
                         Save

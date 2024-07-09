@@ -24,7 +24,7 @@ import {
     fetchFhirResource, updateFhirResource, fetchFhirResourceEverything,
     extractQuestionnaireResponse, createMultipleFhirResources, executeFhirCqlQuery
 } from '@/app/loader';
-import { getResourcesFromBundle, REMOTE_SPECIALIST } from '@/utils/fhir-utils';
+import { getResourcesFromBundle, REMOTE_SPECIALIST_USER_TYPE_CODE } from '@/utils/fhir-utils';
 
 export default function RemoteSpecialistDiagnosis() {
     const { id } = useParams();
@@ -308,7 +308,7 @@ export default function RemoteSpecialistDiagnosis() {
                         status={(tasks?.length ? activeTask?.status : '') as IQuestionnaire['status'] | 'completed' | ''}
                         onSubmit={onSubmit}
                         sendForSecondOpinion={sendForSecondOpinion}
-                        allowSecondOpinion={session?.userType === REMOTE_SPECIALIST}
+                        allowSecondOpinion={session?.userType === REMOTE_SPECIALIST_USER_TYPE_CODE}
                         isSpecialistUser={true}
                     />
                 </>
@@ -317,7 +317,7 @@ export default function RemoteSpecialistDiagnosis() {
                 <div className="absolute flex flex-1 bg-gray-900 opacity-40 h-full w-full" />
                 <p className="text-white text-base font-semibold z-10">Submitting & loading next image</p>
                 <div className="w-[200px] h-2 relative bg-white rounded mt-4 ">
-                    <div className="h-2 left-0 top-0 absolute bg-app_primary rounded animate-linear" />
+                    <div className="h-2 left-0 top-0 absolute bg-primary-400 rounded animate-linear" />
                 </div>
             </div>}
         </div>

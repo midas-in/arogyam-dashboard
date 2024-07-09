@@ -62,7 +62,7 @@ export default function ReaderTasks() {
             <div className="flex justify-between items-center pb-4 border-b border-gray-3">
                 <h2 className='text-[40px] text-gray-900 font-normal leading-[48px]'>Tasks</h2>
                 <button
-                    className='bg-app_primary disabled:bg-gray-200 flex justify-center items-center px-4 py-2.5 text-white  text-base font-semibold leading-6 rounded'
+                    className='bg-primary-400 disabled:bg-gray-200 flex justify-center items-center px-4 py-2.5 text-white  text-base font-semibold leading-6 rounded'
                     onClick={() => tasks?.length && onClick(tasks[0]?.id)}
                     disabled={!tasks?.length}
                 >

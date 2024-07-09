@@ -93,23 +93,28 @@ export function getResourcesFromBundle<TResource>(bundle: IBundle) {
 export const getUserTypeCode = (role: IPractitionerRole) =>
     role.code
         ?.flatMap((code) => code.coding ?? [])
-        .find((code) => code.system === USER_TYPE_SYSTEM)?.code;
+        .find((code) => code.system === USER_TYPE_SYSTEM)?.code as UserTypeCodes;
 
 // get user type from user type code
-export const getUserType = (userTypeCode: string) => {
-    switch (userTypeCode) {
-        case SUPERVISOR_USER_TYPE_CODE:
-            return SUPERVISOR;
-        case REMOTE_SPECIALIST_USER_TYPE_CODE:
-            return REMOTE_SPECIALIST;
-        case SENIOR_SPECIALIST_USER_TYPE_CODE:
-            return SENIOR_SPECIALIST;
-        case READER_USER_TYPE_CODE:
-            return READER;
-        default:
-            return PRACTITIONER;
-    }
-};
+// export const getUserType = (userTypeCode: string) => {
+//     switch (userTypeCode) {
+//         case SUPERVISOR_USER_TYPE_CODE:
+//             return SUPERVISOR_USER_TYPE_CODE;
+//         case REMOTE_SPECIALIST_USER_TYPE_CODE:
+//             return REMOTE_SPECIALIST_USER_TYPE_CODE;
+//         case SENIOR_SPECIALIST_USER_TYPE_CODE:
+//             return SENIOR_SPECIALIST_USER_TYPE_CODE;
+//         case READER_USER_TYPE_CODE:
+//             return READER_USER_TYPE_CODE;
+//         default:
+//             return PRACTITIONER;
+//     }
+// };
+// export const PRACTITIONER = "practitioner";
+// export const SUPERVISOR = 'supervisor';
+// export const REMOTE_SPECIALIST = 'remote-specialist';
+// export const SENIOR_SPECIALIST = 'senior-specialist';
+// export const READER = 'reader';
 
 export const keycloakIdentifierCoding = {
     system: 'http://hl7.org/fhir/identifier-type',
@@ -121,20 +126,18 @@ export const groupResourceType = 'Group';
 export const compositionResourceType = 'Composition';
 export const practitionerRoleResourceType = 'PractitionerRole';
 
-export const PRACTITIONER = "practitioner";
-export const SUPERVISOR = 'supervisor';
-export const REMOTE_SPECIALIST = 'remote-specialist';
-export const SENIOR_SPECIALIST = 'senior-specialist';
-export const READER = 'reader';
-
 export const USER_TYPE_SYSTEM = "https://midas.iisc.ac.in/fhir/CodeSystem/practitioner-role-type";
 export const SUPERVISOR_USER_TYPE_CODE = 'super-admin';
+export const SITE_ADMIN_TYPE_CODE = 'site-admin';
+export const SITE_COORDINATOR_USER_TYPE_CODE = 'site-coordinator';
 export const PRACTITIONER_USER_TYPE_CODE = 'flw';
-export const REMOTE_SPECIALIST_USER_TYPE_CODE = 'specialist'; //TODO update code
-export const SENIOR_SPECIALIST_USER_TYPE_CODE = 'senior-specialist'; //TODO update code
-export const READER_USER_TYPE_CODE = 'reader'; //TODO update code
+export const REMOTE_SPECIALIST_USER_TYPE_CODE = 'specialist';
+export const SENIOR_SPECIALIST_USER_TYPE_CODE = 'senior-specialist';
+export const READER_USER_TYPE_CODE = 'reader';
 export const SNOMED_CODEABLE_SYSTEM = 'http://snomed.info/sct';
 export const DEVICE_SETTING_CODEABLE_CODE = '1156600005';
+
+export type UserTypeCodes = typeof SUPERVISOR_USER_TYPE_CODE | typeof SITE_ADMIN_TYPE_CODE | typeof SITE_COORDINATOR_USER_TYPE_CODE | typeof PRACTITIONER_USER_TYPE_CODE | typeof REMOTE_SPECIALIST_USER_TYPE_CODE | typeof SENIOR_SPECIALIST_USER_TYPE_CODE | typeof READER_USER_TYPE_CODE;
 
 export const OBSERVATION_CODE_LABEL_MAPPING: { [key: string]: string } = {
     '63638-1': 'Cigarette/ Bidi',

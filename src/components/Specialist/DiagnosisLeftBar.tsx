@@ -68,7 +68,7 @@ const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
             {id}
           </p>
         </div>
-        <button className={`h-8 px-2 py-1 rounded border border-gray-100 justify-start items-center gap-1 inline-flex ${collapseSidebar ? 'bg-app_primary border-0' : 'bg-white'}`} onClick={() => setCollapseSidebar(prev => !prev)} >
+        <button className={`h-8 px-2 py-1 rounded border border-gray-100 justify-start items-center gap-1 inline-flex ${collapseSidebar ? 'bg-primary-400 border-0' : 'bg-white'}`} onClick={() => setCollapseSidebar(prev => !prev)} >
           {/* <div className={`text-base font-normal ${collapseSidebar ? 'text-white' : ''}`}>Close</div> */}
           <div className={`w-5 h-5 relative transition-all ${collapseSidebar ? 'rotate-180' : ''}`} >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -144,7 +144,7 @@ const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
           {medias?.map((media, i) => {
             return <div
               key={i}
-              className={`cursor-pointer relative bg-white rounded ${i === activeMediaIndex ? 'outline outline-offset-[-2px] outline-2 outline-app_primary' : ''}`}
+              className={`cursor-pointer relative bg-white rounded ${i === activeMediaIndex ? 'outline outline-offset-[-2px] outline-2 outline-primary-400' : ''}`}
               onClick={() => setActiveMediaIndex(i)}>
               <NextImage
                 width={10}

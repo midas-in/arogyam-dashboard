@@ -1,10 +1,11 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from './api/auth/[...nextauth]/authOptions';
 
+import AdminMain from '@/components/Admin/AdminMain';
 import ReaderTasks from '@/components/Reader/TasksMain';
 import RemoteSpecialistTasks from '@/components/Specialist/TasksMain';
 import Login from '@/components/Login';
-import { READER, REMOTE_SPECIALIST, SENIOR_SPECIALIST } from '@/utils/fhir-utils';
+import { SUPERVISOR_USER_TYPE_CODE, READER_USER_TYPE_CODE, REMOTE_SPECIALIST_USER_TYPE_CODE, SENIOR_SPECIALIST_USER_TYPE_CODE } from '@/utils/fhir-utils';
 
 
 export default async function Home() {
@@ -18,11 +19,15 @@ export default async function Home() {
     </div >
   }
 
-  if (session?.userType === READER) {
+  if (session?.userType === SUPERVISOR_USER_TYPE_CODE) {
+    return <AdminMain />
+  }
+
+  if (session?.userType === READER_USER_TYPE_CODE) {
     return <ReaderTasks />
   }
 
-  if (session?.userType === REMOTE_SPECIALIST || session?.userType === SENIOR_SPECIALIST) {
+  if (session?.userType === REMOTE_SPECIALIST_USER_TYPE_CODE || session?.userType === SENIOR_SPECIALIST_USER_TYPE_CODE) {
     return <RemoteSpecialistTasks />
   }
 

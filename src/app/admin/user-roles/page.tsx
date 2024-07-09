@@ -5,6 +5,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useSession } from "next-auth/react";
 import MyTable from '@/components/MyTable';
 import { fetchUserRoles } from '@/app/loader';
+import { message } from 'antd';
 
 const columnHelper = createColumnHelper<any>()
 const columns = [
@@ -35,23 +36,22 @@ export default function UserRoles() {
     if (session?.accessToken) {
       fetchUserRoles(session.accessToken)
         .then(data => setRoles(data))
-        .catch(error => console.error('Error fetching roles:', error));
+        .catch(error => message.error('Error fetching roles'));
     }
   }, [session?.accessToken]);
 
   return (
-    <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)]	justify-center flex">
-      <div className="p-5 bg-white h-min w-full">
-        <div className='flex justify-end'>
-        </div>
-        <div className="h-4" />
-        <MyTable
-          {...{
-            data: roles,
-            columns,
-          }}
-        />
+    <div className="p-5 bg-white h-min w-full">
+      <div className='flex'>
+        <h2 className="text-xl font-semibold">User Roles</h2>
       </div>
+      <div className="h-4" />
+      <MyTable
+        {...{
+          data: roles,
+          columns,
+        }}
+      />
     </div>
   )
 }

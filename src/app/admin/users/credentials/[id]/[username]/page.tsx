@@ -67,7 +67,7 @@ export default function UserCredentials() {
 
 
     return (
-        <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)] flex-col">
+        <div className="p-5 bg-white h-min w-full">
             <h2 className="text-xl font-semibold mb-5">{heading}</h2>
             <div className="p-5 bg-white h-min w-full justify-center flex">
                 <Row className='min-w-[500px]'>

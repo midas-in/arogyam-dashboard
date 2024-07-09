@@ -135,7 +135,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         {id}
                     </p>}
                 </div>
-                <button className={`h-8 px-2 py-1 rounded border border-gray-100 justify-start items-center gap-1 inline-flex ${!showRightSidebar ? 'bg-app_primary border-0' : 'bg-white'}`} onClick={() => setShowRightSidebar(prev => !prev)} >
+                <button className={`h-8 px-2 py-1 rounded border border-gray-100 justify-start items-center gap-1 inline-flex ${!showRightSidebar ? 'bg-primary-400 border-0' : 'bg-white'}`} onClick={() => setShowRightSidebar(prev => !prev)} >
                     {/* <div className={`text-base font-normal ${!showRightSidebar ? 'text-white' : ''}`}>Close</div> */}
                     <div className={`w-5 h-5 relative transition-all ${!showRightSidebar ? 'rotate-180' : ''}`} >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -236,11 +236,11 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         <p className="text-success text-base font-semibold p-3">Diagnosis Submitted</p>
                     </>
                     : <>
-                        {allowSecondOpinion && <button className="h-12 bg-white border border-app_primary disabled:border-gray-400 rounded justify-center items-center flex flex-1 text-app_primary disabled:text-gray-400 text-base font-semibold leading-normal" onClick={sendForSecondOpinion} >
+                        {allowSecondOpinion && <button className="h-12 bg-white border border-primary-400 disabled:border-gray-400 rounded justify-center items-center flex flex-1 text-primary-400 disabled:text-gray-400 text-base font-semibold leading-normal" onClick={sendForSecondOpinion} >
                             Second Opinion
                         </button>}
                         <button
-                            className="h-12 bg-app_primary disabled:bg-gray-200 rounded justify-center items-center flex flex-1 text-white text-base font-semibold leading-normal"
+                            className="h-12 bg-primary-400 disabled:bg-gray-200 rounded justify-center items-center flex flex-1 text-white text-base font-semibold leading-normal"
                             onClick={() => onSubmit(answers)}
                             disabled={!allowSubmit()}
                         >

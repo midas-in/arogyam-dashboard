@@ -203,7 +203,7 @@ export default function EditGroup() {
     }
 
     return (
-        <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)] flex-col">
+        <div className="p-5 bg-white h-min w-full">
             <h2 className="text-xl font-semibold mb-5">{pageTitle}</h2>
             <div className="p-5 bg-white h-min w-full justify-center flex">
                 <Row className="content-section user-group min-w-[300px]">

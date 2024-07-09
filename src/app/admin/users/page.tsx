@@ -22,18 +22,18 @@ const confirm = async (id: string, accessToken: string, onSuccess: Function) => 
   }
 };
 
-const Delete = ({ id, onSuccess }: { id: string, onSuccess: Function }) => {
-  const { data: session } = useSession();
-  return <Popconfirm
-    title="Delete the user"
-    description="Are you sure to delete this user?"
-    onConfirm={() => confirm(id, session?.accessToken as string, onSuccess)}
-    okText="Yes"
-    cancelText="No"
-  >
-    <a className='text-red-500 ml-5 cursor-pointer'>Delete</a>
-  </Popconfirm>
-}
+// const Delete = ({ id, onSuccess }: { id: string, onSuccess: Function }) => {
+//   const { data: session } = useSession();
+//   return <Popconfirm
+//     title="Delete the user"
+//     description="Are you sure to delete this user?"
+//     onConfirm={() => confirm(id, session?.accessToken as string, onSuccess)}
+//     okText="Yes"
+//     cancelText="No"
+//   >
+//     <a className='text-red-500 ml-5 cursor-pointer'>Delete</a>
+//   </Popconfirm>
+// }
 
 const columnHelper = createColumnHelper<any>()
 
@@ -54,10 +54,10 @@ const TableAction = ({ info, fetchAllUsers }: { info: any, fetchAllUsers: Functi
               onClick={() => router.push(`/admin/users/credentials/${info.row.original.id}/${info.row.original.username}`)}
             >
               {'Credentials'}
-            </Button>,
-          }, {
-            key: '2',
-            label: <Delete id={info.row.original.id} onSuccess={fetchAllUsers} />
+            </Button>
+            // }, {
+            //   key: '2',
+            //   label: <Delete id={info.row.original.id} onSuccess={fetchAllUsers} />
           }]
       }}
       placement="bottomRight"
@@ -95,7 +95,7 @@ export default function Users() {
       header: () => <span>email</span>,
     }),
   ]
-  if (session?.permissions?.includes('EDIT_KEYCLOAK_USERS')) {
+  if (session?.permissions?.includes('EDIT_KEYCLOAK_USERS') || session?.permissions?.includes('FHIR_ALL_WRITE')) {
     columns.push(columnHelper.accessor('Action', {
       cell: info => <TableAction info={info} fetchAllUsers={fetchAllUsers} />,
       header: () => <span>Action</span>,
@@ -106,7 +106,7 @@ export default function Users() {
     if (session?.accessToken) {
       fetchUsers(session.accessToken)
         .then(data => setUsers(data))
-        .catch(error => message.error('Error fetching users:', error));
+        .catch(error => message.error('Error fetching users'));
     }
   }
 
@@ -118,19 +118,20 @@ export default function Users() {
 
 
   return (
-    <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)]	justify-center flex">
-      <div className="p-5 bg-white h-min w-full">
-        {session?.permissions?.includes('EDIT_KEYCLOAK_USERS') && <div className='flex justify-end'>
-          <Link href='/admin/users/new' className="border px-4 py-1 rounded bg-app_primary text-white"> + Add user</Link>
+    <div className="p-5 bg-white h-min w-full">
+      <div className='flex justify-between items-center'>
+        <h2 className="text-xl font-semibold">Users</h2>
+        {(session?.permissions?.includes('EDIT_KEYCLOAK_USERS') || session?.permissions?.includes('FHIR_ALL_WRITE')) && <div className='flex justify-end'>
+          <Link href='/admin/users/new' className="border px-4 py-1 rounded bg-primary-400 text-white"> + Add user</Link>
         </div>}
-        <div className="h-4" />
-        <MyTable
-          {...{
-            data: users,
-            columns,
-          }}
-        />
       </div>
+      <div className="h-4" />
+      <MyTable
+        {...{
+          data: users,
+          columns,
+        }}
+      />
     </div>
   )
 }

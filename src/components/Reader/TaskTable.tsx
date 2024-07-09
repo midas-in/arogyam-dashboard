@@ -37,18 +37,18 @@ const TaskTable = ({ loading, data, currentPage, itemsPerPage, totalItems, onPag
                     </div>
                 </li>
                 {loading
-                    ? <div className='relative min-h-[300px]'><Loader /></div>
+                    ? <div className='relative min-h-[200px]'><Loader /></div>
                     : data && data?.length > 0
                         ? data?.map((task, i) => (
                             <li key={i} className="flex items-center justify-between mb-2 border-b last:border-b-0 border-gray-3 py-2 px-4">
                                 <span className="font-normal text-gray-900 text-base">{task?.id}</span>
                                 <div className='w-[100px]'>
-                                    <button onClick={() => { onClick(task.id as string); }} className="bg-app_primary text-white text-sm font-semilight py-1 px-4 rounded">
+                                    <button onClick={() => { onClick(task.id as string); }} className="bg-primary-400 text-white text-sm font-semilight py-1 px-4 rounded">
                                         View
                                     </button>
                                 </div>
                             </li>
-                        )) : <div className='min-h-[300px] absolute inset-0 flex items-center justify-center'>
+                        )) : <div className='min-h-[200px] flex items-center justify-center'>
                             <p className='text-gray-900'>There are no tasks</p>
                         </div>}
 
