@@ -27,10 +27,8 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
-ARG NEXT_PUBLIC_FHIR_API_BASE_URL
-ARG NEXT_PUBLIC_KEYCLOAK_URL
 ARG NEXT_PUBLIC_KEYCLOAK_REALM
-RUN echo $NEXT_PUBLIC_FHIR_API_BASE_URL
+RUN echo $NEXT_PUBLIC_KEYCLOAK_REALM
 
 RUN \
     if [ -f yarn.lock ]; then yarn run build; \
@@ -52,9 +50,6 @@ ENV KEYCLOAK_ISSUER https://staging.arogyam-midas.iisc.ac.in/auth/realms/arogyam
 ENV KEYCLOAK_CLIENT_ID arogyam-web
 
 ENV NEXT_PUBLIC_KEYCLOAK_REALM=$NEXT_PUBLIC_KEYCLOAK_REALM
-ENV NEXT_PUBLIC_KEYCLOAK_URL=$NEXT_PUBLIC_KEYCLOAK_URL
-
-ENV NEXT_PUBLIC_FHIR_API_BASE_URL=$NEXT_PUBLIC_FHIR_API_BASE_URL
 
 
 # Uncomment the following line in case you want to disable telemetry during runtime.

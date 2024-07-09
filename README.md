@@ -19,7 +19,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## Run Docker Image
 
 ```bash
-docker build -t arogyam-dashboard .
+docker build --build-arg NEXT_PUBLIC_KEYCLOAK_REALM=arogyam -t arogyam-dashboard .
 
 docker run -p 3000:3000 --env-file .env arogyam-dashboard
 

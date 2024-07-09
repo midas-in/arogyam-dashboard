@@ -2,14 +2,24 @@ import KcAdminClient from '@keycloak/keycloak-admin-client';
 import Fhir from 'fhir.js/src/adapters/native';
 import axios from 'axios';
 
+const origin =
+    typeof window !== "undefined" && window.location.origin
+        ? window.location.origin
+        : process.env.NEXTAUTH_URL;
+const isDev = origin === 'http://localhost:3000';
+
 const kcAdminClient = new KcAdminClient({
-    baseUrl: process.env.NEXT_PUBLIC_KEYCLOAK_URL,
+    baseUrl: isDev ? process.env.NEXT_PUBLIC_KEYCLOAK_URL : origin + '/auth',
     realmName: process.env.NEXT_PUBLIC_KEYCLOAK_REALM
 });
 
+const getFhirUrl = () => {
+    return isDev ? process.env.NEXT_PUBLIC_FHIR_API_BASE_URL : origin + '/fhir';
+}
+
 const createFhirClient = (token: string) => {
     const client = Fhir({
-        baseUrl: process.env.NEXT_PUBLIC_FHIR_API_BASE_URL,
+        baseUrl: getFhirUrl(),
         auth: {
             bearer: token,
         }
@@ -121,7 +131,7 @@ export function fetchFhirResource(accessToken: string, payload: { resourceType: 
     const { resourceType, query } = payload;
     return axios({
         method: 'GET',
-        baseURL: process.env.NEXT_PUBLIC_FHIR_API_BASE_URL,
+        baseURL: getFhirUrl(),
         url: `/${resourceType}/_search`,
         params: query,
         headers: {
@@ -136,7 +146,7 @@ export function fetchFhirResourceEverything(accessToken: string, payload: any) {
     const { resourceType, id, query } = payload;
     return axios({
         method: 'GET',
-        baseURL: process.env.NEXT_PUBLIC_FHIR_API_BASE_URL,
+        baseURL: getFhirUrl(),
         url: `/${resourceType}/${id}/$everything`,
         params: query,
         headers: {
@@ -163,7 +173,7 @@ export function updateFhirResource(accessToken: string, payload?: any) {
 export function extractQuestionnaireResponse(accessToken: string, payload: { resourceType: string, parameter: object }) {
     return axios({
         method: 'POST',
-        baseURL: process.env.NEXT_PUBLIC_FHIR_API_BASE_URL,
+        baseURL: getFhirUrl(),
         url: `/QuestionnaireResponse/$extract`,
         data: payload,
         headers: {
@@ -175,7 +185,7 @@ export function extractQuestionnaireResponse(accessToken: string, payload: { res
 export function createMultipleFhirResources(accessToken: string, payload: { resourceType: string, query: object }) {
     return axios({
         method: 'POST',
-        baseURL: process.env.NEXT_PUBLIC_FHIR_API_BASE_URL,
+        baseURL: getFhirUrl(),
         url: ``,
         data: payload,
         headers: {
@@ -187,7 +197,7 @@ export function createMultipleFhirResources(accessToken: string, payload: { reso
 export function executeFhirCqlQuery(accessToken: string, payload: { resourceType: string, parameter: object }) {
     return axios({
         method: 'POST',
-        baseURL: process.env.NEXT_PUBLIC_FHIR_API_BASE_URL,
+        baseURL: getFhirUrl(),
         url: `/$cql`,
         data: payload,
         headers: {
