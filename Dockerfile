@@ -28,7 +28,6 @@ COPY . .
 # ENV NEXT_TELEMETRY_DISABLED 1
 
 ARG NEXT_PUBLIC_KEYCLOAK_REALM
-RUN echo $NEXT_PUBLIC_KEYCLOAK_REALM
 
 RUN \
     if [ -f yarn.lock ]; then yarn run build; \
@@ -40,16 +39,6 @@ RUN \
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
-
-ENV NODE_ENV production
-ENV NEXTAUTH_SECRET fkwdnwkdnw
-ENV NEXTAUTH_URL https://staging.arogyam-midas.iisc.ac.in
-
-ENV KEYCLOAK_CLIENT_SECRET W6JM9wq8T2BrHSzskdDwYxUjajbp06fZ
-ENV KEYCLOAK_ISSUER https://staging.arogyam-midas.iisc.ac.in/auth/realms/arogyam
-ENV KEYCLOAK_CLIENT_ID arogyam-web
-
-ENV NEXT_PUBLIC_KEYCLOAK_REALM=$NEXT_PUBLIC_KEYCLOAK_REALM
 
 
 # Uncomment the following line in case you want to disable telemetry during runtime.
