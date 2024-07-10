@@ -131,7 +131,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                     <p className="text-gray-900 text-base font-semibold leading-normal ">
                         Diagnosis
                     </p>
-                    {!isSpecialistUser && <p className="truncate text-gray-900 text-base font-semibold leading-normal ml-1" style={{ width: width - 150 }}>
+                    {!isSpecialistUser && <p className="truncate text-gray-900 text-base font-semibold leading-normal ml-1" style={{ width: width - 170 }}>
                         {id}
                     </p>}
                 </div>
@@ -146,7 +146,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
             </div>
         </div>
 
-        <div className={`px-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-501px)] ${!showRightSidebar ? 'hidden' : ''}`}>
+        <div className={`px-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-482px)] ${!showRightSidebar ? 'hidden' : ''}`}>
             {questionnaire?.item?.map((question, qIndex) => {
                 // media-id question will be hidden
                 if (question.linkId === 'media-id') return;
@@ -159,8 +159,8 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         {question.answerOption?.map(({ valueCoding }) => {
                             const isDefaultChecked = question?.linkId ? JSON.stringify(answers[question.linkId]) === JSON.stringify({ valueCoding }) ?? false : false;
                             return <div key={valueCoding?.code} className="py-1.5 bg-white justify-center items-center flex">
-                                <input type="radio" className='w-5 h-5 cursor-pointer' id={valueCoding?.code} name="diagnosis" checked={isDefaultChecked} value={JSON.stringify({ valueCoding })} onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} />
-                                <label htmlFor={valueCoding?.code} className="text-gray-900 text-base font-normal leading-normal ml-2 cursor-pointer">{valueCoding?.display}</label>
+                                <input type="radio" className='w-5 h-5 cursor-pointer disabled:accent-gray-600 disabled:cursor-not-allowed' id={valueCoding?.code} name="diagnosis" checked={isDefaultChecked} value={JSON.stringify({ valueCoding })} onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} />
+                                <label htmlFor={valueCoding?.code} className="flex-1 text-gray-900 text-base font-normal leading-normal ml-2 cursor-pointer">{valueCoding?.display}</label>
                             </div>
                         })}
                     </div>
@@ -236,7 +236,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         <p className="text-success text-base font-semibold p-3">Diagnosis Submitted</p>
                     </>
                     : <>
-                        {allowSecondOpinion && <button className="h-12 bg-white border border-primary-400 disabled:border-gray-400 rounded justify-center items-center flex flex-1 text-primary-400 disabled:text-gray-400 text-base font-semibold leading-normal" onClick={sendForSecondOpinion} >
+                        {allowSecondOpinion && <button className="h-12 bg-white border border-primary-400 disabled:border-gray-400 rounded justify-center items-center flex flex-1 text-primary-400 disabled:text-gray-400 text-base font-semibold leading-normal" onClick={sendForSecondOpinion} disabled={!questionnaire?.id} >
                             Second Opinion
                         </button>}
                         <button

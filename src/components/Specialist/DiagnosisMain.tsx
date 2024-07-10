@@ -21,7 +21,7 @@ import { DiagnosisLeftBar } from "@/components/Specialist/DiagnosisLeftBar";
 import { DiagnosisRightBar } from "@/components/Diagnosis/DiagnosisRightBar";
 import { Loader } from "@/components/UI/Loader";
 import {
-    fetchFhirResource, updateFhirResource, fetchFhirResourceEverything,
+    fetchFhirResource, updateFhirResource, fetchFhirSingleResource, fetchFhirResourceEverything,
     extractQuestionnaireResponse, createMultipleFhirResources, executeFhirCqlQuery
 } from '@/app/loader';
 import { getResourcesFromBundle, REMOTE_SPECIALIST_USER_TYPE_CODE } from '@/utils/fhir-utils';
@@ -83,28 +83,29 @@ export default function RemoteSpecialistDiagnosis() {
         if (session?.accessToken && tasks?.length && activeTaskIndex !== undefined && activeTaskIndex !== -1) {
             // Fetch encounter
             const [encounterResourceType, encounterId] = activeTask.encounter?.reference?.split('/') ?? []
+            const [questionnaireResourceType, questionnaireId] = activeTask?.focus?.reference?.split('/') ?? []
 
-            fetchFhirResourceEverything(session?.accessToken, {
-                resourceType: encounterResourceType,
-                id: encounterId
-            })
-                .then(async (data: IBundle) => {
-                    const [questionnaireResourceType, questionnaireId] = activeTask?.focus?.reference?.split('/') ?? []
+            Promise.all([
+                fetchFhirResourceEverything(session?.accessToken, { resourceType: encounterResourceType, id: encounterId }),
+                fetchFhirSingleResource(session?.accessToken, { resourceType: questionnaireResourceType, id: questionnaireId }),
+            ])
+                .then(async ([data, ques]: [IBundle, IQuestionnaire]) => {
+
                     const bundledData = getResourcesFromBundle<any>(data);
                     setEncounter(bundledData.filter(bd => bd.resourceType === 'Encounter')[0]);
                     setMedias(bundledData.filter(bd => bd.resourceType === 'Media'));
                     setObservations(bundledData.filter(bd => bd.resourceType === 'Observation'));
-                    const questionnaireFromEverything = bundledData.filter(bd => bd.resourceType === 'Questionnaire');
-                    const foundQuestionnaire = questionnaireFromEverything.find(q => q.id === questionnaireId);
-                    setQuestionnaire(foundQuestionnaire);
+                    // const questionnaireFromEverything = bundledData.filter(bd => bd.resourceType === 'Questionnaire');
+                    // const foundQuestionnaire = questionnaireFromEverything.find(q => q.id === questionnaireId);
+                    setQuestionnaire(ques);
                     setPatient(bundledData.filter(bd => bd.resourceType === 'Patient')[0]);
                     // Get the submitted question response as well when the task is completed
-                    if (searchParams.get('status') === 'completed' && foundQuestionnaire?.url) {
+                    if (activeTask.status === 'completed' && ques?.url) {
 
                         const qResponse = await fetchFhirResource(session?.accessToken as string, {
                             resourceType: 'QuestionnaireResponse',
                             query: {
-                                questionnaire: foundQuestionnaire.url,
+                                questionnaire: ques.url,
                                 encounter: activeTask.encounter?.reference,
                                 author: `Practitioner/${session?.resourceId}`,
                             }
@@ -238,7 +239,7 @@ export default function RemoteSpecialistDiagnosis() {
                 }
             });
             await createMultipleFhirResources(session?.accessToken as string, extractedResponse);
-
+            message.success('Submitted successfully');
             setTasks(update(tasks, { [activeTaskIndex]: { $merge: taskPayload } }));
             onClickNext();
         }
@@ -251,7 +252,7 @@ export default function RemoteSpecialistDiagnosis() {
         }
     }
 
-    return <div className="flex flex-1 flex-col gap-3 m-6">
+    return <div className="flex flex-1 flex-col gap-3 mx-6 my-4">
         <div className="flex align-center justify-between p-3 border-b border-gray-100">
             <div className="flex items-center gap-3">
                 <Link href={'/'}>
@@ -283,7 +284,7 @@ export default function RemoteSpecialistDiagnosis() {
             </div>
         </div>
 
-        <div className={`min-h-[calc(100vh-190px)] relative flex items-center justify-center ${loading ? 'bg-gray-100' : 'bg-black'}`}>
+        <div className={`min-h-[calc(100vh-166px)] relative flex items-center justify-center ${loading ? 'bg-gray-100' : 'bg-black'}`}>
             {loading
                 ? <Loader />
                 : <>

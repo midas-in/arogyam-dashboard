@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Viewport } from 'next'
 import Image from "next/image";
 import Link from "next/link";
 import { Dropdown } from 'antd';
@@ -18,6 +19,13 @@ export const metadata: Metadata = {
   title: "Aarogyam dashboard",
   description: "Aarogyam dashboard",
 };
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
 
 export default async function RootLayout({
   children,
@@ -54,12 +62,22 @@ export default async function RootLayout({
                       items: [
                         {
                           key: '1',
+                          label: <div className="text-left py-1">
+                            <p className="text-gray-600 font-base">{session.user?.email}</p>
+                          </div>,
+                          disabled: true,
+                        },
+                        {
+                          type: 'divider',
+                        },
+                        {
+                          key: '2',
                           label: (
                             <Logout />
                           ),
                         },
                       ]
-                    }} placement="bottomRight" arrow>
+                    }} placement="bottomRight" arrow >
                       {
                         session?.user?.image
                           ? <Image

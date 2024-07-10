@@ -140,11 +140,11 @@ export const DEVICE_SETTING_CODEABLE_CODE = '1156600005';
 export type UserTypeCodes = typeof SUPERVISOR_USER_TYPE_CODE | typeof SITE_ADMIN_TYPE_CODE | typeof SITE_COORDINATOR_USER_TYPE_CODE | typeof PRACTITIONER_USER_TYPE_CODE | typeof REMOTE_SPECIALIST_USER_TYPE_CODE | typeof SENIOR_SPECIALIST_USER_TYPE_CODE | typeof READER_USER_TYPE_CODE;
 
 export const OBSERVATION_CODE_LABEL_MAPPING: { [key: string]: string } = {
-    '63638-1': 'Cigarette/ Bidi',
+    '63638-1': 'Cigarette/Bidi',
     '39240-7': 'Smokeless Tobacco',
-    '64004-5': 'Areca nut',
+    '64004-5': 'Areca Nut',
     '74205-6': 'Alcohol',
     '62559-0': 'Lifetime alcohol exposure',
-    'LP232821-1': 'Mouth open',
-    '62596-2': 'Lesion'
+    'LP232821-1': 'Able to open mouth?',
+    '62596-2': 'Lesion/Patch'
 }

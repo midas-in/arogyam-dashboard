@@ -95,7 +95,7 @@ export default function ReaderDiagnosis() {
                                 setQuestionResponse({ item: [{ ...mediaIdItem, answer: [{ valueString: `Media/${mda?.id}` }] }] });
                             }
                         }
-                        if (searchParams.get('status') === 'completed' && ques && ques?.url) {
+                        if (activeTask.status === 'completed' && ques && ques?.url) {
                             const qResponse = await fetchFhirResource(session?.accessToken as string, {
                                 resourceType: 'QuestionnaireResponse',
                                 query: {
@@ -184,6 +184,7 @@ export default function ReaderDiagnosis() {
                 }
             });
             await createMultipleFhirResources(session?.accessToken as string, extractedResponse);
+            message.success('Submitted successfully');
             setTasks(update(tasks, { [activeTaskIndex]: { $merge: taskPayload } }));
             onClickNext();
         }
@@ -197,7 +198,7 @@ export default function ReaderDiagnosis() {
     }
 
 
-    return <div className="flex flex-1 flex-col gap-3 m-6">
+    return <div className="flex flex-1 flex-col gap-3 mx-6 my-4">
         <div className="flex align-center justify-between p-3 border-b border-gray-100">
             <div className="flex items-center gap-3">
                 <Link href={'/'}>
@@ -229,7 +230,7 @@ export default function ReaderDiagnosis() {
             </div>
         </div>
 
-        <div className={`min-h-[calc(100vh-190px)] relative flex items-center justify-center ${loading ? 'bg-gray-100' : 'bg-black'}`}>
+        <div className={`min-h-[calc(100vh-166px)] relative flex items-center justify-center ${loading ? 'bg-gray-100' : 'bg-black'}`}>
             {loading
                 ? <Loader />
                 : <>
