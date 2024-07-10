@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchState } from 'react-zoom-pan-pinch';
 import { IMedia } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IMedia';
 import { NextImage } from "@/components/UI/NextImage";
@@ -8,6 +9,7 @@ import { NextImage } from "@/components/UI/NextImage";
 export function DiagnosisImage({ medias, activeMediaIndex = 0, setActiveMediaIndex }: { medias?: IMedia[], activeMediaIndex?: number, setActiveMediaIndex?: Function }) {
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const transformWrapperRef = useRef(null);
+  const { data: session } = useSession();
 
   // const imgUrl = 'https://s3-alpha-sig.figma.com/img/d5b1/15da/8f90a01d74ab376a4f3456aad62eda3e?Expires=1717977600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=VWgspSxqBpMViUn27z8-Q1uLC1eUFkyMz0MruBKW5WvKU7R~CLdSYNgXjicHXl0Aujxgm4G1qDu70Wk0H36wCwsTE5MsIV7COV8oHmOYTXy8iC1sEsC6dC~dR3Yel7dY58-iAjkQJ0iQbyrDUEaWrHpF5OJnkOAptbkRYh93Ljh1JcHUrqPGIJlQqIDE-nlru1t-Fuas2XaJxUuCs7W45io5yAFvrk-X1ouHEd7OTxAkUqHziRftmlbPJs1ALa9gtxiY2hwWBgUkeBohAlkukzKK-jSznXRT4GBG9WmfVBnw5CfeAB4mhJVXbWBcD0Z~v6Ft9ubanjWy-71~0KJSwQ__';
 
@@ -72,7 +74,7 @@ export function DiagnosisImage({ medias, activeMediaIndex = 0, setActiveMediaInd
             width={700}
             height={700}
             className={`h-[700px] w-[700px] bg-gray-100 object-cover`}
-            src={medias && medias?.length ? medias[activeMediaIndex]?.content?.url ?? '' : ''}
+            src={medias && medias?.length ? `${medias[activeMediaIndex]?.content?.url}?token=${session?.accessToken}` ?? '' : ''}
             alt={"Image"}
             sizes="100vw"
           />

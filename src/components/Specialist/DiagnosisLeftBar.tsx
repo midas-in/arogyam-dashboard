@@ -1,4 +1,5 @@
 import React, { useState, } from "react";
+import { useSession } from "next-auth/react";
 import { IPatient } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPatient';
 import { IEncounter } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IEncounter';
 import { IObservation } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IObservation';
@@ -20,6 +21,7 @@ interface DiagnosisLeftBarProps {
 
 const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
   const { id, patient, encounter, observations, medias, activeMediaIndex, setActiveMediaIndex } = props;
+  const { data: session } = useSession();
 
   const [collapseSidebar, setCollapseSidebar] = useState(false);
   const [resizing, setResizing] = useState(false);
@@ -150,7 +152,7 @@ const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
                 width={10}
                 height={10}
                 className={`h-10 w-10 bg-gray-100 object-cover rounded`}
-                src={media ? media?.content?.url ?? '' : ''}
+                src={media ? `${media?.content?.url}?token=${session?.accessToken}` ?? '' : ''}
                 alt={"Image"}
                 sizes="100vw"
               />
