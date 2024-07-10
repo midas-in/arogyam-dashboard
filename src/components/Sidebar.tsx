@@ -22,7 +22,7 @@ const ROUTES: Route[] = [
       { label: 'User groups', path: '/admin/user-groups', permissions: ['VIEW_KEYCLOAK_USERS', 'FHIR_ALL_READ'] },
       { label: 'User roles', path: '/admin/user-roles', permissions: ['EDIT_KEYCLOAK_USERS', 'FHIR_ALL_WRITE'] }
     ],
-    userTypes: [SUPERVISOR_USER_TYPE_CODE, SITE_COORDINATOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE]
+    userTypes: [SITE_COORDINATOR_USER_TYPE_CODE]
   },
   // {
   //   label: 'Team Management',
