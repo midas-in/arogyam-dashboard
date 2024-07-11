@@ -158,7 +158,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         </div>
                         {question.answerOption?.map(({ valueCoding }) => {
                             const isDefaultChecked = question?.linkId ? JSON.stringify(answers[question.linkId]) === JSON.stringify({ valueCoding }) ?? false : false;
-                            return <div key={valueCoding?.code} className="custom-radio">
+                            return <div key={valueCoding?.code} className="custom-radio py-1">
                                 <input type="radio" className='w-5 h-5' id={valueCoding?.code} name="diagnosis" checked={isDefaultChecked} value={JSON.stringify({ valueCoding })} onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} />
                                 <label htmlFor={valueCoding?.code} className="text-gray-900 text-base font-normal leading-6">{valueCoding?.display}</label>
                             </div>
