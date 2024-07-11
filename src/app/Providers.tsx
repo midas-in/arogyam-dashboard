@@ -1,10 +1,10 @@
 'use client'
 
-import {SessionProvider, SessionProviderProps} from "next-auth/react"
+import { SessionProvider, SessionProviderProps } from "next-auth/react"
 
-export function Providers({children, ...props}: SessionProviderProps) {
+export function Providers({ children, ...props }: SessionProviderProps) {
     return (
-        <SessionProvider {...props} refetchInterval={4 * 60}>
+        <SessionProvider {...props} refetchInterval={4 * 60} basePath='/dashboard/api/auth'>
             {children}
         </SessionProvider>
     )

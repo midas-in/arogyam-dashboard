@@ -49,7 +49,7 @@ export default async function RootLayout({
                         height={32}
                         width={32}
                         className={`h-[32px] w-[32px] object-cover`}
-                        src={'/images/logo.svg'}
+                        src={'/dashboard/images/logo.svg'}
                         alt={"Logo"}
                       />
                       <span className="text-2xl font-medium text-primary-400 ml-6">Aarogya Aarohan</span>

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { JWT } from "next-auth/jwt";
+import { getUrlOrigin } from '@/utils';
 
 function logoutParams(token: JWT): Record<string, string> {
     return {
         id_token_hint: token.idToken as string,
-        post_logout_redirect_uri: process.env.NEXTAUTH_URL + '/auth/callback/keycloak',
+        post_logout_redirect_uri: `${getUrlOrigin(process.env.NEXTAUTH_URL)}/dashboard`
     };
 }
 
