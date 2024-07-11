@@ -152,7 +152,7 @@ const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
                 width={10}
                 height={10}
                 className={`h-10 w-10 bg-gray-100 object-cover rounded`}
-                src={media ? `${media?.content?.url}?token=${session?.accessToken}` ?? '' : ''}
+                src={media ? `${media?.content?.url}&authToken=${session?.accessToken}` ?? '' : ''}
                 alt={"Image"}
                 sizes="100vw"
               />
