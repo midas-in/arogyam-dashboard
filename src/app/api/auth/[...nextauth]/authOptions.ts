@@ -65,7 +65,8 @@ async function fetchRole(accessToken: string, id: string) {
 
 export const authOptions: AuthOptions = {
     pages: {
-        signIn: '/',
+        signIn: '/dashboard',
+        signOut: '/dashboard'
     },
     providers: [
         KeycloakProvider({

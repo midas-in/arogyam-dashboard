@@ -53,7 +53,7 @@ body {
   -moz-appearance:none; /* Firefox */
   -webkit-appearance:none; /* Safari and Chrome */
   appearance:none;
-  background-image: url('/images/chevron-down.svg');
+  background-image: url('/dashboard/images/chevron-down.svg');
   background-repeat: no-repeat;
   background-position: right .75rem center;
 }

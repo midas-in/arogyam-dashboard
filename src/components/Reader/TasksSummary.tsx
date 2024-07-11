@@ -91,7 +91,7 @@ const TaskSummary = () => {
                             height={24}
                             width={24}
                             className={`h-6 w-6 object-cover`}
-                            src={'/images/tasks/total-images.svg'}
+                            src={'/dashboard/images/tasks/total-images.svg'}
                             alt={"Image"}
                         />
                     </div>
@@ -110,7 +110,7 @@ const TaskSummary = () => {
                             height={24}
                             width={24}
                             className={`h-6 w-6 object-cover`}
-                            src={'/images/tasks/pending-diagnosis.svg'}
+                            src={'/dashboard/images/tasks/pending-diagnosis.svg'}
                             alt={"Image"}
                         />
                     </div>
@@ -129,7 +129,7 @@ const TaskSummary = () => {
                             height={24}
                             width={20}
                             className={`h-6 w-5 object-cover`}
-                            src={'/images/tasks/completed-diagnosis.svg'}
+                            src={'/dashboard/images/tasks/completed-diagnosis.svg'}
                             alt={"Image"}
                         />
                     </div>

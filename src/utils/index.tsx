@@ -9,3 +9,13 @@ export const getAge = (dateString: string | number | Date) => {
     }
     return age;
 }
+
+export const getUrlOrigin = (url: string) => {
+    if (!url) return '';
+    try {
+        return new URL(url).origin;
+    }
+    catch (e) {
+        return '';
+    }
+}

@@ -1,12 +1,13 @@
 import KcAdminClient from '@keycloak/keycloak-admin-client';
 import Fhir from 'fhir.js/src/adapters/native';
 import axios from 'axios';
+import { getUrlOrigin } from '@/utils';
 
 const origin =
     typeof window !== "undefined" && window.location.origin
         ? window.location.origin
-        : process.env.NEXTAUTH_URL;
-const isDev = origin === 'http://localhost:3000';
+        : getUrlOrigin(process.env.NEXTAUTH_URL)
+const isDev = origin?.startsWith('http://localhost:3000');
 
 const kcAdminClient = new KcAdminClient({
     baseUrl: isDev ? process.env.NEXT_PUBLIC_KEYCLOAK_URL : origin + '/auth',
