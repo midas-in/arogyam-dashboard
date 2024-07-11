@@ -158,9 +158,9 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                         </div>
                         {question.answerOption?.map(({ valueCoding }) => {
                             const isDefaultChecked = question?.linkId ? JSON.stringify(answers[question.linkId]) === JSON.stringify({ valueCoding }) ?? false : false;
-                            return <div key={valueCoding?.code} className="py-1.5 bg-white justify-center items-center flex">
-                                <input type="radio" className='w-5 h-5 cursor-pointer disabled:accent-gray-600 disabled:cursor-not-allowed' id={valueCoding?.code} name="diagnosis" checked={isDefaultChecked} value={JSON.stringify({ valueCoding })} onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} />
-                                <label htmlFor={valueCoding?.code} className="flex-1 text-gray-900 text-base font-normal leading-normal ml-2 cursor-pointer">{valueCoding?.display}</label>
+                            return <div key={valueCoding?.code} className="custom-radio">
+                                <input type="radio" className='w-5 h-5' id={valueCoding?.code} name="diagnosis" checked={isDefaultChecked} value={JSON.stringify({ valueCoding })} onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} />
+                                <label htmlFor={valueCoding?.code} className="text-gray-900 text-base font-normal leading-6">{valueCoding?.display}</label>
                             </div>
                         })}
                     </div>
