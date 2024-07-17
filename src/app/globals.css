@@ -32,6 +32,10 @@ body {
   font-style: normal;
 }
 
+body:has(.no-scroll) {
+  overflow: hidden;
+}
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0;
 }
@@ -129,9 +133,14 @@ body {
   background-color: #ad9cff;
 }
 
+.first-column-shadow {
+  box-shadow: 4px 0 4px -2px rgba(0, 0, 0, 0.25);
+}
+
 /* width */
 ::-webkit-scrollbar {
   width: 4px;
+  height: 8px;
 }
 
 /* Track */
@@ -144,6 +153,12 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #0F62FE;
   border-radius: 4px;
+}
+.gray-scroll::-webkit-scrollbar-thumb{
+  background: #C1C1C1;
+}
+.gray-scroll::-webkit-scrollbar-track {
+  background: #F5F5FA66
 }
 
 /* Handle on hover */
