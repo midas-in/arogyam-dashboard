@@ -17,6 +17,7 @@ const config: Config = {
         success: '#24A148',
         primary: {
           10: '#F5F8FF',
+          300: '#0F62FE',
           400: '#0075EB',
         },
         gray: {

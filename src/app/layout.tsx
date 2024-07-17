@@ -98,7 +98,7 @@ export default async function RootLayout({
             {session?.userType && [SUPERVISOR_USER_TYPE_CODE, SITE_COORDINATOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE].includes(session.userType)
               ? <div className="flex flex-1">
                 <Sidebar />
-                <div className="p-5 bg-gray-25 w-full min-h-[calc(100vh-65px)] justify-center flex">
+                <div className="px-[72px] py-10 w-full justify-center flex">
                   {children}
                 </div>
               </div>

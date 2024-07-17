@@ -24,14 +24,13 @@ const ROUTES: Route[] = [
     ],
     userTypes: [SITE_COORDINATOR_USER_TYPE_CODE]
   },
-  // {
-  //   label: 'Team Management',
-  //   subRoutes: [
-  //     { label: 'Team', path: '/admin/teams', permissions: ['VIEW_KEYCLOAK_USERS', 'FHIR_ALL_READ'] },
-  //     { label: 'Team Assignment', path: '/admin/team-assignment', permissions: ['EDIT_KEYCLOAK_USERS', 'FHIR_ALL_WRITE'] },
-  //   ],
-  //   userTypes: SUPERVISOR_USER_TYPE_CODE
-  // }
+  {
+    label: 'Reports & Summary',
+    subRoutes: [
+      { label: 'Reports', path: '/admin/reports', permissions: ['VIEW_KEYCLOAK_USERS', 'FHIR_ALL_READ'] },
+    ],
+    userTypes: [SITE_COORDINATOR_USER_TYPE_CODE, SUPERVISOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE]
+  }
 ]
 
 const Sidebar = () => {
@@ -39,7 +38,7 @@ const Sidebar = () => {
   const { data: session } = useSession();
 
   return (
-    <nav className="flex w-[256px] bg-gray-0 flex-col gap-3 px-5 py-3 text-base font-normal text-gray-900 border-r border-gray-100">
+    <nav className="flex w-[256px] min-h-[calc(100vh-65px)] bg-gray-0 flex-col gap-3 px-5 py-3 text-base font-normal text-gray-900 border-r border-gray-100">
       {ROUTES
         .filter(r => session?.userType && r.userTypes?.includes(session.userType))
         .map((route, i) => {
