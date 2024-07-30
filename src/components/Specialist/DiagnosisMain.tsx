@@ -231,6 +231,9 @@ export default function RemoteSpecialistDiagnosis() {
                 ...activeTask,
                 status: 'completed'
             }
+            if (encounter?.participant && encounter.participant[0]?.individual?.reference) {
+                taskPayload.owner = encounter.participant[0]?.individual;
+            }
             extractedResponse.entry?.push({
                 resource: taskPayload,
                 request: {
