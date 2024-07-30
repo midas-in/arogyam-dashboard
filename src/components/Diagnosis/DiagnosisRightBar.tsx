@@ -15,6 +15,25 @@ interface DiagnosisRightBarProps {
     allowSecondOpinion?: boolean
     isSpecialistUser?: boolean
 }
+interface DiagnosisResult {
+    risk: string;
+    isSuspicious: boolean;
+}
+
+const DIAGNOSIS_RESULTS_MAPPING: { [key: string]: DiagnosisResult } = {
+    'oral cavity normal': { risk: 'Low', isSuspicious: false },
+    'benign': { risk: 'Low', isSuspicious: false },
+    'smokeless tobacco keratosis': { risk: 'Low', isSuspicious: true },
+    'homogenous Oral leukoplakia': { risk: 'Low', isSuspicious: true },
+    'oral submucosal fibrosis': { risk: 'Low', isSuspicious: true },
+    'oral lichen planus': { risk: 'Low', isSuspicious: true },
+    'speckled oral leukoplakia': { risk: 'High', isSuspicious: true },
+    'erythroplakia': { risk: 'Low', isSuspicious: true },
+    'verrucous oral leukoplakia': { risk: 'Low', isSuspicious: true },
+    'proliferative verrucous oral leukoplakia': { risk: 'Low', isSuspicious: true },
+    'squamous cell carcinoma of oral mucous membrane': { risk: 'Low', isSuspicious: true },
+    'non-diagnostic procedure finding': { risk: 'Low', isSuspicious: true },
+}
 
 const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
     const { id, questionnaire, questionResponse, status, onSubmit, sendForSecondOpinion, allowSecondOpinion, isSpecialistUser } = props;
@@ -25,6 +44,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
     const [resizing, setResizing] = useState<boolean>(false);
     const [resizeData, setResizeData] = useState<{ totalWidth: number, left: number }>();
     const [width, setWidth] = useState<number>(320);
+    const [diagnosisResults, setDiagnosisResults] = useState<{ risk: string, suspicion: string }>();
 
     useEffect(() => {
         if (questionResponse?.item?.length) {
@@ -37,6 +57,19 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
             setAnswers(tempQueRes);
         }
     }, [questionResponse?.item?.length])
+
+    useEffect(() => {
+        if (answers["provisional-diagnosis"]) {
+            type DiagnosisKey = keyof typeof DIAGNOSIS_RESULTS_MAPPING;
+            const selectedOption: DiagnosisKey = answers["provisional-diagnosis"].valueCoding.display.toLowerCase();
+            if (selectedOption && DIAGNOSIS_RESULTS_MAPPING[selectedOption]) {
+                setDiagnosisResults({
+                    risk: DIAGNOSIS_RESULTS_MAPPING[selectedOption].risk + ' risk',
+                    suspicion: DIAGNOSIS_RESULTS_MAPPING[selectedOption].isSuspicious ? 'Suspicious' : 'Non suspicious',
+                });
+            }
+        }
+    }, [answers["provisional-diagnosis"]])
 
     // useEffect(() => {
     // Fetch results of diagnosis
@@ -217,12 +250,12 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                     <div className="justify-start items-start gap-1 inline-flex">
                         <p className="w-20 text-gray-900 text-base font-normal leading-normal">Risk</p>
                         <p className="text-gray-900 text-base font-normal leading-normal">:</p>
-                        <p className="grow shrink basis-0 text-gray-900 text-base font-normal leading-normal">-</p>
+                        <p className="grow shrink basis-0 text-gray-900 text-base font-normal leading-normal ml-1">{diagnosisResults?.risk ?? '-'}</p>
                     </div>
                     <div className="justify-start items-start gap-1 inline-flex">
                         <p className="w-20 text-gray-900 text-base font-normal leading-normal">Suspicion</p>
                         <p className="text-gray-900 text-base font-normal leading-normal">:</p>
-                        <p className="grow shrink basis-0 text-gray-900 text-base font-normal leading-normal">-</p>
+                        <p className="grow shrink basis-0 text-gray-900 text-base font-normal leading-normal ml-1">{diagnosisResults?.suspicion ?? '-'}</p>
                     </div>
                 </div>
             </div>

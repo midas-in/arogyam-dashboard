@@ -90,7 +90,7 @@ const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
     </div> */}
 
     <div className={`overflow-y-auto h-[calc(100vh-261px)] px-4 flex-col justify-start items-start gap-2 inline-flex ${collapseSidebar ? 'hidden' : ''}`}>
-      <div className="h-44 flex-col justify-start items-start gap-2 flex border-b border-gray-100">
+      <div className="flex-col justify-start items-start gap-2 flex border-b border-gray-100">
         <h6 className="text-gray-900 text-sm font-semibold leading-tight">Registration Details</h6>
         <div className="pr-4 py-2 rounded justify-start items-start inline-flex">
           <div className="flex-col justify-start items-start gap-2 inline-flex">
@@ -118,6 +118,11 @@ const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
               <p className="text-gray-900 text-sm font-semibold leading-tight" style={{ width: (width / 2) - 32 }}>District</p>
               <p className="text-gray-900 text-sm font-normal leading-tight">:</p>
               <p className="text-gray-900 text-sm font-normal leading-tight">{patient?.address ? patient?.address[0]?.district : '-'}</p>
+            </div>
+            <div className="justify-start items-start gap-2 inline-flex">
+              <p className="text-gray-900 text-sm font-semibold leading-tight" style={{ width: (width / 2) - 32 }}>Captured by</p>
+              <p className="text-gray-900 text-sm font-normal leading-tight">:</p>
+              <p className="text-gray-900 text-sm font-normal leading-tight">{patient?.generalPractitioner ? patient?.generalPractitioner[0]?.reference?.split('/')[1] ?? '-' : '-'}</p>
             </div>
           </div>
         </div>
