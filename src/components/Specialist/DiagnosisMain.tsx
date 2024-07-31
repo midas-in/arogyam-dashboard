@@ -222,8 +222,8 @@ export default function RemoteSpecialistDiagnosis() {
 
             // Update the follow up task and assign it the original flw
             const followUpTask = extractedResponse?.entry?.find((e:any)=> 
-                e.resource.resourceType==="Task" &&
-                e.resource.instantiatesCanonical==="https://midas.iisc.ac.in/fhir/ActivityDefinition/oral-cancer-screen-patient"
+                e.resource.resourceType === "Task" &&
+                e.resource.instantiatesUri==="https://midas.iisc.ac.in/fhir/ActivityDefinition/oral-cancer-screen-patient"
             )
             if(followUpTask){
                 if (patient?.generalPractitioner?.[0]?.reference) {
