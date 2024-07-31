@@ -221,16 +221,16 @@ export default function RemoteSpecialistDiagnosis() {
             const extractedResponse = await extractQuestionnaireResponse(session?.accessToken as string, extractPayload);
 
             // Update the follow up task and assign it the original flw
-            const followUpTask = extractedResponse?.entry?.find((e:any)=> 
+            const followUpTask = extractedResponse?.entry?.find((e: any) =>
                 e.resource.resourceType === "Task" &&
                 e.resource.instantiatesUri === "https://midas.iisc.ac.in/fhir/Task/oral-cancer-screening-follow-up"
             )
-            if(followUpTask){
+            if (followUpTask) {
                 if (patient?.generalPractitioner?.[0]?.reference) {
-                    followUpTask.owner = patient.generalPractitioner[0];
+                    followUpTask.resource.owner = patient.generalPractitioner[0];
                 }
                 if (!followUpTask.owner && encounter?.participant && encounter.participant[0]?.individual?.reference) {
-                    followUpTask.owner = encounter.participant[0]?.individual;
+                    followUpTask.resource.owner = encounter.participant[0]?.individual;
                 }
             }
 
