@@ -219,6 +219,21 @@ export default function RemoteSpecialistDiagnosis() {
                 ]
             }
             const extractedResponse = await extractQuestionnaireResponse(session?.accessToken as string, extractPayload);
+
+            // Update the follow up task and assign it the original flw
+            const followUpTask = extractedResponse?.entry?.find((e:any)=> 
+                e.resource.resourceType==="Task" &&
+                e.resource.instantiatesCanonical==="https://midas.iisc.ac.in/fhir/ActivityDefinition/oral-cancer-screen-patient"
+            )
+            if(followUpTask){
+                if (patient?.generalPractitioner?.[0]?.reference) {
+                    followUpTask.owner = patient.generalPractitioner[0];
+                }
+                if (!followUpTask.owner && encounter?.participant && encounter.participant[0]?.individual?.reference) {
+                    followUpTask.owner = encounter.participant[0]?.individual;
+                }
+            }
+
             extractedResponse.entry?.push({
                 resource: responsePayload,
                 request: {
@@ -231,12 +246,7 @@ export default function RemoteSpecialistDiagnosis() {
                 ...activeTask,
                 status: 'completed'
             }
-            if (patient?.generalPractitioner?.[0]?.reference) {
-                taskPayload.owner = patient.generalPractitioner[0];
-            }
-            if (!taskPayload.owner && encounter?.participant && encounter.participant[0]?.individual?.reference) {
-                taskPayload.owner = encounter.participant[0]?.individual;
-            }
+
             extractedResponse.entry?.push({
                 resource: taskPayload,
                 request: {
