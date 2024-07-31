@@ -25,14 +25,12 @@ const DIAGNOSIS_RESULTS_MAPPING: { [key: string]: DiagnosisResult } = {
     'benign': { risk: 'Low', isSuspicious: false },
     'smokeless tobacco keratosis': { risk: 'Low', isSuspicious: true },
     'homogenous Oral leukoplakia': { risk: 'Low', isSuspicious: true },
-    'oral submucosal fibrosis': { risk: 'Low', isSuspicious: true },
     'oral lichen planus': { risk: 'Low', isSuspicious: true },
     'speckled oral leukoplakia': { risk: 'High', isSuspicious: true },
-    'erythroplakia': { risk: 'Low', isSuspicious: true },
-    'verrucous oral leukoplakia': { risk: 'Low', isSuspicious: true },
-    'proliferative verrucous oral leukoplakia': { risk: 'Low', isSuspicious: true },
-    'squamous cell carcinoma of oral mucous membrane': { risk: 'Low', isSuspicious: true },
-    'non-diagnostic procedure finding': { risk: 'Low', isSuspicious: true },
+    'erythroplakia': { risk: 'High', isSuspicious: true },
+    'verrucous oral leukoplakia': { risk: 'High', isSuspicious: true },
+    'proliferative verrucous oral leukoplakia': { risk: 'High', isSuspicious: true },
+    'squamous cell carcinoma of oral mucous membrane': { risk: 'High', isSuspicious: true },
 }
 
 const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
@@ -44,7 +42,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
     const [resizing, setResizing] = useState<boolean>(false);
     const [resizeData, setResizeData] = useState<{ totalWidth: number, left: number }>();
     const [width, setWidth] = useState<number>(320);
-    const [diagnosisResults, setDiagnosisResults] = useState<{ risk: string, suspicion: string }>();
+    const [diagnosisResults, setDiagnosisResults] = useState<{ risk: string, suspicion: string } | null>();
 
     useEffect(() => {
         if (questionResponse?.item?.length) {
@@ -67,6 +65,9 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                     risk: DIAGNOSIS_RESULTS_MAPPING[selectedOption].risk + ' risk',
                     suspicion: DIAGNOSIS_RESULTS_MAPPING[selectedOption].isSuspicious ? 'Suspicious' : 'Non suspicious',
                 });
+            }
+            else {
+                setDiagnosisResults(null);
             }
         }
     }, [answers["provisional-diagnosis"]])
