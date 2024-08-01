@@ -206,3 +206,15 @@ export function executeFhirCqlQuery(accessToken: string, payload: { resourceType
         },
     }).then(({ data }: { data: any }) => data);
 }
+
+export function fetchReports(accessToken: string, params: any) {
+    return axios({
+        method: 'GET',
+        baseURL: getFhirUrl(),
+        url: `/Patient`,
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        },
+        params: params,
+    }).then(({ data }: { data: any }) => data);
+}
