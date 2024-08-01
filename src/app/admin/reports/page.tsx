@@ -20,20 +20,23 @@ export default function Reports() {
   const [totalItems, setTotalItems] = useState<number>();
   const [loading, setLoading] = useState<boolean>(false);
   const [reportFetched, setReportFetched] = useState<boolean>(false);
+  const [filter, setFilter] = useState<any>({});
 
+  console.log('filter', filter);
   useEffect(() => {
     if (session?.accessToken) {
       if (reportFetched) {
         fetchReportData();
       }
     }
-  }, [currentPage, limit])
+  }, [currentPage, limit, JSON.stringify(filter)])
 
   const fetchReportData = (forcedCurrentPage?: number) => {
     if (session?.accessToken) {
       setLoading(true);
       const commonParams = {
-        _revinclude: 'QuestionnaireResponse:subject'
+        ...filter,
+        _revinclude: 'QuestionnaireResponse:subject',
       }
       const params = {
         ...commonParams,
@@ -104,9 +107,8 @@ export default function Reports() {
   const resetBtnClick = () => {
     setReports([]);
     setTotalItems(0);
+    setReportFetched(false);
   }
-
-  // console.log('reports', reports);
 
   return <div className="w-full flex flex-col gap-8">
     <div className="py-3 border-b border-gray-100 flex justify-start items-start ">
@@ -114,7 +116,7 @@ export default function Reports() {
     </div>
 
     <div className="flex-col justify-start items-start gap-8 flex">
-      <div className="flex-col justify-start items-start gap-[15px] flex">
+      {/* <div className="flex-col justify-start items-start gap-[15px] flex">
         <div className="text-black text-base font-semibold">1. Date range</div>
         <div className="justify-start items-start gap-7 inline-flex">
           <div className="w-[336px] border border-gray-100 rounded flex-col justify-start items-start gap-2 inline-flex">
@@ -144,8 +146,8 @@ export default function Reports() {
             </div>
           </div>
         </div>
-      </div>
-      <div className="flex-col justify-start items-start gap-4 flex">
+      </div> */}
+      {/* <div className="flex-col justify-start items-start gap-4 flex">
         <div className="text-black text-base font-semibold">2. Patient Information</div>
         <div className="justify-start items-start gap-8 inline-flex">
           <div className="w-40 justify-start items-center gap-2 inline-flex">
@@ -161,8 +163,8 @@ export default function Reports() {
             <label htmlFor="Images" className="text-base font-normal">Images</label>
           </div>
         </div>
-      </div>
-      <div className="flex-col justify-start items-start gap-4 flex">
+      </div> */}
+      {/* <div className="flex-col justify-start items-start gap-4 flex">
         <div className="text-black text-base font-semibold">3. Specialist diagnosis</div>
         <div className="justify-start items-start gap-8 inline-flex">
           <div className="w-[54px] justify-start items-center gap-2 inline-flex">
@@ -174,13 +176,13 @@ export default function Reports() {
             <label htmlFor="No" className="text-base font-normal">No</label>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
 
     <div className="justify-center items-start gap-1 flex">
       <button
-        className="w-[142px] h-[44px] rounded border border-primary-300 flex-col justify-center items-center flex text-primary-300 text-sm font-semibold leading-tight"
-        onClick={resetBtnClick}>
+        className="w-[142px] h-[44px] rounded border border-primary-300 flex-col justify-center items-center flex text-primary-300 text-sm font-semibold leading-tight disabled:opacity-50"
+        onClick={resetBtnClick} disabled={!reportFetched}>
         Reset
       </button>
       <button
@@ -195,23 +197,23 @@ export default function Reports() {
     <div className="self-stretch border-t border-gray-100" />
 
     <div className="flex flex-col">
-      {session?.userType && [SUPERVISOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE].includes(session?.userType) &&
-        <>
-          <div className="h-[50px] py-2 justify-between items-center inline-flex">
-            <p className="text-gray-900 text-2xl font-normal">Generated report</p>
-            <ReportsFilterModal />
-          </div>
-          <ReportTable
-            data={reports}
-            currentPage={currentPage}
-            itemsPerPage={limit}
-            totalItems={totalItems ?? 0}
-            onPageChange={handlePageChange}
-            loading={loading}
-          />
-        </>}
+      {/* {session?.userType && [SUPERVISOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE].includes(session?.userType) && */}
+      {/* <> */}
+      <div className="h-[50px] py-2 justify-between items-center inline-flex">
+        <p className="text-gray-900 text-2xl font-normal">Generated report</p>
+        {reportFetched && <ReportsFilterModal setFilter={setFilter} />}
+      </div>
+      <ReportTable
+        data={reports}
+        currentPage={currentPage}
+        itemsPerPage={limit}
+        totalItems={totalItems ?? 0}
+        onPageChange={handlePageChange}
+        loading={loading}
+      />
+      {/* </>} */}
 
-      {session?.userType === SITE_COORDINATOR_USER_TYPE_CODE &&
+      {/* {session?.userType === SITE_COORDINATOR_USER_TYPE_CODE &&
         <>
           <div className="h-[50px] py-2 justify-between items-center inline-flex">
             <p className="text-gray-900 text-2xl font-normal">Reports History</p>
@@ -224,7 +226,7 @@ export default function Reports() {
             onPageChange={handlePageChange}
             loading={loading}
           />
-        </>}
+        </>} */}
 
     </div>
   </div>

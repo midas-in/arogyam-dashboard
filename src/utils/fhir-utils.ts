@@ -144,7 +144,15 @@ export const OBSERVATION_CODE_LABEL_MAPPING: { [key: string]: string } = {
     '39240-7': 'Smokeless Tobacco',
     '64004-5': 'Areca Nut',
     '74205-6': 'Alcohol',
-    '62559-0': 'Lifetime alcohol exposure',
     'LP232821-1': 'Able to open mouth?',
     '62596-2': 'Lesion/Patch'
+}
+
+export const OBSERVATION_CODE_LABEL_MAPPING_REVERSE: { [key: string]: string } = {
+    'Cigarette/Bidi': '63638-1',
+    'Smokeless Tobacco': '39240-7',
+    'Areca Nut': '64004-5',
+    'Alcohol': '74205-6',
+    'Able to open mouth?': 'LP232821-1',
+    'Lesion/Patch': '62596-2'
 }

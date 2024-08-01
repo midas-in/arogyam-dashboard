@@ -81,12 +81,12 @@ const COLUMNS = [
     width: 200,
     getValue: (data: any) => data.habitHistory ? data.oralExaminations['Lesion/Patch'] : '-'
   },
-  {
-    id: 'specialist-diagnosis',
-    name: 'Specialist diagnosis',
-    width: 200,
-    getValue: (data: any) => data.meta.lastUpdated
-  },
+  // {
+  //   id: 'specialist-diagnosis',
+  //   name: 'Specialist diagnosis',
+  //   width: 200,
+  //   getValue: (data: any) => data.meta.lastUpdated
+  // },
   {
     id: 'image-1',
     name: 'Image 1',
