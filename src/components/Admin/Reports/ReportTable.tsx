@@ -31,34 +31,33 @@ const ReportTable = (props: ReportTableProps) => {
     }
   };
 
-  if (loading) {
-    return <div className='relative min-h-[200px]'><Loader /></div>
-  }
-
   if (!loading && data && data?.length === 0) {
     return <div className="relative mt-4 h-11 p-2.5 bg-gray-25 block w-fit">
       <p className="text-gray-900 text-base font-normal ">Your report will be shown here</p>
     </div>
   }
 
+  const filteredColumn = COLUMNS.filter(c => session?.userType !== 'site-coordinator' ? !c.siteCoordinatorOnly : true);
+
   return (
-    <div className='relative mt-4 w-[calc(100vw-360px)]'>
+    <div className='relative mt-4 w-[calc(100vw-360px)] min-h-[200px]'>
+      {loading && <Loader className='bg-gray-3' />}
       {/* Fixed first row */}
       <div className='absolute top-0 left-0 bg-white first-column-shadow'>
-        <div key={COLUMNS[0].id}
-          className={`w-[${COLUMNS[0].width}px] truncate bg-primary-10 font-semibold text-gray-800 text-base py-3 px-4 border border-r-0 border-gray-100`}>
-          {COLUMNS[0].name}
+        <div key={filteredColumn[0].id}
+          className={`w-[${filteredColumn[0].width}px] truncate bg-primary-10 font-semibold text-gray-800 text-base py-3 px-4 border border-r-0 border-gray-100`}>
+          {filteredColumn[0].name}
         </div>
         {data?.map((report: any, i) => (
-          <div key={COLUMNS[0].id + i}
-            className={`w-[${COLUMNS[0].width}px] truncate font-normal text-gray-800 text-base py-3 px-4 border-l border-b border-gray-100`}>
-            {report[COLUMNS[0].id] ?? '-'}
+          <div key={filteredColumn[0].id + i}
+            className={`w-[${filteredColumn[0].width}px] truncate font-normal text-gray-800 text-base py-3 px-4 border-l border-b border-gray-100`}>
+            {report[filteredColumn[0].id] ?? '-'}
           </div>
         ))}
       </div>
       <div className='pb-4 overflow-x-auto gray-scroll whitespace-nowrap'>
         <div className="flex min-w-full">
-          {COLUMNS.slice(1).map((column, i) => {
+          {filteredColumn.slice(1).map((column, i) => {
             return <div key={column.id + i}
               className={`${i == 0 ? 'ml-[200px]' : ''} flex-shrink-0 w-[${column.width}px] bg-primary-10 font-semibold text-gray-800 text-base py-3 px-4 border-t border-r-0 last:border-r border-b border-gray-100`}>
               {column.name}
@@ -67,7 +66,7 @@ const ReportTable = (props: ReportTableProps) => {
         </div>
         {data && data?.length > 0 && data?.map((report: any, i) => (
           <div key={i} className="flex min-w-full">
-            {COLUMNS.slice(1).map((column, i) => {
+            {filteredColumn.slice(1).map((column, i) => {
               return <div key={column.id}
                 className={`${i == 0 ? 'ml-[200px]' : ''} flex-shrink-0 w-[${column.width}px] truncate font-normal text-gray-800 text-base py-3 px-4 last:border-r border-b border-gray-100`}>
                 {column.getValue(report, session?.accessToken) ?? '-'}

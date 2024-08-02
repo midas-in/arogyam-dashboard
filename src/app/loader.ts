@@ -136,7 +136,8 @@ export function fetchFhirResource(accessToken: string, payload: { resourceType: 
         url: `/${resourceType}/_search`,
         params: query,
         headers: {
-            'Authorization': `Bearer ${accessToken}`
+            'Authorization': `Bearer ${accessToken}`,
+            'cache-control': 'none'
         },
     }).then(({ data }: { data: any }) => data);
     // const fhirClient = createFhirClient(accessToken);
@@ -225,7 +226,8 @@ export function fetchReports(accessToken: string, params: any) {
         baseURL: getFhirUrl(),
         url: `/Patient?${buildQueryString(params)}`,
         headers: {
-            'Authorization': `Bearer ${accessToken}`
+            'Authorization': `Bearer ${accessToken}`,
+            'cache-control': 'none'
         },
     }).then(({ data }: { data: any }) => data);
 }

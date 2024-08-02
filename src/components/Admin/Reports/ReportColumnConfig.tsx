@@ -4,6 +4,7 @@ interface Column {
   name: string;
   width: number;
   getValue: (data: any, accessToken?: string, isCsv?: boolean) => any;
+  siteCoordinatorOnly?: boolean;
 }
 
 export const COLUMNS: Column[] = [
@@ -26,6 +27,27 @@ export const COLUMNS: Column[] = [
     getValue: (data: any) => data.generalPractitioner ? data.generalPractitioner[0].reference.split("/")[1] : '-'
   },
   {
+    id: 'first-name',
+    name: 'First name',
+    width: 200,
+    getValue: (data: any) => data.basicInfo ? data.basicInfo['First name'] || '-' : '-',
+    siteCoordinatorOnly: true,
+  },
+  {
+    id: 'last-name',
+    name: 'Last name',
+    width: 200,
+    getValue: (data: any) => data.basicInfo ? data.basicInfo['Last name'] || '-' : '-',
+    siteCoordinatorOnly: true,
+  },
+  {
+    id: 'ABHA-ID',
+    name: 'ABHA ID',
+    width: 200,
+    getValue: (data: any) => data.basicInfo ? data.basicInfo['ABHA ID(Optional)'] || '-' : '-',
+    siteCoordinatorOnly: true,
+  },
+  {
     id: 'age',
     name: 'Age',
     width: 200,
@@ -36,6 +58,55 @@ export const COLUMNS: Column[] = [
     name: 'Gender',
     width: 200,
     getValue: (data: any) => capitalizeFirstLetter(data.gender),
+  },
+  {
+    id: 'patient-contact-primary',
+    name: 'Primary contact number',
+    width: 200,
+    getValue: (data: any) => data.basicInfo ? data.basicInfo['Primary contact number'] || '-' : '-',
+    siteCoordinatorOnly: true,
+  },
+  {
+    id: 'patient-contact-secondary',
+    name: 'Secondary contact number',
+    width: 200,
+    getValue: (data: any) => data.basicInfo ? data.basicInfo['Secondary contact number'] || '-' : '-',
+    siteCoordinatorOnly: true,
+  },
+  {
+    id: 'patient-address-house',
+    name: 'House number & street',
+    width: 200,
+    getValue: (data: any) => data.basicInfo ? data.basicInfo['House number & street'] || '-' : '-',
+    siteCoordinatorOnly: true,
+  },
+  {
+    id: 'patient-address-village',
+    name: 'Village/Town/Area',
+    width: 200,
+    getValue: (data: any) => data.basicInfo ? data.basicInfo['Village/Town/Area'] || '-' : '-',
+    siteCoordinatorOnly: true,
+  },
+  {
+    id: 'patient-address-pincode',
+    name: 'Pincode',
+    width: 200,
+    getValue: (data: any) => data.basicInfo ? data.basicInfo['Pincode'] || '-' : '-',
+    siteCoordinatorOnly: true,
+  },
+  {
+    id: 'patient-address-district',
+    name: 'District',
+    width: 200,
+    getValue: (data: any) => data.basicInfo ? data.basicInfo['District'] || '-' : '-',
+    siteCoordinatorOnly: true,
+  },
+  {
+    id: 'patient-address-state',
+    name: 'State',
+    width: 200,
+    getValue: (data: any) => data.basicInfo ? data.basicInfo['State'] || '-' : '-',
+    siteCoordinatorOnly: true,
   },
   {
     id: 'cigarette/bidi',
@@ -85,7 +156,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 1']
-        ? isCsv ? data.images['Image 1'] : <a className='text-primary-400' href={`${data.images['Image 1']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 1']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 1']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
@@ -95,7 +166,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 2']
-        ? isCsv ? data.images['Image 2'] : <a className='text-primary-400' href={`${data.images['Image 2']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 2']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 2']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
@@ -105,7 +176,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 3']
-        ? isCsv ? data.images['Image 3'] : <a className='text-primary-400' href={`${data.images['Image 3']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 3']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 3']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
@@ -115,7 +186,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 4']
-        ? isCsv ? data.images['Image 4'] : <a className='text-primary-400' href={`${data.images['Image 4']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 4']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 4']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
@@ -125,7 +196,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 5']
-        ? isCsv ? data.images['Image 5'] : <a className='text-primary-400' href={`${data.images['Image 5']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 5']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 5']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
@@ -135,7 +206,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 6']
-        ? isCsv ? data.images['Image 6'] : <a className='text-primary-400' href={`${data.images['Image 6']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 6']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 6']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
@@ -145,7 +216,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 7']
-        ? isCsv ? data.images['Image 7'] : <a className='text-primary-400' href={`${data.images['Image 7']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 7']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 7']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
@@ -155,7 +226,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 8']
-        ? isCsv ? data.images['Image 8'] : <a className='text-primary-400' href={`${data.images['Image 8']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 8']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 8']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
@@ -165,7 +236,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 9']
-        ? isCsv ? data.images['Image 9'] : <a className='text-primary-400' href={`${data.images['Image 9']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 9']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 9']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
@@ -175,7 +246,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 10']
-        ? isCsv ? data.images['Image 10'] : <a className='text-primary-400' href={`${data.images['Image 10']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 10']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 10']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
@@ -185,7 +256,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 11']
-        ? isCsv ? data.images['Image 11'] : <a className='text-primary-400' href={`${data.images['Image 11']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 11']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 11']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
@@ -195,7 +266,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 12']
-        ? isCsv ? data.images['Image 12'] : <a className='text-primary-400' href={`${data.images['Image 12']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 12']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 12']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
@@ -205,7 +276,7 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any, accessToken?: string, isCsv?: boolean) => {
       return data.images && data.images['Image 13']
-        ? isCsv ? data.images['Image 13'] : <a className='text-primary-400' href={`${data.images['Image 13']}&authToken=${accessToken}`} target='_blank'>view</a>
+        ? isCsv ? `${data.images['Image 13']}&authToken=${accessToken}` : <a className='text-primary-400' href={`${data.images['Image 13']}&authToken=${accessToken}`} target='_blank'>view</a>
         : '-'
     }
   },
