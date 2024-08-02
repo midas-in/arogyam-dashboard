@@ -5,18 +5,23 @@ import { useSession } from "next-auth/react";
 import { message } from 'antd';
 import { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
 import { ITask } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/ITask';
+import { IPatient } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPatient';
+import { IEncounter } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IEncounter';
 
 import { Tabs } from '@/components/UI/Tabs';
 import { TaskTable } from '@/components/Specialist/TaskTable';
 import { TaskSummary } from '@/components/Specialist/TasksSummary';
 import { fetchFhirResource } from '@/app/loader';
 import { getResourcesFromBundle } from '@/utils/fhir-utils';
-
+interface IExtendedTask extends ITask {
+    patient: IPatient;
+    encounterData: IEncounter;
+}
 export default function RemoteSpecialistTasks() {
     const router = useRouter();
     const { data: session } = useSession();
     const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
-    const [tasks, setTasks] = useState<{ [key: number]: ITask[] }>({});
+    const [tasks, setTasks] = useState<{ [key: number]: IExtendedTask[] }>({});
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [limit, setLimit] = useState<number>(10);
     const [totalItems, setTotalItems] = useState<{ [key: number]: number }>({});
@@ -30,13 +35,24 @@ export default function RemoteSpecialistTasks() {
                 query: {
                     owner: `Practitioner/${session?.resourceId}`,
                     status: ['requested', 'completed'][activeTabIndex],
+                    _include: ['Task:patient', 'Task:encounter'],
                     _count: limit,
                     _getpagesoffset: (currentPage - 1) * limit,
                 }
             }
             fetchFhirResource(session.accessToken, params)
                 .then((data: IBundle) => {
-                    setTasks({ ...tasks, [activeTabIndex]: getResourcesFromBundle<ITask>(data) });
+                    const allData = getResourcesFromBundle<any>(data);
+                    const taskResources = allData.filter(d => d.resourceType === 'Task');
+                    taskResources.forEach(t => {
+                        t.patient = allData.find(d => {
+                            return d.resourceType === "Patient" && t.for.reference === `Patient/${d.id}`
+                        });
+                        t.encounterData = allData.find(d => {
+                            return d.resourceType === "Encounter" && t.encounter.reference === `Encounter/${d.id}`
+                        });
+                    })
+                    setTasks({ ...tasks, [activeTabIndex]: taskResources });
                 })
                 .catch((error: any) => { console.log(error); message.error('Error fetching Tasks') })
                 .finally(() => setLoading(false));

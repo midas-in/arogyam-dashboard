@@ -6,7 +6,7 @@ import { IObservation } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IObserva
 import { IMedia } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IMedia';
 
 import { NextImage } from "@/components/UI/NextImage";
-import { getAge } from "@/utils";
+import { getAge, formatDate } from "@/utils";
 import { OBSERVATION_CODE_LABEL_MAPPING } from "@/utils/fhir-utils";
 
 interface DiagnosisLeftBarProps {
@@ -106,7 +106,7 @@ const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
             <div className="justify-start items-start gap-2 inline-flex">
               <p className="text-gray-900 text-sm font-semibold leading-tight" style={{ width: (width / 2) - 32 }}>Captured on</p>
               <p className="text-gray-900 text-sm font-normal leading-tight">:</p>
-              <p className="text-gray-900 text-sm font-normal leading-tight">{encounter?.period?.end ? new Date(encounter?.period?.end).toLocaleString().split(',')[0].replaceAll('/', '-') : '-'}</p>
+              <p className="text-gray-900 text-sm font-normal leading-tight">{encounter?.period?.end ? formatDate(encounter?.period?.end) : '-'}</p>
             </div>
             <div className="justify-start items-start gap-2 inline-flex">
               <p className="text-gray-900 text-sm font-semibold leading-tight" style={{ width: (width / 2) - 32 }}>State</p>

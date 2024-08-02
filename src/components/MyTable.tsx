@@ -109,7 +109,7 @@ function MyTable({
     }, [table.getState().columnFilters[0]?.id])
 
     return (
-        <div className="p-2">
+        <div className="">
             <div>
                 <DebouncedInput
                     value={globalFilter ?? ''}

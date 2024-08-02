@@ -45,7 +45,8 @@ export default function ReaderDiagnosis() {
                 resourceType: 'Task',
                 query: {
                     owner: `Practitioner/${session?.resourceId}`,
-                    status: searchParams.get('status') ?? 'requested'
+                    status: searchParams.get('status') ?? 'requested',
+                    _count: 100,
                 }
             }
             fetchFhirResource(session.accessToken, params)
