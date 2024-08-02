@@ -27,12 +27,12 @@ export function CreateUserGroup() {
     }
 
     return <div className="p-5 bg-white h-min w-full">
-        <h2 className="text-xl font-semibold mb-5">Add Group</h2>
+        <h2 className="text-xl text-gray-800 font-semibold mb-5">Add Group</h2>
         <div className="p-5 bg-white h-min w-full justify-center flex">
             <div className="">
-                <label className="font-bold mr-2">Name</label>
+                <label className="text-gray-800 font-semibold mr-2">Name</label>
                 <input
-                    className="p-2 text-sm font-semilight border border-block rounded"
+                    className="p-2 text-sm text-gray-800 font-semilight border border-block rounded"
                     value={name} onChange={e => setName(e.target.value)}
                 />
                 <div className="">
@@ -43,7 +43,7 @@ export function CreateUserGroup() {
                     >
                         Save
                     </button>
-                    <Link href={'/admin/user-groups'} className="border rounded py-2 px-4" >Cancel</Link>
+                    <Link href={'/admin/user-groups'} className="border rounded py-2 px-4 text-gray-800 text-sm" >Cancel</Link>
                 </div>
             </div>
         </div>

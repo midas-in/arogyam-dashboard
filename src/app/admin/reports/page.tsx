@@ -1,8 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { useSession } from "next-auth/react";
 import { message } from 'antd';
 import { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import { ReportsFilterModal } from '@/components/Admin/Reports/ReportsFilterModal';
 import { ReportTable } from '@/components/Admin/Reports/ReportTable';
@@ -10,6 +12,30 @@ import { ReportHistoryTable } from '@/components/Admin/Reports/ReportHistoryTabl
 import { SITE_COORDINATOR_USER_TYPE_CODE, SUPERVISOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE } from '@/utils/fhir-utils';
 import { fetchReports } from '@/app/loader';
 import { getResourcesFromBundle } from '@/utils/fhir-utils';
+import { subDays } from '@/utils'
+
+// eslint-disable-next-line react/display-name
+const CustomDateInput = forwardRef<HTMLDivElement, {
+  value?: string;
+  onClick?: () => void;
+  title: string;
+}>(
+  ({ value, onClick, title }, ref) => (
+    <div onClick={onClick} ref={ref} className="w-[336px] border border-gray-100 rounded flex-col justify-start items-start gap-2 inline-flex">
+      <div className="self-stretch px-4 py-[11px] justify-start items-start gap-4 inline-flex">
+        <div className="grow shrink basis-0 h-6 justify-start items-start gap-4 flex">
+          <p className="border-gray-900 text-base font-normal">{value ?? title}</p>
+        </div>
+        <div className="w-6 h-6 relative" >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect width="24" height="24" fill="white" />
+            <path d="M19.5 3H16.5V1.5H15V3H9V1.5H7.5V3H4.5C3.675 3 3 3.675 3 4.5V19.5C3 20.325 3.675 21 4.5 21H19.5C20.325 21 21 20.325 21 19.5V4.5C21 3.675 20.325 3 19.5 3ZM19.5 19.5H4.5V9H19.5V19.5ZM19.5 7.5H4.5V4.5H7.5V6H9V4.5H15V6H16.5V4.5H19.5V7.5Z" fill="#101010" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  ),
+);
 
 export default function Reports() {
   const { data: session } = useSession();
@@ -21,13 +47,13 @@ export default function Reports() {
   const [loading, setLoading] = useState<boolean>(false);
   const [reportFetched, setReportFetched] = useState<boolean>(false);
   const [filter, setFilter] = useState<any>({});
+  const [startDate, setStartDate] = useState<Date | null>(subDays(new Date(), 5));
+  const [endDate, setEndDate] = useState<Date | null>(new Date());
 
-  console.log('filter', filter);
   useEffect(() => {
     if (session?.accessToken) {
-      if (reportFetched) {
-        fetchReportData();
-      }
+      setReportFetched(true);
+      fetchReportData();
     }
   }, [currentPage, limit, JSON.stringify(filter)])
 
@@ -37,6 +63,9 @@ export default function Reports() {
       const commonParams = {
         ...filter,
         _revinclude: 'QuestionnaireResponse:subject',
+      }
+      if (startDate && endDate) {
+        commonParams['_lastUpdated'] = [`gt${new Date(startDate).toISOString().split('T')[0]}`, `lt${new Date(endDate).toISOString().split('T')[0]}`]
       }
       const params = {
         ...commonParams,
@@ -107,6 +136,8 @@ export default function Reports() {
   const resetBtnClick = () => {
     setReports([]);
     setTotalItems(0);
+    setStartDate(subDays(new Date(), 5))
+    setEndDate(new Date())
     setReportFetched(false);
   }
 
@@ -116,37 +147,28 @@ export default function Reports() {
     </div>
 
     <div className="flex-col justify-start items-start gap-8 flex">
-      {/* <div className="flex-col justify-start items-start gap-[15px] flex">
+      <div className="flex-col justify-start items-start gap-[15px] flex">
         <div className="text-black text-base font-semibold">1. Date range</div>
-        <div className="justify-start items-start gap-7 inline-flex">
-          <div className="w-[336px] border border-gray-100 rounded flex-col justify-start items-start gap-2 inline-flex">
-            <div className="self-stretch px-4 py-[11px] justify-start items-start gap-4 inline-flex">
-              <div className="grow shrink basis-0 h-6 justify-start items-start gap-4 flex">
-                <p className="border-gray-900 text-base font-normal">From</p>
-              </div>
-              <div className="w-6 h-6 relative" >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect width="24" height="24" fill="white" />
-                  <path d="M19.5 3H16.5V1.5H15V3H9V1.5H7.5V3H4.5C3.675 3 3 3.675 3 4.5V19.5C3 20.325 3.675 21 4.5 21H19.5C20.325 21 21 20.325 21 19.5V4.5C21 3.675 20.325 3 19.5 3ZM19.5 19.5H4.5V9H19.5V19.5ZM19.5 7.5H4.5V4.5H7.5V6H9V4.5H15V6H16.5V4.5H19.5V7.5Z" fill="#101010" />
-                </svg>
-              </div>
-            </div>
+        <div className="flex gap-7">
+          <div className="">
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              dateFormat="dd/MM/yyyy"
+              customInput={<CustomDateInput title="From" />}
+            />
           </div>
-          <div className="w-[336px] border border-gray-100 rounded flex-col justify-start items-start gap-2 inline-flex">
-            <div className="self-stretch px-4 py-[11px] justify-start items-start gap-4 inline-flex">
-              <div className="grow shrink basis-0 h-6 justify-start items-start gap-4 flex">
-                <p className="border-gray-900 text-base font-normal">To</p>
-              </div>
-              <div className="w-6 h-6 relative" >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect width="24" height="24" fill="white" />
-                  <path d="M19.5 3H16.5V1.5H15V3H9V1.5H7.5V3H4.5C3.675 3 3 3.675 3 4.5V19.5C3 20.325 3.675 21 4.5 21H19.5C20.325 21 21 20.325 21 19.5V4.5C21 3.675 20.325 3 19.5 3ZM19.5 19.5H4.5V9H19.5V19.5ZM19.5 7.5H4.5V4.5H7.5V6H9V4.5H15V6H16.5V4.5H19.5V7.5Z" fill="#101010" />
-                </svg>
-              </div>
-            </div>
+          <div className="">
+            <DatePicker
+              selected={endDate}
+              onChange={(date) => setEndDate(date)}
+              dateFormat="dd/MM/yyyy"
+              customInput={<CustomDateInput title="To" />}
+            />
           </div>
         </div>
-      </div> */}
+      </div>
+
       {/* <div className="flex-col justify-start items-start gap-4 flex">
         <div className="text-black text-base font-semibold">2. Patient Information</div>
         <div className="justify-start items-start gap-8 inline-flex">

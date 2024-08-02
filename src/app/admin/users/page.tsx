@@ -126,7 +126,7 @@ export default function Users() {
   return (
     <div className="p-5 bg-white h-min w-full">
       <div className='flex justify-between items-center'>
-        <h2 className="text-xl font-semibold">Users</h2>
+        <h2 className="text-xl text-gray-800 font-semibold">Users</h2>
         {(session?.permissions?.includes('EDIT_KEYCLOAK_USERS') || session?.permissions?.includes('FHIR_ALL_WRITE')) && <div className='flex justify-end'>
           <Link href='/admin/users/new' className="border border-primary-400 px-4 py-1 rounded bg-primary-400 text-white"> + Add user</Link>
         </div>}

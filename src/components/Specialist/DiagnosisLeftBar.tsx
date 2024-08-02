@@ -10,7 +10,6 @@ import { getAge } from "@/utils";
 import { OBSERVATION_CODE_LABEL_MAPPING } from "@/utils/fhir-utils";
 
 interface DiagnosisLeftBarProps {
-  id: string;
   patient?: IPatient;
   encounter?: IEncounter;
   observations?: IObservation[];
@@ -20,7 +19,7 @@ interface DiagnosisLeftBarProps {
 }
 
 const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
-  const { id, patient, encounter, observations, medias, activeMediaIndex, setActiveMediaIndex } = props;
+  const { patient, encounter, observations, medias, activeMediaIndex, setActiveMediaIndex } = props;
   const { data: session } = useSession();
 
   const [collapseSidebar, setCollapseSidebar] = useState(false);
@@ -67,7 +66,7 @@ const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
             Case ID -
           </p>
           <p className="truncate text-gray-900 text-base font-semibold leading-normal ml-1" style={{ width: width - 150 }} >
-            {id}
+            {patient?.id}
           </p>
         </div>
         <button className={`h-8 px-2 py-1 rounded border border-gray-100 justify-start items-center gap-1 inline-flex ${collapseSidebar ? 'bg-primary-400 border-0' : 'bg-white'}`} onClick={() => setCollapseSidebar(prev => !prev)} >

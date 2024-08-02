@@ -114,7 +114,7 @@ function MyTable({
                 <DebouncedInput
                     value={globalFilter ?? ''}
                     onChange={value => setGlobalFilter(String(value))}
-                    className="p-2 text-sm font-semilight border border-block rounded"
+                    className="p-2 text-gray-800 text-sm font-semilight border border-block rounded"
                     placeholder="Search"
                 />
             </div>
@@ -125,7 +125,7 @@ function MyTable({
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => {
                                 return (
-                                    <th key={header.id} colSpan={header.colSpan} className='border p-2 text-left text-sm font-semilight'>
+                                    <th key={header.id} colSpan={header.colSpan} className='border p-2 text-left text-gray-800 text-sm font-semilight'>
                                         <div
                                             {...{
                                                 className: header.column.getCanSort()
@@ -160,7 +160,7 @@ function MyTable({
                             <tr key={row.id} className='border-b'>
                                 {row.getVisibleCells().map(cell => {
                                     return (
-                                        <td key={cell.id} className='border-r p-2 text-sm font-semilight'>
+                                        <td key={cell.id} className='border-r p-2 text-gray-800 text-sm font-semilight'>
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext()
@@ -174,8 +174,8 @@ function MyTable({
                 </tbody>
             </table>
             <div className="h-5" />
-            <div className="flex items-center justify-between gap-2 text-sm font-semilight">
-                <div className="flex items-center gap-2 text-sm font-semilight">
+            <div className="flex items-center justify-between gap-2 text-gray-800 text-sm font-semilight">
+                <div className="flex items-center gap-2 text-gray-800 text-sm font-semilight">
                     <button
                         className="border rounded px-1 pt-1 disabled:text-gray-300"
                         onClick={() => table.firstPage()}
@@ -205,7 +205,7 @@ function MyTable({
                         <span className="material-symbols-outlined">keyboard_double_arrow_right</span>
                     </button>
                 </div>
-                <span className="flex items-center gap-1 text-sm font-semilight">
+                <span className="flex items-center gap-1 text-gray-800 text-sm font-semilight">
                     <span className="flex items-center gap-1">
                         <div>Page</div>
                         <strong>
@@ -227,7 +227,7 @@ function MyTable({
                     </span>
                 </span>
                 <select
-                    className='text-sm font-semilight'
+                    className='text-gray-800 text-sm font-semilight'
                     value={table.getState().pagination.pageSize}
                     onChange={e => {
                         table.setPageSize(Number(e.target.value))

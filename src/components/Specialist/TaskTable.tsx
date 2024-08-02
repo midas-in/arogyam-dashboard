@@ -46,7 +46,7 @@ const TaskTable = (props: TaskTableProps) => {
                     : data && data?.length > 0
                         ? data?.map((task, i) => (
                             <li key={i} className="flex items-center justify-between mb-2 border-b last:border-b-0 border-gray-3 py-2 px-4">
-                                <span className="flex-1 font-normal text-gray-900 text-base">{task?.id}</span>
+                                <span className="flex-1 font-normal text-gray-900 text-base">{task?.for?.reference?.split('/')[1]}</span>
                                 <span className="w-[140px] font-normal text-gray-900 text-base">-</span> {/* TODO */}
                                 <span className="w-[140px] font-normal text-gray-900 text-base">-</span>{/* TODO */}
                                 <span className="w-[140px] font-normal text-gray-900 text-base">-</span> {/* TODO */}

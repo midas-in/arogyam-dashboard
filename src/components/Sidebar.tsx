@@ -20,7 +20,7 @@ const ROUTES: Route[] = [
     subRoutes: [
       { label: 'Users', path: '/admin/users', permissions: ['VIEW_KEYCLOAK_USERS', 'FHIR_ALL_READ'] },
       { label: 'User groups', path: '/admin/user-groups', permissions: ['VIEW_KEYCLOAK_USERS', 'FHIR_ALL_READ'] },
-      { label: 'User roles', path: '/admin/user-roles', permissions: ['EDIT_KEYCLOAK_USERS', 'FHIR_ALL_WRITE'] }
+      // { label: 'User roles', path: '/admin/user-roles', permissions: ['EDIT_KEYCLOAK_USERS', 'FHIR_ALL_WRITE'] }
     ],
     userTypes: [SITE_COORDINATOR_USER_TYPE_CODE]
   },

@@ -2,7 +2,7 @@ import React from 'react';
 import { useSession } from "next-auth/react";
 
 import { Loader } from "@/components/UI/Loader";
-import { getAge, formatDate } from "@/utils";
+import { getAge, formatDate, capitalizeFirstLetter } from "@/utils";
 
 interface ReportTableProps {
   data?: object[];
@@ -42,8 +42,7 @@ const COLUMNS = [
     id: 'gender',
     name: 'Gender',
     width: 200,
-    getValue: (data: any) => data.gender,
-
+    getValue: (data: any) => capitalizeFirstLetter(data.gender),
   },
   {
     id: 'cigarette/bidi',
@@ -55,13 +54,13 @@ const COLUMNS = [
     id: 'smokeless-tobacco',
     name: 'Smokeless tobacco',
     width: 200,
-    getValue: (data: any) => data.habitHistory ? data.habitHistory['Smokeless tobacco'] : '-'
+    getValue: (data: any) => data.habitHistory ? data.habitHistory['Smokeless Tobacco'] : '-'
   },
   {
     id: 'areca-nut',
     name: 'Areca nut',
     width: 200,
-    getValue: (data: any) => data.habitHistory ? data.habitHistory['Areca nut'] : '-'
+    getValue: (data: any) => data.habitHistory ? data.habitHistory['Areca Nut'] : '-'
   },
   {
     id: 'alcohol',
@@ -73,7 +72,7 @@ const COLUMNS = [
     id: 'open-mouth',
     name: 'Able to open mouth',
     width: 200,
-    getValue: (data: any) => data.habitHistory ? data.oralExaminations['Open Mouth'] : '-'
+    getValue: (data: any) => data.habitHistory ? data.oralExaminations['Able to open mouth?'] : '-'
   },
   {
     id: 'lesion-patch',
@@ -190,7 +189,7 @@ const ReportTable = (props: ReportTableProps) => {
 
   if (!loading && data && data?.length === 0) {
     return <div className="relative mt-4 h-11 p-2.5 bg-gray-25 block w-fit">
-      <p className="text-gray-900 text-base font-normal ">Your reports will be shown here</p>
+      <p className="text-gray-900 text-base font-normal ">Your report will be shown here</p>
     </div>
   }
 
