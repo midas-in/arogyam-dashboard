@@ -22,3 +22,19 @@ export const getUrlOrigin = (url: string) => {
 export const formatDate = (date: string) => {
     return date ? new Date(date).toLocaleString().split(',')[0].replaceAll('/', '-') : ''
 }
+
+/**
+ * Subtracts a specified number of days from a given date.
+ * @param {Date} date - The date from which to subtract days.
+ * @param {number} days - The number of days to subtract.
+ * @returns {Date} - The new date after subtracting the specified number of days.
+ */
+export const subDays = (date: Date, days: number): Date => {
+    const result = new Date(date);
+    result.setDate(result.getDate() - days);
+    return result;
+}
+
+export const capitalizeFirstLetter = (string: string) => {
+    return string?.charAt(0).toUpperCase() + string?.slice(1);
+}

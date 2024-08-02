@@ -39,9 +39,9 @@ export default function UserGroups() {
   return (
     <div className="p-5 bg-white h-min w-full">
       <div className='flex justify-between items-center'>
-        <h2 className="text-xl font-semibold">User Groups</h2>
-        {(session?.permissions?.includes('EDIT_KEYCLOAK_USERS') || session?.permissions?.includes('FHIR_ALL_WRITE')) &&
-          <Link href='/admin/user-groups/new' className="border border-primary-400 px-4 py-1 rounded bg-primary-400 text-white"> + Add group</Link>}
+        <h2 className="text-xl text-gray-800 font-semibold">User Groups</h2>
+        {/* {(session?.permissions?.includes('EDIT_KEYCLOAK_USERS') || session?.permissions?.includes('FHIR_ALL_WRITE')) &&
+          <Link href='/admin/user-groups/new' className="border border-primary-400 px-4 py-1 rounded bg-primary-400 text-white"> + Add group</Link>} */}
       </div>
       <div className="h-4" />
       <MyTable

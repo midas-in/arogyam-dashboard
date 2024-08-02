@@ -43,7 +43,7 @@ export default function UserRoles() {
   return (
     <div className="p-5 bg-white h-min w-full">
       <div className='flex'>
-        <h2 className="text-xl font-semibold">User Roles</h2>
+        <h2 className="text-xl text-gray-800 font-semibold">User Roles</h2>
       </div>
       <div className="h-4" />
       <MyTable

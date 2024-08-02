@@ -372,43 +372,43 @@ export function CreateEditUser({ id }: { id?: string }) {
         : 'Add User';
 
     return <div className="p-5 bg-white h-min w-full">
-        <h2 className="text-xl font-semibold mb-5">{pageTitle}</h2>
+        <h2 className="text-xl text-gray-800 font-semibold mb-5">{pageTitle}</h2>
         <div className="p-5 bg-white h-min w-full justify-center flex">
             <div className="">
                 <div className="mt-5 flex">
-                    <label className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">First Name<small className="text-red-500">*</small> :</label>
+                    <label className="block min-w-[100px] md:min-w-[180px] text-gray-800 font-regular mr-2 text-right mr-5">First Name<small className="text-red-500">*</small> :</label>
                     <input
-                        className={`md:w-[350px] p-2 text-sm font-semilight border border-block rounded ${errors.firstName ? 'border-red-500' : ''}`}
+                        className={`md:w-[350px] p-2 text-gray-800 text-sm font-semilight border border-block rounded ${errors.firstName ? 'border-red-500' : ''}`}
                         value={userData.firstName} onChange={onChange('firstName')}
                     />
                 </div>
                 <div className="mt-5 flex">
-                    <label className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">Last Name<small className="text-red-500">*</small> :</label>
+                    <label className="block min-w-[100px] md:min-w-[180px] text-gray-800 font-regular mr-2 text-right mr-5">Last Name<small className="text-red-500">*</small> :</label>
                     <input
-                        className={`md:w-[350px] p-2 text-sm font-semilight border border-block rounded ${errors.lastName ? 'border-red-500' : ''}`}
+                        className={`md:w-[350px] p-2 text-gray-800 text-sm font-semilight border border-block rounded ${errors.lastName ? 'border-red-500' : ''}`}
                         value={userData.lastName} onChange={onChange('lastName')}
                     />
                 </div>
                 <div className="mt-5 flex">
-                    <label className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">Username<small className="text-red-500">*</small> :</label>
+                    <label className="block min-w-[100px] md:min-w-[180px] text-gray-800 font-regular mr-2 text-right mr-5">Username<small className="text-red-500">*</small> :</label>
                     <input
-                        className={`md:w-[350px] p-2 text-sm font-semilight border border-block rounded ${errors.username ? 'border-red-500' : ''}`}
+                        className={`md:w-[350px] p-2 text-gray-800 text-sm font-semilight border border-block rounded ${errors.username ? 'border-red-500' : ''}`}
                         value={userData.username} onChange={onChange('username')}
                         disabled={!!userData.id}
                     />
                 </div>
                 <div className="mt-5 flex">
-                    <label className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">Email :</label>
+                    <label className="block min-w-[100px] md:min-w-[180px] text-gray-800 font-regular mr-2 text-right mr-5">Email :</label>
                     <input
-                        className="md:w-[350px] p-2 text-sm font-semilight border border-block rounded"
+                        className="md:w-[350px] p-2 text-gray-800 text-sm font-semilight border border-block rounded"
                         value={userData.email} onChange={onChange('email')}
                     />
                 </div>
                 <div className="mt-5 flex">
-                    <label htmlFor="role" className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">User Type<small className="text-red-500">*</small>:</label>
+                    <label htmlFor="role" className="block min-w-[100px] md:min-w-[180px] text-gray-800 font-regular mr-2 text-right mr-5">User Type<small className="text-red-500">*</small>:</label>
                     <Select
                         status={errors.userTypeCode ? 'error' : ''}
-                        className='md:w-[350px] text-sm font-semilight md:w-[350px]'
+                        className='md:w-[350px] text-gray-800 text-sm font-semilight md:w-[350px]'
                         options={practitionerRoles?.map((role: any) => {
                             return { value: role.code, label: role.display }
                         }) ?? []}
@@ -417,16 +417,16 @@ export function CreateEditUser({ id }: { id?: string }) {
                     />
                 </div>
                 <div className="mt-5 flex">
-                    <label className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">Enable User :</label>
+                    <label className="block min-w-[100px] md:min-w-[180px] text-gray-800 font-regular mr-2 text-right mr-5">Enable User :</label>
                     <input className="" type="radio" id="yes" name="enabled" value="1" checked={userData.enabled} onChange={onChange('enabled')} />
                     <label className="ml-1" htmlFor="yes">Yes</label>
                     <input className="ml-5" type="radio" id="no" name="enabled" value="0" checked={!userData.enabled} onChange={onChange('enabled')} />
                     <label className="ml-1" htmlFor="no">No</label>
                 </div>
                 <div className="mt-5 flex">
-                    <label htmlFor="groups" className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">User Group:</label>
+                    <label htmlFor="groups" className="block min-w-[100px] md:min-w-[180px] text-gray-800 font-regular mr-2 text-right mr-5">User Group:</label>
                     <ReactSelect
-                        className='md:w-[350px] text-sm font-semilight md:w-[350px]'
+                        className='md:w-[350px] text-gray-800 text-sm font-semilight md:w-[350px]'
                         options={groups.map((group: any) => {
                             return { value: group.id, label: group.name }
                         })}
@@ -436,10 +436,10 @@ export function CreateEditUser({ id }: { id?: string }) {
                     />
                 </div>
                 <div className="mt-5 flex">
-                    <label htmlFor="groups" className="block min-w-[100px] md:min-w-[180px] font-regular mr-2 text-right mr-5">Application ID<small className="text-red-500">*</small> :</label>
+                    <label htmlFor="groups" className="block min-w-[100px] md:min-w-[180px] text-gray-800 font-regular mr-2 text-right mr-5">Application ID<small className="text-red-500">*</small> :</label>
                     <Select
                         status={errors.attributes ? 'error' : ''}
-                        className='md:w-[350px] text-sm font-semilight md:w-[350px]'
+                        className='md:w-[350px] text-gray-800 text-sm font-semilight md:w-[350px]'
                         options={composition?.map((e: any) => {
                             return { value: e.identifier.value, label: `${e.title}(${e.identifier.value})` }
                         }) ?? []}
@@ -449,12 +449,12 @@ export function CreateEditUser({ id }: { id?: string }) {
                 </div>
                 <div className="mt-5 flex justify-center">
                     <button
-                        className="bg-primary-400 disabled:bg-gray-300 text-white font-medium text-sm py-1 px-4 rounded mx-5"
+                        className="bg-primary-400 disabled:bg-gray-300 text-white font-medium text-gray-800 text-sm py-1 px-4 rounded mx-5"
                         onClick={onSubmit}
                     >
                         Save
                     </button>
-                    <Link href={'/admin/users'} className="border rounded py-1 px-4" >Cancel</Link>
+                    <Link href={'/admin/users'} className="border rounded py-1 px-4 text-sm text-gray-800" >Cancel</Link>
                 </div>
             </div>
         </div>

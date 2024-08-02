@@ -138,7 +138,7 @@ const ReportsFilterModal = ({ setFilter }: { setFilter: (params: any) => void })
                   {filterQuestion?.answerOption?.map((option: any, j: number) => {
                     return <div key={j} className="w-[112px] justify-start items-center gap-2 inline-flex">
                       <input type="checkbox" id={option.valueCoding.code + i} className="w-5 h-5 cursor-pointer" onChange={onFilterChange(filterQuestion?.text, option)} />
-                      <label htmlFor={option.valueCoding.code + i} className="text-base font-normal cursor-pointer">{option.valueCoding.display}</label>
+                      <label htmlFor={option.valueCoding.code + i} className="text-gray-800 text-base font-normal cursor-pointer">{option.valueCoding.display}</label>
                     </div>
                   })}
                 </div>
