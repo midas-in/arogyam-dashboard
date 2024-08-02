@@ -310,7 +310,6 @@ export default function RemoteSpecialistDiagnosis() {
                         setActiveMediaIndex={setActiveMediaIndex}
                     />
                     <DiagnosisLeftBar
-                        id={id as string}
                         patient={patient}
                         encounter={encounter}
                         observations={observations}

@@ -49,6 +49,7 @@ export default function Reports() {
   const [filter, setFilter] = useState<any>({});
   const [startDate, setStartDate] = useState<Date | null>(subDays(new Date(), 5));
   const [endDate, setEndDate] = useState<Date | null>(new Date());
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     if (session?.accessToken) {
@@ -57,16 +58,20 @@ export default function Reports() {
     }
   }, [currentPage, limit, JSON.stringify(filter)])
 
+  const getCommonParams = () => {
+    const commonParams = {
+      ...filter,
+      _revinclude: 'QuestionnaireResponse:subject',
+    }
+    if (startDate && endDate) {
+      commonParams['_lastUpdated'] = [`gt${new Date(startDate).toISOString().split('T')[0]}`, `lt${new Date(endDate).toISOString().split('T')[0]}`]
+    }
+    return commonParams;
+  }
   const fetchReportData = (forcedCurrentPage?: number) => {
     if (session?.accessToken) {
       setLoading(true);
-      const commonParams = {
-        ...filter,
-        _revinclude: 'QuestionnaireResponse:subject',
-      }
-      if (startDate && endDate) {
-        commonParams['_lastUpdated'] = [`gt${new Date(startDate).toISOString().split('T')[0]}`, `lt${new Date(endDate).toISOString().split('T')[0]}`]
-      }
+      const commonParams = getCommonParams();
       const params = {
         ...commonParams,
         _count: limit,
@@ -141,6 +146,37 @@ export default function Reports() {
     setReportFetched(false);
   }
 
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const params = getCommonParams();
+      const response = await fetch('/dashboard/api/download-report', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.accessToken}`,
+        },
+        body: JSON.stringify({ params }),
+      });
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'cases.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (error) {
+      console.log('Download failed', error)
+      message.error('Failed to download CSV. Please try again.');
+    }
+    finally {
+      setIsDownloading(false);
+    }
+  };
+
   return <div className="w-full flex flex-col gap-8">
     <div className="py-3 border-b border-gray-100 flex justify-start items-start ">
       <h2 className="text-gray-900 text-[32px] leading-10 font-normal">Reports</h2>
@@ -201,7 +237,7 @@ export default function Reports() {
       </div> */}
     </div>
 
-    <div className="justify-center items-start gap-1 flex">
+    <div className="justify-center items-start gap-4 flex">
       <button
         className="w-[142px] h-[44px] rounded border border-primary-300 flex-col justify-center items-center flex text-primary-300 text-sm font-semibold leading-tight disabled:opacity-50"
         onClick={resetBtnClick} disabled={!reportFetched}>
@@ -222,7 +258,23 @@ export default function Reports() {
       {/* {session?.userType && [SUPERVISOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE].includes(session?.userType) && */}
       {/* <> */}
       <div className="h-[50px] py-2 justify-between items-center inline-flex">
-        <p className="text-gray-900 text-2xl font-normal">Generated report</p>
+        <div className='flex align-items-center'>
+          <p className="text-gray-900 text-2xl font-normal">Generated report</p>
+          {session?.userType === SITE_COORDINATOR_USER_TYPE_CODE &&
+            <button
+              className="ml-8 px-2 rounded border border-primary-300 justify-center items-center flex text-primary-300 text-sm font-normal leading-4 disabled:bg-gray-100 disabled:border-gray-100 disabled:text-white "
+              onClick={handleDownload}
+              disabled={isDownloading}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 22" fill="none" className='cursor-pointer'>
+                <rect width="24" height="24" fill="white" style={{ mixBlendMode: 'multiply' }} />
+                <path d="M19.5 18V21H4.5V18H3V21C3 21.3978 3.15804 21.7794 3.43934 22.0607C3.72064 22.342 4.10218 22.5 4.5 22.5H19.5C19.8978 22.5 20.2794 22.342 20.5607 22.0607C20.842 21.7794 21 21.3978 21 21V18H19.5Z" fill="#0075EB" />
+                <path d="M19.5 10.5L18.4425 9.4425L12.75 15.1275V1.5H11.25V15.1275L5.5575 9.4425L4.5 10.5L12 18L19.5 10.5Z" fill="#0075EB" />
+              </svg>
+              <span className='ml-1'>Download csv</span>
+            </button>
+          }
+        </div>
         {reportFetched && <ReportsFilterModal setFilter={setFilter} />}
       </div>
       <ReportTable
