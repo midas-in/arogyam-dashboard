@@ -14,17 +14,18 @@ import { fetchReports } from '@/app/loader';
 import { getResourcesFromBundle } from '@/utils/fhir-utils';
 import { subDays } from '@/utils'
 
-// eslint-disable-next-line react/display-name
-const CustomDateInput = forwardRef<HTMLDivElement, {
+interface CustomDateInputProps {
   value?: string;
   onClick?: () => void;
   title: string;
-}>(
+}
+// eslint-disable-next-line react/display-name
+const CustomDateInput = forwardRef<HTMLDivElement, CustomDateInputProps>(
   ({ value, onClick, title }, ref) => (
     <div onClick={onClick} ref={ref} className="w-[336px] border border-gray-100 rounded flex-col justify-start items-start gap-2 inline-flex">
       <div className="self-stretch px-4 py-[11px] justify-start items-start gap-4 inline-flex">
         <div className="grow shrink basis-0 h-6 justify-start items-start gap-4 flex">
-          <p className="border-gray-900 text-base font-normal">{value ?? title}</p>
+          <p className="text-gray-800 text-base font-normal">{value ?? title}</p>
         </div>
         <div className="w-6 h-6 relative" >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -62,6 +63,7 @@ export default function Reports() {
     const commonParams = {
       ...filter,
       _revinclude: 'QuestionnaireResponse:subject',
+      _sort: '-_lastUpdated',
     }
     if (startDate && endDate) {
       commonParams['_lastUpdated'] = [`gt${new Date(startDate).toISOString().split('T')[0]}`, `lt${new Date(endDate).toISOString().split('T')[0]}`]
@@ -88,6 +90,12 @@ export default function Reports() {
                 d.questionnaire === 'Questionnaire/OralCancerPatientRegistration'
             });
             if (questionnaireResponse) {
+              // Extract basic info question answers
+              const basicInfoGroup = questionnaireResponse?.item.find((i: any) => i.linkId === 'basic-info-group');
+              const basicInfo = basicInfoGroup?.item.reduce((prev: any, curr: any) => {
+                return Object.assign({}, prev, { [curr.text]: curr.answer ? curr.answer[0].valueCoding?.display ?? curr.answer[0].valueString : '' });
+              }, {});
+              c.basicInfo = basicInfo;
               // Extract habit history question answers
               const habitHistoryGroup = questionnaireResponse?.item.find((i: any) => i.linkId === 'habit-history-group');
               const habitHistory = habitHistoryGroup?.item.reduce((prev: any, curr: any) => {
@@ -154,6 +162,7 @@ export default function Reports() {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session?.accessToken}`,
+          'userType': `${session?.userType}`,
         },
         body: JSON.stringify({ params }),
       });
@@ -260,16 +269,16 @@ export default function Reports() {
       <div className="h-[50px] py-2 justify-between items-center inline-flex">
         <div className='flex align-items-center'>
           <p className="text-gray-900 text-2xl font-normal">Generated report</p>
-          {session?.userType === SITE_COORDINATOR_USER_TYPE_CODE &&
+          {reportFetched && session?.userType === SITE_COORDINATOR_USER_TYPE_CODE &&
             <button
               className="ml-8 px-2 rounded border border-primary-300 justify-center items-center flex text-primary-300 text-sm font-normal leading-4 disabled:bg-gray-100 disabled:border-gray-100 disabled:text-white "
               onClick={handleDownload}
               disabled={isDownloading}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 22" fill="none" className='cursor-pointer'>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 22" fill="none" className='cursor-pointer fill-current'>
                 <rect width="24" height="24" fill="white" style={{ mixBlendMode: 'multiply' }} />
-                <path d="M19.5 18V21H4.5V18H3V21C3 21.3978 3.15804 21.7794 3.43934 22.0607C3.72064 22.342 4.10218 22.5 4.5 22.5H19.5C19.8978 22.5 20.2794 22.342 20.5607 22.0607C20.842 21.7794 21 21.3978 21 21V18H19.5Z" fill="#0075EB" />
-                <path d="M19.5 10.5L18.4425 9.4425L12.75 15.1275V1.5H11.25V15.1275L5.5575 9.4425L4.5 10.5L12 18L19.5 10.5Z" fill="#0075EB" />
+                <path d="M19.5 18V21H4.5V18H3V21C3 21.3978 3.15804 21.7794 3.43934 22.0607C3.72064 22.342 4.10218 22.5 4.5 22.5H19.5C19.8978 22.5 20.2794 22.342 20.5607 22.0607C20.842 21.7794 21 21.3978 21 21V18H19.5Z" />
+                <path d="M19.5 10.5L18.4425 9.4425L12.75 15.1275V1.5H11.25V15.1275L5.5575 9.4425L4.5 10.5L12 18L19.5 10.5Z" />
               </svg>
               <span className='ml-1'>Download csv</span>
             </button>

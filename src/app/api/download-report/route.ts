@@ -6,6 +6,7 @@ import { COLUMNS } from '@/components/Admin/Reports/ReportColumnConfig';
 
 export async function POST(request: any) {
     const accessToken = request.headers.get('Authorization')?.split(' ')[1];
+    const userType = request.headers.get('userType');
 
     if (!accessToken) {
         return new NextResponse('Unauthorized', { status: 401 });
@@ -34,6 +35,12 @@ export async function POST(request: any) {
                     d.questionnaire === 'Questionnaire/OralCancerPatientRegistration'
             });
             if (questionnaireResponse) {
+                // Extract basic info question answers
+                const basicInfoGroup = questionnaireResponse?.item.find((i: any) => i.linkId === 'basic-info-group');
+                const basicInfo = basicInfoGroup?.item.reduce((prev: any, curr: any) => {
+                    return Object.assign({}, prev, { [curr.text]: curr.answer ? curr.answer[0].valueCoding?.display ?? curr.answer[0].valueString : '' });
+                }, {});
+                c.basicInfo = basicInfo;
                 // Extract habit history question answers
                 const habitHistoryGroup = questionnaireResponse?.item.find((i: any) => i.linkId === 'habit-history-group');
                 const habitHistory = habitHistoryGroup?.item.reduce((prev: any, curr: any) => {
@@ -61,10 +68,12 @@ export async function POST(request: any) {
         page++;
     }
 
+    const filteredColumn = COLUMNS.filter(c => userType !== 'site-coordinator' ? !c.siteCoordinatorOnly : true);
+
     const csvData = stringify([
-        COLUMNS.map((column) => column.name),
+        filteredColumn.map((column) => column.name),
         ...allCases.map(report => {
-            return COLUMNS.map((column) => {
+            return filteredColumn.map((column) => {
                 return column.getValue(report, accessToken, true) ?? '-'
             })
         })
