@@ -206,3 +206,26 @@ export function executeFhirCqlQuery(accessToken: string, payload: { resourceType
         },
     }).then(({ data }: { data: any }) => data);
 }
+
+function buildQueryString(params: Record<string, string | string[]>): string {
+    return Object.entries(params)
+        .flatMap(([key, value]) => {
+            if (Array.isArray(value)) {
+                return value.map(item => `${encodeURIComponent(key)}=${encodeURIComponent(item)}`);
+            } else {
+                return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+            }
+        })
+        .join('&');
+}
+
+export function fetchReports(accessToken: string, params: any) {
+    return axios({
+        method: 'GET',
+        baseURL: getFhirUrl(),
+        url: `/Patient?${buildQueryString(params)}`,
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        },
+    }).then(({ data }: { data: any }) => data);
+}

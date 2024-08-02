@@ -19,3 +19,6 @@ export const getUrlOrigin = (url: string) => {
         return '';
     }
 }
+export const formatDate = (date: string) => {
+    return date ? new Date(date).toLocaleString().split(',')[0].replaceAll('/', '-') : ''
+}

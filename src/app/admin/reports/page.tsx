@@ -1,25 +1,114 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
+import { message } from 'antd';
+import { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
 
 import { ReportsFilterModal } from '@/components/Admin/Reports/ReportsFilterModal';
 import { ReportTable } from '@/components/Admin/Reports/ReportTable';
 import { ReportHistoryTable } from '@/components/Admin/Reports/ReportHistoryTable';
 import { SITE_COORDINATOR_USER_TYPE_CODE, SUPERVISOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE } from '@/utils/fhir-utils';
-
+import { fetchReports } from '@/app/loader';
+import { getResourcesFromBundle } from '@/utils/fhir-utils';
 
 export default function Reports() {
   const { data: session } = useSession();
 
-  const [reports, setReports] = useState<[]>([]);
+  const [reports, setReports] = useState<any>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [totalItems, setTotalItems] = useState<number>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [reportFetched, setReportFetched] = useState<boolean>(false);
+  const [filter, setFilter] = useState<any>({});
+
+  console.log('filter', filter);
+  useEffect(() => {
+    if (session?.accessToken) {
+      if (reportFetched) {
+        fetchReportData();
+      }
+    }
+  }, [currentPage, limit, JSON.stringify(filter)])
+
+  const fetchReportData = (forcedCurrentPage?: number) => {
+    if (session?.accessToken) {
+      setLoading(true);
+      const commonParams = {
+        ...filter,
+        _revinclude: 'QuestionnaireResponse:subject',
+      }
+      const params = {
+        ...commonParams,
+        _count: limit,
+        _getpagesoffset: ((forcedCurrentPage ?? currentPage) - 1) * limit,
+      }
+      fetchReports(session.accessToken, params)
+        .then((data: IBundle) => {
+          const allData = getResourcesFromBundle<any>(data);
+          const cases = allData.filter(d => d.resourceType === 'Patient');
+          cases.forEach(c => {
+            const questionnaireResponse = allData.find(d => {
+              return d.resourceType === "QuestionnaireResponse" &&
+                d.subject.reference === `Patient/${c.id}` &&
+                d.questionnaire === 'Questionnaire/OralCancerPatientRegistration'
+            });
+            if (questionnaireResponse) {
+              // Extract habit history question answers
+              const habitHistoryGroup = questionnaireResponse?.item.find((i: any) => i.linkId === 'habit-history-group');
+              const habitHistory = habitHistoryGroup?.item.reduce((prev: any, curr: any) => {
+                return Object.assign({}, prev, { [curr.text]: curr.answer ? curr.answer[0].valueCoding?.display : '' });
+              }, {});
+              c.habitHistory = habitHistory;
+              // Extract screening info like oral examination and images
+              const screeningGroup = questionnaireResponse?.item.find((i: any) => i.linkId === 'screening-group');
+              const screeningOralExamination = screeningGroup?.item.find((i: any) => i.linkId === 'patient-screening-question-group');
+              const oralExaminations = screeningOralExamination?.item.reduce((prev: any, curr: any) => {
+                return Object.assign({}, prev, { [curr.text]: curr.answer ? curr.answer[0].valueCoding?.display : '' });
+              }, {});
+              c.oralExaminations = oralExaminations;
+              const screeningImages = screeningGroup?.item.find((i: any) => i.linkId === 'patient-screening-image-group');
+              const images = screeningImages?.item.reduce((prev: any, curr: any) => {
+                return Object.assign({}, prev, { [curr.text]: curr.answer ? curr.answer[0].valueAttachment?.url : '' });
+              }, {});
+              c.images = images;
+            }
+          })
+          setReports(cases);
+        })
+        .catch((error: any) => {
+          console.log(error);
+          message.error('Error fetching Report Data');
+        })
+        .finally(() => setLoading(false));
+
+      fetchReports(session.accessToken, { ...commonParams, _summary: 'count' })
+        .then((data: IBundle) => {
+          setTotalItems(data.total || 0);
+        })
+        .catch((error: any) => {
+          console.log(error);
+          message.error('Error fetching Report count');
+        })
+        .finally(() => setLoading(false));
+    }
+  }
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
+
+  const showReportBtnClick = () => {
+    setReportFetched(true);
+    setCurrentPage(1);
+    fetchReportData(1);
+  }
+
+  const resetBtnClick = () => {
+    setReports([]);
+    setTotalItems(0);
+    setReportFetched(false);
+  }
 
   return <div className="w-full flex flex-col gap-8">
     <div className="py-3 border-b border-gray-100 flex justify-start items-start ">
@@ -27,7 +116,7 @@ export default function Reports() {
     </div>
 
     <div className="flex-col justify-start items-start gap-8 flex">
-      <div className="flex-col justify-start items-start gap-[15px] flex">
+      {/* <div className="flex-col justify-start items-start gap-[15px] flex">
         <div className="text-black text-base font-semibold">1. Date range</div>
         <div className="justify-start items-start gap-7 inline-flex">
           <div className="w-[336px] border border-gray-100 rounded flex-col justify-start items-start gap-2 inline-flex">
@@ -57,8 +146,8 @@ export default function Reports() {
             </div>
           </div>
         </div>
-      </div>
-      <div className="flex-col justify-start items-start gap-4 flex">
+      </div> */}
+      {/* <div className="flex-col justify-start items-start gap-4 flex">
         <div className="text-black text-base font-semibold">2. Patient Information</div>
         <div className="justify-start items-start gap-8 inline-flex">
           <div className="w-40 justify-start items-center gap-2 inline-flex">
@@ -74,8 +163,8 @@ export default function Reports() {
             <label htmlFor="Images" className="text-base font-normal">Images</label>
           </div>
         </div>
-      </div>
-      <div className="flex-col justify-start items-start gap-4 flex">
+      </div> */}
+      {/* <div className="flex-col justify-start items-start gap-4 flex">
         <div className="text-black text-base font-semibold">3. Specialist diagnosis</div>
         <div className="justify-start items-start gap-8 inline-flex">
           <div className="w-[54px] justify-start items-center gap-2 inline-flex">
@@ -87,14 +176,20 @@ export default function Reports() {
             <label htmlFor="No" className="text-base font-normal">No</label>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
 
     <div className="justify-center items-start gap-1 flex">
-      <button className="w-[142px] h-[44px] rounded border border-primary-300 flex-col justify-center items-center flex text-primary-300 text-sm font-semibold leading-tight">
+      <button
+        className="w-[142px] h-[44px] rounded border border-primary-300 flex-col justify-center items-center flex text-primary-300 text-sm font-semibold leading-tight disabled:opacity-50"
+        onClick={resetBtnClick} disabled={!reportFetched}>
         Reset
       </button>
-      <button className="w-[142px] h-[44px] bg-primary-300 rounded flex-col justify-center items-center flex text-white text-sm font-semibold leading-tight">
+      <button
+        className="w-[142px] h-[44px] bg-primary-300 rounded flex-col justify-center items-center flex text-white text-sm font-semibold leading-tight"
+        onClick={showReportBtnClick}
+        disabled={loading}
+      >
         Show report
       </button>
     </div>
@@ -102,23 +197,23 @@ export default function Reports() {
     <div className="self-stretch border-t border-gray-100" />
 
     <div className="flex flex-col">
-      {session?.userType && [SUPERVISOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE].includes(session?.userType) &&
-        <>
-          <div className="h-[50px] py-2 justify-between items-center inline-flex">
-            <p className="text-gray-900 text-2xl font-normal">Generated report</p>
-            <ReportsFilterModal />
-          </div>
-          <ReportTable
-            data={Array(5).fill(5)}
-            currentPage={currentPage}
-            itemsPerPage={limit}
-            totalItems={5}
-            onPageChange={handlePageChange}
-            loading={loading}
-          />
-        </>}
+      {/* {session?.userType && [SUPERVISOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE].includes(session?.userType) && */}
+      {/* <> */}
+      <div className="h-[50px] py-2 justify-between items-center inline-flex">
+        <p className="text-gray-900 text-2xl font-normal">Generated report</p>
+        {reportFetched && <ReportsFilterModal setFilter={setFilter} />}
+      </div>
+      <ReportTable
+        data={reports}
+        currentPage={currentPage}
+        itemsPerPage={limit}
+        totalItems={totalItems ?? 0}
+        onPageChange={handlePageChange}
+        loading={loading}
+      />
+      {/* </>} */}
 
-      {session?.userType === SITE_COORDINATOR_USER_TYPE_CODE &&
+      {/* {session?.userType === SITE_COORDINATOR_USER_TYPE_CODE &&
         <>
           <div className="h-[50px] py-2 justify-between items-center inline-flex">
             <p className="text-gray-900 text-2xl font-normal">Reports History</p>
@@ -131,7 +226,7 @@ export default function Reports() {
             onPageChange={handlePageChange}
             loading={loading}
           />
-        </>}
+        </>} */}
 
     </div>
   </div>

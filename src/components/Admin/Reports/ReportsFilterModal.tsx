@@ -1,9 +1,107 @@
 'use client';
-import React, { useState } from 'react';
-import { CustomModal } from '@/components/UI/CustomModal';
+import React, { useEffect, useState } from 'react';
+import { useSession } from "next-auth/react";
+import { message } from 'antd';
+import { IQuestionnaire } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaire';
 
-const ReportsFilterModal = () => {
+import { CustomModal } from '@/components/UI/CustomModal';
+import { fetchFhirSingleResource } from '@/app/loader';
+import { OBSERVATION_CODE_LABEL_MAPPING_REVERSE } from '@/utils/fhir-utils';
+
+const ReportsFilterModal = ({ setFilter }: { setFilter: (params: any) => void }) => {
+  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const [filterQuestionnaire, setFilterQuestionnaire] = useState<any>([]);
+  const [selectedFilter, setSelectedFilter] = useState<any>({});
+
+  useEffect(() => {
+    if (session?.accessToken) {
+      fetchFhirSingleResource(session.accessToken, { resourceType: 'Questionnaire', id: 'OralCancerPatientRegistration' })
+        .then((questionnaire: IQuestionnaire) => {
+          const fQuestionnaire: any = [
+            { text: 'Username', answerOption: [{ valueCoding: { code: 'Practitioner/flw1', display: 'flw1' } }] },
+            {
+              text: 'Gender',
+              answerOption: [
+                {
+                  "valueCoding": {
+                    "system": "http://hl7.org/fhir/administrative-gender",
+                    "code": "male",
+                    "display": "Male"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "http://hl7.org/fhir/administrative-gender",
+                    "code": "female",
+                    "display": "Female"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "http://hl7.org/fhir/administrative-gender",
+                    "code": "other",
+                    "display": "Other"
+                  }
+                }
+              ]
+            }
+          ];
+          const habitHistoryGroup = questionnaire?.item?.find(i => i.linkId === 'habit-history-group');
+          const screeningGroup = questionnaire?.item?.find((i: any) => i.linkId === 'screening-group');
+          const screeningOralExamination = screeningGroup?.item?.find((i: any) => i.linkId === 'patient-screening-question-group');
+          if (habitHistoryGroup?.item) fQuestionnaire.push(...habitHistoryGroup?.item)
+          if (screeningOralExamination?.item) fQuestionnaire.push(...screeningOralExamination?.item)
+          setFilterQuestionnaire(fQuestionnaire);
+        })
+        .catch((error: any) => message.error('Error fetching Filter questionnaire'));
+    }
+  }, [session?.accessToken])
+
+  const onFilterChange = (title: string, option: any) => (e: any) => {
+    const payload = { ...selectedFilter };
+    let key = '', value = option.valueCoding.code;
+    if (title === 'Username') {
+      key = 'general-practitioner';
+    } else if (title === 'Gender') {
+      key = 'gender';
+    } else {
+      key = '_has:Observation:subject:code-value-concept';
+      value = `${OBSERVATION_CODE_LABEL_MAPPING_REVERSE[title]}$${option.valueCoding.code}`;
+    }
+    if (e.target.checked) {
+      if (!payload[key]) {
+        payload[key] = value;
+      } else if (Array.isArray(payload[key])) {
+        payload[key].push(value);
+      }
+      else {
+        payload[key] = [payload[key], value]
+      }
+    }
+    else {
+      if (Array.isArray(payload[key])) {
+        const index = payload[key].indexOf(value);
+        if (index > -1) {
+          payload[key].splice(index, 1);
+        }
+      }
+      else {
+        delete payload[key];
+      }
+    }
+    setSelectedFilter(payload);
+  }
+
+  const resetFilter = () => {
+    setFilter({});
+    setIsOpen(false);
+  }
+
+  const applyFilter = () => {
+    setFilter(selectedFilter);
+    setIsOpen(false);
+  }
 
   return <>
     <div className="px-[15px] py-1 rounded-sm border border-gray-100 justify-center items-center gap-2 flex cursor-pointer" onClick={() => setIsOpen(true)}>
@@ -26,41 +124,39 @@ const ReportsFilterModal = () => {
           </div>
         </div>
         <div className="p-6 flex flex-col gap-4 h-[calc(100%-104px)] overflow-auto">
-          {Array(8).fill(8).map((_, i) => {
+          {filterQuestionnaire.map((filterQuestion: any, i: number) => {
             return <React.Fragment key={i}>
               <div className="flex-col justify-start items-start gap-4 flex">
                 <div className="self-stretch justify-between items-center flex">
-                  <p className="text-gray-900 text-base font-semibold">Username</p>
-                  <div className="items-center gap-2 inline-flex">
-                    <input type="checkbox" id='Select-all' className="w-5 h-5" />
-                    <label htmlFor="Select-all" className="text-gray-600 text-base font-normal">Select all</label>
-                  </div>
+                  <p className="text-gray-900 text-base font-semibold">{filterQuestion?.text}</p>
+                  {/* <div className="items-center gap-2 inline-flex">
+                    <input type="checkbox" id={'Select-all' + i} className="w-5 h-5 cursor-pointer" />
+                    <label htmlFor={"Select-all" + i} className="text-gray-600 text-base font-normal cursor-pointer">Select all</label>
+                  </div> */}
                 </div>
                 <div className="self-stretch justify-start items-center gap-6 inline-flex">
-                  <div className="w-[112px] justify-start items-center gap-2 inline-flex">
-                    <input type="checkbox" id={`Mallapadi-${i}`} className="w-5 h-5" />
-                    <label htmlFor="Habit-history" className="text-base font-normal">Mallapadi 1</label>
-                  </div>
-                  <div className="w-[112px] justify-start items-center gap-2 inline-flex">
-                    <input type="checkbox" id={`Mallapadi-${i}`} className="w-5 h-5" />
-                    <label htmlFor="Habit-history" className="text-gray-900 text-base font-normal">Mallapadi 2</label>
-                  </div>
-                  <div className="w-[112px] justify-start items-center gap-2 inline-flex">
-                    <input type="checkbox" id={`Mallapadi-${i}`} className="w-5 h-5" />
-                    <label htmlFor="Habit-history" className="text-gray-900 text-base font-normal">Mallapadi 3</label>
-                  </div>
+                  {filterQuestion?.answerOption?.map((option: any, j: number) => {
+                    return <div key={j} className="w-[112px] justify-start items-center gap-2 inline-flex">
+                      <input type="checkbox" id={option.valueCoding.code + i} className="w-5 h-5 cursor-pointer" onChange={onFilterChange(filterQuestion?.text, option)} />
+                      <label htmlFor={option.valueCoding.code + i} className="text-base font-normal cursor-pointer">{option.valueCoding.display}</label>
+                    </div>
+                  })}
                 </div>
               </div>
-              <div className="border-t border-gray-100" />
+              {i < filterQuestionnaire.length - 1 && <div className="border-t border-gray-100" />}
             </React.Fragment>
           })}
         </div>
 
         <div className="p-2.5 border-t border-gray-100 justify-center items-center flex gap-3">
-          <button className="w-[138px] h-9 bg-white rounded border border-primary-300 flex-col justify-center items-center inline-flex text-primary-300 text-sm font-semibold leading-5">
+          <button
+            className="w-[138px] h-9 bg-white rounded border border-primary-300 flex-col justify-center items-center inline-flex text-primary-300 text-sm font-semibold leading-5"
+            onClick={resetFilter}>
             Reset
           </button>
-          <button className="w-[138px] h-9 bg-primary-300 rounded flex-col justify-center items-center inline-flex text-white text-sm font-semibold leading-5">
+          <button
+            className="w-[138px] h-9 bg-primary-300 rounded flex-col justify-center items-center inline-flex text-white text-sm font-semibold leading-5"
+            onClick={applyFilter}>
             Apply filter
           </button>
         </div>
