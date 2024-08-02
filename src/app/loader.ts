@@ -28,6 +28,18 @@ const createFhirClient = (token: string) => {
     return client;
 }
 
+const buildQueryString = (params: Record<string, string | string[]>): string => {
+    return Object.entries(params)
+        .flatMap(([key, value]) => {
+            if (Array.isArray(value)) {
+                return value.map(item => `${encodeURIComponent(key)}=${encodeURIComponent(item)}`);
+            } else {
+                return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+            }
+        })
+        .join('&');
+}
+
 export async function fetchUsers(accessToken: string) {
     kcAdminClient.setAccessToken(accessToken);
     return kcAdminClient.users.find()
@@ -128,13 +140,13 @@ export function fetchFhirComposition(accessToken: string) {
     }).then(({ data }: { data: any }) => data);
 }
 
-export function fetchFhirResource(accessToken: string, payload: { resourceType: string, query: object }) {
+export function fetchFhirResource(accessToken: string, payload: { resourceType: string, query: any }) {
     const { resourceType, query } = payload;
     return axios({
         method: 'GET',
         baseURL: getFhirUrl(),
-        url: `/${resourceType}/_search`,
-        params: query,
+        url: `/${resourceType}/_search?${buildQueryString(query)}`,
+        // params: query,
         headers: {
             'Authorization': `Bearer ${accessToken}`,
             'cache-control': 'none'
@@ -206,18 +218,6 @@ export function executeFhirCqlQuery(accessToken: string, payload: { resourceType
             'Authorization': `Bearer ${accessToken}`
         },
     }).then(({ data }: { data: any }) => data);
-}
-
-function buildQueryString(params: Record<string, string | string[]>): string {
-    return Object.entries(params)
-        .flatMap(([key, value]) => {
-            if (Array.isArray(value)) {
-                return value.map(item => `${encodeURIComponent(key)}=${encodeURIComponent(item)}`);
-            } else {
-                return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-            }
-        })
-        .join('&');
 }
 
 export function fetchReports(accessToken: string, params: any) {

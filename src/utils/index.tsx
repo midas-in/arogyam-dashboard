@@ -19,8 +19,8 @@ export const getUrlOrigin = (url: string) => {
         return '';
     }
 }
-export const formatDate = (date: string) => {
-    return date ? new Date(date).toLocaleString().split(',')[0].replaceAll('/', '-') : ''
+export const formatDate = (date?: Date | string) => {
+    return date ? new Date(date).toLocaleString('en-In', { timeZone: 'Asia/Kolkata' }).split(',')[0].replaceAll('/', '-') : ''
 }
 
 /**

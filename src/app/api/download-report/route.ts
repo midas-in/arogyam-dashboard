@@ -16,7 +16,7 @@ export async function POST(request: any) {
     const { params } = body;
 
     const allCases = [];
-    let page = 1, limit = 20;
+    let page = 1, limit = 50;
     let hasMore = true;
     const countData = await fetchReports(accessToken, { ...params, _summary: 'count' });
 

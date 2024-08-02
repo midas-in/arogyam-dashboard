@@ -1,9 +1,17 @@
 import React from 'react';
 import { ITask } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/ITask';
+import { IPatient } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPatient';
+import { IEncounter } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IEncounter';
 import { Loader } from "@/components/UI/Loader";
+import { getAge, formatDate } from "@/utils";
+
+interface IExtendedTask extends ITask {
+    patient: IPatient;
+    encounterData: IEncounter;
+}
 
 interface TaskTableProps {
-    data?: ITask[];
+    data?: IExtendedTask[];
     currentPage: number;
     itemsPerPage: number;
     totalItems: number;
@@ -47,10 +55,10 @@ const TaskTable = (props: TaskTableProps) => {
                         ? data?.map((task, i) => (
                             <li key={i} className="flex items-center justify-between mb-2 border-b last:border-b-0 border-gray-3 py-2 px-4">
                                 <span className="flex-1 font-normal text-gray-900 text-base">{task?.for?.reference?.split('/')[1]}</span>
-                                <span className="w-[140px] font-normal text-gray-900 text-base">-</span> {/* TODO */}
-                                <span className="w-[140px] font-normal text-gray-900 text-base">-</span>{/* TODO */}
-                                <span className="w-[140px] font-normal text-gray-900 text-base">-</span> {/* TODO */}
-                                {showLabelledOn && <span className="w-[200px] font-normal text-gray-900 text-base">-</span>}{/* TODO */}
+                                <span className="w-[140px] font-normal text-gray-900 text-base">{task?.patient?.birthDate ? getAge(task?.patient?.birthDate) : '-'}</span>
+                                <span className="w-[140px] font-normal text-gray-900 text-base capitalize">{task?.patient?.gender ?? '-'}</span>
+                                <span className="w-[140px] font-normal text-gray-900 text-base">{task?.encounterData?.period?.end ? formatDate(task?.encounterData?.period?.end) : '-'}</span>
+                                {showLabelledOn && <span className="w-[200px] font-normal text-gray-900 text-base">-</span>}
                                 <div className='w-[100px]'>
                                     <button onClick={() => { onClick(task.id as string); }} className="ml-1 bg-primary-400 text-white text-sm font-semilight py-1 px-4 rounded">
                                         View

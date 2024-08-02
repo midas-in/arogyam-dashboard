@@ -2,6 +2,7 @@ import NextAuth, { AuthOptions, TokenSet } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import KeycloakProvider from "next-auth/providers/keycloak";
 import jwt from 'jsonwebtoken';
+import { IPractitioner } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPractitioner';
 import { IPractitionerRole } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPractitionerRole';
 import { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
 
@@ -39,7 +40,7 @@ function requestRefreshOfAccessToken(token: JWT) {
 async function fetchPractitioner(accessToken: string, id: string) {
     return fetchFhirResource(accessToken, { resourceType: 'Practitioner', query: { identifier: id } })
         .then((data: IBundle) => {
-            const practitioner = (getResourcesFromBundle<IPractitionerRole>(data)[0]);
+            const practitioner = (getResourcesFromBundle<IPractitioner>(data)[0]);
             return practitioner;
         })
         .catch(error => console.error("Error fetching Practitioner", error.response.data))

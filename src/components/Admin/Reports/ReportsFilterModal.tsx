@@ -3,10 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { useSession } from "next-auth/react";
 import { message } from 'antd';
 import { IQuestionnaire } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaire';
+import { IPractitionerRole } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IPractitionerRole';
+import { IBundle } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IBundle';
 
 import { CustomModal } from '@/components/UI/CustomModal';
-import { fetchFhirSingleResource } from '@/app/loader';
-import { OBSERVATION_CODE_LABEL_MAPPING_REVERSE } from '@/utils/fhir-utils';
+import { fetchFhirResource, fetchFhirSingleResource } from '@/app/loader';
+import { PRACTITIONER_USER_TYPE_CODE, OBSERVATION_CODE_LABEL_MAPPING_REVERSE, getResourcesFromBundle } from '@/utils/fhir-utils';
 
 const ReportsFilterModal = ({ setFilter }: { setFilter: (params: any) => void }) => {
   const { data: session } = useSession();
@@ -14,47 +16,56 @@ const ReportsFilterModal = ({ setFilter }: { setFilter: (params: any) => void })
   const [filterQuestionnaire, setFilterQuestionnaire] = useState<any>([]);
   const [selectedFilter, setSelectedFilter] = useState<any>({});
 
+  const fetchFilterOptions = async () => {
+    if (session?.accessToken) {
+      const fQuestionnaire: any = []
+      try {
+        const data: IBundle = await fetchFhirResource(session?.accessToken, { resourceType: 'PractitionerRole', query: { role: PRACTITIONER_USER_TYPE_CODE, active: true } })
+        const practitionerRoles = getResourcesFromBundle<IPractitionerRole>(data);
+        fQuestionnaire.push({ text: 'Username', answerOption: practitionerRoles.map(pr => ({ valueCoding: { code: pr.practitioner?.reference, display: pr.practitioner?.reference?.split('/')[1] } })) });
+        fQuestionnaire.push({
+          text: 'Gender',
+          answerOption: [
+            {
+              valueCoding: {
+                system: 'http://hl7.org/fhir/administrative-gender',
+                code: 'male',
+                display: 'Male'
+              }
+            },
+            {
+              valueCoding: {
+                system: 'http://hl7.org/fhir/administrative-gender',
+                code: 'female',
+                display: 'Female'
+              }
+            },
+            {
+              valueCoding: {
+                system: 'http://hl7.org/fhir/administrative-gender',
+                code: 'other',
+                display: 'Other'
+              }
+            }
+          ]
+        });
+        const questionnaire: IQuestionnaire = await fetchFhirSingleResource(session.accessToken, { resourceType: 'Questionnaire', id: 'OralCancerPatientRegistration' })
+        const habitHistoryGroup = questionnaire?.item?.find(i => i.linkId === 'habit-history-group');
+        const screeningGroup = questionnaire?.item?.find((i: any) => i.linkId === 'screening-group');
+        const screeningOralExamination = screeningGroup?.item?.find((i: any) => i.linkId === 'patient-screening-question-group');
+        if (habitHistoryGroup?.item) fQuestionnaire.push(...habitHistoryGroup?.item)
+        if (screeningOralExamination?.item) fQuestionnaire.push(...screeningOralExamination?.item)
+        setFilterQuestionnaire(fQuestionnaire);
+      }
+      catch (error) {
+        message.error("Error fetching FilterOptions")
+      }
+    }
+  }
+
   useEffect(() => {
     if (session?.accessToken) {
-      fetchFhirSingleResource(session.accessToken, { resourceType: 'Questionnaire', id: 'OralCancerPatientRegistration' })
-        .then((questionnaire: IQuestionnaire) => {
-          const fQuestionnaire: any = [
-            { text: 'Username', answerOption: [{ valueCoding: { code: 'Practitioner/flw1', display: 'flw1' } }] },
-            {
-              text: 'Gender',
-              answerOption: [
-                {
-                  "valueCoding": {
-                    "system": "http://hl7.org/fhir/administrative-gender",
-                    "code": "male",
-                    "display": "Male"
-                  }
-                },
-                {
-                  "valueCoding": {
-                    "system": "http://hl7.org/fhir/administrative-gender",
-                    "code": "female",
-                    "display": "Female"
-                  }
-                },
-                {
-                  "valueCoding": {
-                    "system": "http://hl7.org/fhir/administrative-gender",
-                    "code": "other",
-                    "display": "Other"
-                  }
-                }
-              ]
-            }
-          ];
-          const habitHistoryGroup = questionnaire?.item?.find(i => i.linkId === 'habit-history-group');
-          const screeningGroup = questionnaire?.item?.find((i: any) => i.linkId === 'screening-group');
-          const screeningOralExamination = screeningGroup?.item?.find((i: any) => i.linkId === 'patient-screening-question-group');
-          if (habitHistoryGroup?.item) fQuestionnaire.push(...habitHistoryGroup?.item)
-          if (screeningOralExamination?.item) fQuestionnaire.push(...screeningOralExamination?.item)
-          setFilterQuestionnaire(fQuestionnaire);
-        })
-        .catch((error: any) => message.error('Error fetching Filter questionnaire'));
+      fetchFilterOptions();
     }
   }, [session?.accessToken])
 
@@ -134,7 +145,7 @@ const ReportsFilterModal = ({ setFilter }: { setFilter: (params: any) => void })
                     <label htmlFor={"Select-all" + i} className="text-gray-600 text-base font-normal cursor-pointer">Select all</label>
                   </div> */}
                 </div>
-                <div className="self-stretch justify-start items-center gap-6 inline-flex">
+                <div className="self-stretch justify-start items-center gap-6 inline-flex flex-wrap">
                   {filterQuestion?.answerOption?.map((option: any, j: number) => {
                     return <div key={j} className="w-[112px] justify-start items-center gap-2 inline-flex">
                       <input type="checkbox" id={option.valueCoding.code + i} className="w-5 h-5 cursor-pointer" onChange={onFilterChange(filterQuestion?.text, option)} />
