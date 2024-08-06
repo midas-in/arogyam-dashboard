@@ -26,6 +26,13 @@ import {
 } from '@/app/loader';
 import { getResourcesFromBundle, REMOTE_SPECIALIST_USER_TYPE_CODE } from '@/utils/fhir-utils';
 
+interface QueryParams {
+    sort: string;
+    dateAfter?: string | Date;
+    dateBefore?: string | Date;
+    limit: number;
+}
+
 export default function RemoteSpecialistDiagnosis() {
     const { id } = useParams();
     const router = useRouter();
@@ -34,7 +41,11 @@ export default function RemoteSpecialistDiagnosis() {
 
     const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState<ITask[]>([]);
-    const [activeTaskIndex, setActiveTaskIndex] = useState<number>(-1);
+    const [taskCount, setTaskCount] = useState<number>(0);
+    const [activeTask, setActiveTask] = useState<ITask>();
+    const [activeTaskIndex, setActiveTaskIndex] = useState<number>(0);
+    const [nextTaskId, setNextTaskId] = useState<string | null>(null);
+    const [prevTaskId, setPrevTaskId] = useState<string | null>(null);
     const [questionnaire, setQuestionnaire] = useState<IQuestionnaire>();
     const [questionResponse, setQuestionResponse] = useState<IQuestionnaireResponse>();
     const [encounter, setEncounter] = useState<IEncounter>();
@@ -44,46 +55,149 @@ export default function RemoteSpecialistDiagnosis() {
     const [submitting, setSubmitting] = useState(false);
     const [activeMediaIndex, setActiveMediaIndex] = useState<number>(0);
 
-    const activeTask: ITask = tasks[activeTaskIndex]
-
     useEffect(() => {
-        if (session?.accessToken && !tasks?.length) {
-            const params = {
+        if (id && typeof id === 'string') {
+            fetchTaskAndAdjacentTaskIds(id);
+        }
+    }, [id]);
+
+    async function fetchTaskIndex(task: ITask) {
+        if (task && session?.accessToken) {
+            const params: any = {
                 resourceType: 'Task',
                 query: {
                     owner: `Practitioner/${session?.resourceId}`,
                     status: searchParams.get('status') ?? 'requested',
-                    _count: 100,
+                    _sort: 'authored-on,_id',
+                    _count: '1',
+                    _summary: 'count',
                 }
             }
             fetchFhirResource(session.accessToken, params)
                 .then((data: IBundle) => {
-                    setTasks(getResourcesFromBundle<ITask>(data));
-
+                    setTaskCount(data.total || 0);
                 })
-                .catch((error: any) => {
-                    console.log(error);
-                    message.error('Error fetching Tasks');
-                });
-        }
-    }, [session?.accessToken])
+                .catch((error: any) => { console.log(error); message.error('Error fetching Tasks count') })
+                .finally(() => setLoading(false));
 
-    useEffect(() => {
-        if (tasks?.length && id) {
-            const index = tasks.findIndex(task => task.id === id);
-            setActiveTaskIndex(index);
-            if (index === -1) {
-                router.push('/');
-                message.error('Case not found');
+            // Get number of tasks before the current task
+            if (task?.authoredOn) {
+                params.query['authored-on'] = `lt${new Date(task?.authoredOn).toISOString()}`;
+            }
+            fetchFhirResource(session.accessToken, params)
+                .then((indexData: IBundle) => {
+                    const tasksBeforeCurrent = indexData.total ?? 0;
+
+                    // Calculate current index (add 1 because index is 0-based)
+                    setActiveTaskIndex(tasksBeforeCurrent + 1);
+                })
+                .catch((error: any) => { console.log(error); message.error('Error fetching Tasks count') })
+                .finally(() => setLoading(false));
+        }
+    }
+
+    async function fetchTask(taskId: string) {
+        if (session?.accessToken) {
+            try {
+                const payload = {
+                    resourceType: 'Task',
+                    id: taskId
+                }
+                const taskData: ITask = await fetchFhirSingleResource(session?.accessToken, payload)
+                setActiveTask(taskData);
+                fetchTaskIndex(taskData)
+                return taskData;
+            }
+            catch (error) {
+                console.log(error);
+                message.error('Failed to fetch task');
             }
         }
-    }, [tasks?.length, id])
+    }
+
+    async function fetchTaskAndAdjacentTaskIds(taskId: string): Promise<void> {
+        const currentTask = await fetchTask(taskId);
+
+        if (currentTask) {
+            const nextTask = await searchTasks({
+                sort: 'authored-on,_id',
+                dateAfter: currentTask.authoredOn,
+                limit: 1
+            });
+
+            const prevTask = await searchTasks({
+                sort: '-authored-on,-_id',
+                dateBefore: currentTask.authoredOn,
+                limit: 1
+            });
+
+            setNextTaskId(nextTask && nextTask[0]?.id || null);
+            setPrevTaskId(prevTask && prevTask[0]?.id || null);
+        }
+    }
+
+    async function searchTasks(params: QueryParams) {
+        if (session?.accessToken) {
+            try {
+                const queryParams: any = {
+                    owner: `Practitioner/${session?.resourceId}`,
+                    status: searchParams.get('status') ?? 'requested',
+                    _sort: params.sort,
+                    _count: params.limit.toString(),
+                };
+
+                if (params.dateAfter) queryParams['authored-on'] = `gt${new Date(params.dateAfter).toISOString()}`;
+                if (params.dateBefore) queryParams['authored-on'] = `lt${new Date(params.dateBefore).toISOString()}`;
+
+                const data = await fetchFhirResource(session.accessToken, { resourceType: 'Task', query: queryParams });
+                return getResourcesFromBundle<ITask>(data);
+            }
+            catch (error) {
+                console.log(error);
+                message.error('Failed to fetch tasks');
+            }
+        }
+    }
+
+    // useEffect(() => {
+    //     if (session?.accessToken && !tasks?.length) {
+    //         const params = {
+    //             resourceType: 'Task',
+    //             query: {
+    //                 _id: id,
+    //                 owner: `Practitioner/${session?.resourceId}`,
+    //                 status: searchParams.get('status') ?? 'requested',
+    //                 _count: 1,
+    //             }
+    //         }
+    //         fetchFhirResource(session.accessToken, params)
+    //             .then((data: IBundle) => {
+    //                 setTasks(getResourcesFromBundle<ITask>(data));
+
+    //             })
+    //             .catch((error: any) => {
+    //                 console.log(error);
+    //                 message.error('Error fetching Tasks');
+    //             });
+    //     }
+    // }, [session?.accessToken])
+
+    // useEffect(() => {
+    //     if (tasks?.length && id) {
+    //         const index = tasks.findIndex(task => task.id === id);
+    //         setActiveTaskIndex(index);
+    //         if (index === -1) {
+    //             router.push('/');
+    //             message.error('Case not found');
+    //         }
+    //     }
+    // }, [tasks?.length, id])
 
     useEffect(() => {
         // When id/index changes
-        if (session?.accessToken && tasks?.length && activeTaskIndex !== undefined && activeTaskIndex !== -1) {
+        if (session?.accessToken && activeTask?.id) {
             // Fetch encounter
-            const [encounterResourceType, encounterId] = activeTask.encounter?.reference?.split('/') ?? []
+            const [encounterResourceType, encounterId] = activeTask?.encounter?.reference?.split('/') ?? []
             const [questionnaireResourceType, questionnaireId] = activeTask?.focus?.reference?.split('/') ?? []
 
             Promise.all([
@@ -120,19 +234,26 @@ export default function RemoteSpecialistDiagnosis() {
                 })
                 .finally(() => setLoading(false));
         }
-    }, [id, activeTaskIndex])
+    }, [activeTask?.id])
 
-    const onClickPrevious = () => {
-        if (activeTaskIndex > 0) {
-            const params = new URLSearchParams(searchParams.toString());
-            router.push(`/diagnosis/${tasks[activeTaskIndex - 1].id}?${params.toString()}`);
-        }
-    }
+    // const onClickPrevious = () => {
+    //     if (activeTaskIndex > 0) {
+    //         const params = new URLSearchParams(searchParams.toString());
+    //         router.push(`/diagnosis/${tasks[activeTaskIndex - 1].id}?${params.toString()}`);
+    //     }
+    // }
 
-    const onClickNext = () => {
-        if (tasks?.length && activeTaskIndex < tasks?.length - 1) {
+    // const onClickNext = () => {
+    //     if (tasks?.length && activeTaskIndex < tasks?.length - 1) {
+    //         const params = new URLSearchParams(searchParams.toString());
+    //         router.push(`/diagnosis/${tasks[activeTaskIndex + 1].id}?${params.toString()}`);
+    //     }
+    // }
+
+    const navigateToTask = (taskId: string): void => {
+        if (taskId) {
             const params = new URLSearchParams(searchParams.toString());
-            router.push(`/diagnosis/${tasks[activeTaskIndex + 1].id}?${params.toString()}`);
+            router.push(`/diagnosis/${taskId}?${params.toString()}`);
         }
     }
 
@@ -170,15 +291,17 @@ export default function RemoteSpecialistDiagnosis() {
                 message.error('There are no senior specialist available for the second opinion');
             }
             else {
-                // update status to completed
-                const taskPayload: ITask = {
-                    ...activeTask,
-                    owner: foundParameter.valueReference
+                if (activeTask) {
+                    // update status to completed
+                    const taskPayload: ITask = {
+                        ...activeTask,
+                        owner: foundParameter.valueReference
+                    }
+                    await updateFhirResource(session?.accessToken as string, taskPayload);
                 }
-                await updateFhirResource(session?.accessToken as string, taskPayload);
             }
 
-            onClickNext();
+            nextTaskId && navigateToTask(nextTaskId)
         }
         catch (e) {
             console.log(e);
@@ -190,82 +313,84 @@ export default function RemoteSpecialistDiagnosis() {
     }
 
     const onSubmit = async (answers: { [key: string]: NonNullable<NonNullable<IQuestionnaire['item']>[number]['answerOption']>[number] }) => {
-        setSubmitting(true);
+        if (activeTask) {
+            setSubmitting(true);
 
-        try {
-            // create a resource QuestionnaireResponse
-            const item: any = questionnaire?.item?.map(({ answerOption, ...itm }: any) => {
-                itm.answer = [answers[itm?.linkId as string]];
-                return itm;
-            });
+            try {
+                // create a resource QuestionnaireResponse
+                const item: any = questionnaire?.item?.map(({ answerOption, ...itm }: any) => {
+                    itm.answer = [answers[itm?.linkId as string]];
+                    return itm;
+                });
 
-            const responsePayload: IQuestionnaireResponse = {
-                resourceType: 'QuestionnaireResponse',
-                id: v4(),
-                questionnaire: questionnaire?.url,
-                status: 'completed',
-                subject: activeTask.for,
-                author: activeTask.owner,
-                encounter: activeTask.encounter,
-                item,
-                authored: new Date().toISOString(),
-            }
-            const extractPayload = {
-                resourceType: "Parameters",
-                parameter: [
-                    {
-                        name: "questionnaire-response",
-                        resource: responsePayload
+                const responsePayload: IQuestionnaireResponse = {
+                    resourceType: 'QuestionnaireResponse',
+                    id: v4(),
+                    questionnaire: questionnaire?.url,
+                    status: 'completed',
+                    subject: activeTask.for,
+                    author: activeTask.owner,
+                    encounter: activeTask.encounter,
+                    item,
+                    authored: new Date().toISOString(),
+                }
+                const extractPayload = {
+                    resourceType: "Parameters",
+                    parameter: [
+                        {
+                            name: "questionnaire-response",
+                            resource: responsePayload
+                        }
+                    ]
+                }
+                const extractedResponse = await extractQuestionnaireResponse(session?.accessToken as string, extractPayload);
+
+                // Update the follow up task and assign it the original flw
+                const followUpTask = extractedResponse?.entry?.find((e: any) =>
+                    e.resource.resourceType === "Task" &&
+                    e.resource.instantiatesUri === "https://midas.iisc.ac.in/fhir/Task/oral-cancer-screening-follow-up"
+                )
+                if (followUpTask) {
+                    if (patient?.generalPractitioner?.[0]?.reference) {
+                        followUpTask.resource.owner = patient.generalPractitioner[0];
                     }
-                ]
-            }
-            const extractedResponse = await extractQuestionnaireResponse(session?.accessToken as string, extractPayload);
+                    if (!followUpTask.owner && encounter?.participant && encounter.participant[0]?.individual?.reference) {
+                        followUpTask.resource.owner = encounter.participant[0]?.individual;
+                    }
+                }
 
-            // Update the follow up task and assign it the original flw
-            const followUpTask = extractedResponse?.entry?.find((e: any) =>
-                e.resource.resourceType === "Task" &&
-                e.resource.instantiatesUri === "https://midas.iisc.ac.in/fhir/Task/oral-cancer-screening-follow-up"
-            )
-            if (followUpTask) {
-                if (patient?.generalPractitioner?.[0]?.reference) {
-                    followUpTask.resource.owner = patient.generalPractitioner[0];
+                extractedResponse.entry?.push({
+                    resource: responsePayload,
+                    request: {
+                        method: 'PUT',
+                        url: `${responsePayload.resourceType}/${responsePayload.id}`
+                    }
+                });
+                // update status to completed
+                const taskPayload: ITask = {
+                    ...activeTask,
+                    status: 'completed'
                 }
-                if (!followUpTask.owner && encounter?.participant && encounter.participant[0]?.individual?.reference) {
-                    followUpTask.resource.owner = encounter.participant[0]?.individual;
-                }
-            }
 
-            extractedResponse.entry?.push({
-                resource: responsePayload,
-                request: {
-                    method: 'PUT',
-                    url: `${responsePayload.resourceType}/${responsePayload.id}`
-                }
-            });
-            // update status to completed
-            const taskPayload: ITask = {
-                ...activeTask,
-                status: 'completed'
+                extractedResponse.entry?.push({
+                    resource: taskPayload,
+                    request: {
+                        method: 'PUT',
+                        url: `${taskPayload.resourceType}/${taskPayload.id}`
+                    }
+                });
+                await createMultipleFhirResources(session?.accessToken as string, extractedResponse);
+                message.success('Submitted successfully');
+                setTasks(update(tasks, { [activeTaskIndex]: { $merge: taskPayload } }));
+                nextTaskId && navigateToTask(nextTaskId)
             }
-
-            extractedResponse.entry?.push({
-                resource: taskPayload,
-                request: {
-                    method: 'PUT',
-                    url: `${taskPayload.resourceType}/${taskPayload.id}`
-                }
-            });
-            await createMultipleFhirResources(session?.accessToken as string, extractedResponse);
-            message.success('Submitted successfully');
-            setTasks(update(tasks, { [activeTaskIndex]: { $merge: taskPayload } }));
-            onClickNext();
-        }
-        catch (e) {
-            console.log(e);
-            message.error(`Error while submitting question answer`);
-        }
-        finally {
-            setSubmitting(false)
+            catch (e) {
+                console.log(e);
+                message.error(`Error while submitting question answer`);
+            }
+            finally {
+                setSubmitting(false)
+            }
         }
     }
 
@@ -281,7 +406,7 @@ export default function RemoteSpecialistDiagnosis() {
             </div>
             {/* pagination */}
             <div className="flex items-center justify-center gap-3">
-                <button className="w-[98px] h-8 p-1 bg-gray-25 rounded justify-center items-center gap-1 inline-flex disabled:opacity-50" onClick={onClickPrevious} disabled={activeTaskIndex === 0}>
+                <button className="w-[98px] h-8 p-1 bg-gray-25 rounded justify-center items-center gap-1 inline-flex disabled:opacity-50" onClick={() => prevTaskId && navigateToTask(prevTaskId)} disabled={activeTaskIndex === 0}>
                     <div className="w-6 h-6 relative" >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M10.8284 12.0007L15.7782 16.9504L14.364 18.3646L8 12.0007L14.364 5.63672L15.7782 7.05093L10.8284 12.0007Z" fill="black" />
@@ -289,8 +414,8 @@ export default function RemoteSpecialistDiagnosis() {
                     </div>
                     <div className="text-black text-base font-normal">Previous</div>
                 </button>
-                <p className="text-black text-base font-normal border-l border-r px-3 border-gray-100 inline-flex align-center justify-center align-bottom	leading-8">Case {(activeTaskIndex ?? 0) + 1}/{tasks?.length}</p>
-                <button className="w-[70px] h-8 p-1 bg-gray-25 rounded justify-start items-center gap-1 inline-flex disabled:opacity-50" onClick={onClickNext} disabled={activeTaskIndex === (tasks?.length ?? 0) - 1}>
+                <p className="text-black text-base font-normal border-l border-r px-3 border-gray-100 inline-flex align-center justify-center align-bottom	leading-8">Case {activeTaskIndex}/{taskCount}</p>
+                <button className="w-[70px] h-8 p-1 bg-gray-25 rounded justify-start items-center gap-1 inline-flex disabled:opacity-50" onClick={() => nextTaskId && navigateToTask(nextTaskId)} disabled={activeTaskIndex === (taskCount ?? 0)}>
                     <div className="text-black text-base font-normal">Next</div>
                     <div className="w-6 h-6 relative">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -322,7 +447,7 @@ export default function RemoteSpecialistDiagnosis() {
                         id={id as string}
                         questionnaire={questionnaire}
                         questionResponse={questionResponse}
-                        status={(tasks?.length ? activeTask?.status : '') as IQuestionnaire['status'] | 'completed' | ''}
+                        status={(activeTask?.status ?? '') as IQuestionnaire['status'] | 'completed' | ''}
                         onSubmit={onSubmit}
                         sendForSecondOpinion={sendForSecondOpinion}
                         allowSecondOpinion={session?.userType === REMOTE_SPECIALIST_USER_TYPE_CODE}

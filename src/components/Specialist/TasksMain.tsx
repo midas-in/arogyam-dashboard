@@ -36,6 +36,7 @@ export default function RemoteSpecialistTasks() {
                     owner: `Practitioner/${session?.resourceId}`,
                     status: ['requested', 'completed'][activeTabIndex],
                     _include: ['Task:patient', 'Task:encounter'],
+                    _sort: 'authored-on,_id',
                     _count: limit,
                     _getpagesoffset: (currentPage - 1) * limit,
                 }
