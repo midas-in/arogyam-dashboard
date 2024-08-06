@@ -270,14 +270,14 @@ export default function RemoteSpecialistDiagnosis() {
     }
 
     return <div className="flex flex-1 flex-col gap-3 mx-6 my-4">
-        <div className="flex align-center justify-between p-3 border-b border-gray-100">
+        <div className="flex align-center justify-between px-3 pb-3 border-b border-gray-100">
             <div className="flex items-center gap-3">
                 <Link href={'/'}>
                     <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z" fill="#212121" />
                     </svg>
                 </Link>
-                <div className="text-gray-900 text-2xl leading-8">{questionnaire && questionnaire?.item ? questionnaire?.item[0]?.text : ''}</div>
+                <p className="text-gray-900 text-2xl leading-8 font-normal">{questionnaire && questionnaire?.item ? questionnaire?.item[0]?.text : ''}</p>
             </div>
             {/* pagination */}
             <div className="flex items-center justify-center gap-3">
@@ -301,7 +301,7 @@ export default function RemoteSpecialistDiagnosis() {
             </div>
         </div>
 
-        <div className={`min-h-[calc(100vh-166px)] relative flex items-center justify-center ${loading ? 'bg-gray-100' : 'bg-black'}`}>
+        <div className={`min-h-[calc(100vh-154px)] relative flex items-center justify-center ${loading ? 'bg-gray-100' : 'bg-black'}`}>
             {loading
                 ? <Loader />
                 : <>

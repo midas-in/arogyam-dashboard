@@ -1,12 +1,18 @@
-import React, { ReactNode, useState } from "react";
+import React, { ImgHTMLAttributes, useEffect, useState } from "react";
 import Image, { ImageProps } from "next/image";
 
-export const NextImage: React.FC<ImageProps> = ({ alt = '', ...props }) => {
+export const NextImage: React.FC<ImgHTMLAttributes<HTMLImageElement>> = ({ alt = '', ...props }) => {
     const [isError, setIsError] = useState(false);
+
+    useEffect(() => {
+        if (props.src) {
+            setIsError(false);
+        }
+    }, [props.src])
 
     if (isError) {
         return <div className={props.className} />
     }
-
-    return <Image onError={() => setIsError(true)} {...props} alt={alt} />
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img onError={() => setIsError(true)} {...props} alt={alt} />
 }

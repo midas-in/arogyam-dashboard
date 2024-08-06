@@ -11,8 +11,7 @@ import { ReportTable } from '@/components/Admin/Reports/ReportTable';
 import { ReportHistoryTable } from '@/components/Admin/Reports/ReportHistoryTable';
 import { SITE_COORDINATOR_USER_TYPE_CODE, SUPERVISOR_USER_TYPE_CODE, SITE_ADMIN_TYPE_CODE } from '@/utils/fhir-utils';
 import { fetchReports } from '@/app/loader';
-import { getResourcesFromBundle } from '@/utils/fhir-utils';
-import { subDays } from '@/utils'
+import { getResourcesFromBundle, DIAGNOSIS_RESULTS_MAPPING } from '@/utils/fhir-utils';
 
 interface CustomDateInputProps {
   value?: string;
@@ -48,8 +47,8 @@ export default function Reports() {
   const [loading, setLoading] = useState<boolean>(false);
   const [reportFetched, setReportFetched] = useState<boolean>(false);
   const [filter, setFilter] = useState<any>({});
-  const [startDate, setStartDate] = useState<Date | null>(subDays(new Date(), 5));
-  const [endDate, setEndDate] = useState<Date | null>(new Date());
+  const [startDate, setStartDate] = useState<Date | null>();
+  const [endDate, setEndDate] = useState<Date | null>();
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
@@ -115,6 +114,20 @@ export default function Reports() {
               }, {});
               c.images = images;
             }
+            const diagnosisQuestionnaireResponse = allData.find(d => {
+              return d.resourceType === "QuestionnaireResponse" &&
+                d.subject.reference === `Patient/${c.id}` &&
+                (d.questionnaire === 'https://midas.iisc.ac.in/fhir/Questionnaire/OralCancerScreenPatient'
+                  || d.questionnaire === 'https://midas.iisc.ac.in/fhir/Questionnaire/OralCancerLabelImage')
+            });
+
+            if (diagnosisQuestionnaireResponse) {
+              const provisionalDiagnosis = diagnosisQuestionnaireResponse?.item.find((i: any) => i.linkId === 'provisional-diagnosis');
+              const selectedOption: string = provisionalDiagnosis?.answer ? provisionalDiagnosis?.answer[0].valueCoding.display.toLowerCase() : null;
+              c.provisionalDiagnosis = DIAGNOSIS_RESULTS_MAPPING[selectedOption]?.isSuspicious ? 'Suspicious' : 'Non suspicious';
+              const recommendation = diagnosisQuestionnaireResponse?.item.find((i: any) => i.linkId === 'recommendation');
+              c.recommendation = recommendation?.answer ? recommendation?.answer[0].valueCoding.display : null;
+            }
           })
           setReports(cases);
         })
@@ -149,8 +162,8 @@ export default function Reports() {
   const resetBtnClick = () => {
     setReports([]);
     setTotalItems(0);
-    setStartDate(subDays(new Date(), 5))
-    setEndDate(new Date())
+    setStartDate(null);
+    setEndDate(null);
     setReportFetched(false);
   }
 
