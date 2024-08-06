@@ -93,7 +93,7 @@ export default function Reports() {
               // Extract basic info question answers
               const basicInfoGroup = questionnaireResponse?.item.find((i: any) => i.linkId === 'basic-info-group');
               const basicInfo = basicInfoGroup?.item.reduce((prev: any, curr: any) => {
-                return Object.assign({}, prev, { [curr.text]: curr.answer ? curr.answer[0].valueCoding?.display ?? curr.answer[0].valueString : '' });
+                return Object.assign({}, prev, { [curr.text]: curr.answer ? curr.answer[0].valueCoding?.display ?? curr.answer[0].valueString ?? curr.answer[0].valueInteger : '' });
               }, {});
               c.basicInfo = basicInfo;
               // Extract habit history question answers
