@@ -88,7 +88,7 @@ const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
       <h4 className="text-gray-900 text-base font-semibold leading-normal">Patient details</h4>
     </div> */}
 
-    <div className={`overflow-y-auto h-[calc(100vh-261px)] px-4 flex-col justify-start items-start gap-2 inline-flex ${collapseSidebar ? 'hidden' : ''}`}>
+    <div className={`overflow-y-auto h-[calc(100vh-249px)] px-4 flex-col justify-start items-start gap-2 inline-flex ${collapseSidebar ? 'hidden' : ''}`}>
       <div className="flex-col justify-start items-start gap-2 flex border-b border-gray-100">
         <h6 className="text-gray-900 text-sm font-semibold leading-tight">Registration Details</h6>
         <div className="pr-4 py-2 rounded justify-start items-start inline-flex">

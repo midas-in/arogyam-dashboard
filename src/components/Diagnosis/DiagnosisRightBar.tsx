@@ -4,6 +4,7 @@ import { message } from 'antd';
 import { IQuestionnaire } from '@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaire';
 import { IQuestionnaireResponse } from "@smile-cdr/fhirts/dist/FHIR-R4/interfaces/IQuestionnaireResponse";
 import { executeFhirCqlQuery } from '@/app/loader';
+import { DIAGNOSIS_RESULTS_MAPPING } from '@/utils/fhir-utils';
 
 interface DiagnosisRightBarProps {
     id: string;
@@ -18,19 +19,6 @@ interface DiagnosisRightBarProps {
 interface DiagnosisResult {
     risk: string;
     isSuspicious: boolean;
-}
-
-const DIAGNOSIS_RESULTS_MAPPING: { [key: string]: DiagnosisResult } = {
-    'oral cavity normal': { risk: 'Low', isSuspicious: false },
-    'benign': { risk: 'Low', isSuspicious: false },
-    'smokeless tobacco keratosis': { risk: 'Low', isSuspicious: true },
-    'homogenous Oral leukoplakia': { risk: 'Low', isSuspicious: true },
-    'oral lichen planus': { risk: 'Low', isSuspicious: true },
-    'speckled oral leukoplakia': { risk: 'High', isSuspicious: true },
-    'erythroplakia': { risk: 'High', isSuspicious: true },
-    'verrucous oral leukoplakia': { risk: 'High', isSuspicious: true },
-    'proliferative verrucous oral leukoplakia': { risk: 'High', isSuspicious: true },
-    'squamous cell carcinoma of oral mucous membrane': { risk: 'High', isSuspicious: true },
 }
 
 const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
@@ -180,7 +168,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
             </div>
         </div>
 
-        <div className={`px-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-482px)] ${!showRightSidebar ? 'hidden' : ''}`}>
+        <div className={`px-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-470px)] ${!showRightSidebar ? 'hidden' : ''}`}>
             {questionnaire?.item?.map((question, qIndex) => {
                 // media-id question will be hidden
                 if (question.linkId === 'media-id') return;
@@ -188,7 +176,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                 if (question.type === 'choice' && elementType === 'radio-button') {
                     return <div key={qIndex} className="bg-white flex-col justify-start items-start gap-2 flex">
                         <div className="self-stretch h-7 pb-1">
-                            <h6 className="self-stretch text-gray-900 text-base font-semibold leading-normal">{question.text}</h6>
+                            <h6 className="self-stretch text-gray-900 text-base font-medium leading-normal">{question.text}</h6>
                         </div>
                         {question.answerOption?.map(({ valueCoding }) => {
                             const isDefaultChecked = question?.linkId ? JSON.stringify(answers[question.linkId]) === JSON.stringify({ valueCoding }) ?? false : false;
@@ -202,7 +190,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                 if (question.type === 'choice' && elementType === 'drop-down') {
                     return <div key={qIndex} className="bg-white flex-col justify-start items-start gap-2 flex">
                         <div className="self-stretch h-7 pb-1">
-                            <h6 className="self-stretch text-gray-900 text-base font-semibold leading-normal">{question.text}</h6>
+                            <h6 className="self-stretch text-gray-900 text-base font-medium leading-normal">{question.text}</h6>
                         </div>
                         <select className="custom-select h-10 self-stretch grow shrink bg-white rounded border text-gray-900 px-4 disabled:bg-gray-25" value={question?.linkId ? JSON.stringify(answers[question.linkId]) ?? '' : ''} onChange={onSelectAnswerChange(qIndex)} disabled={status === 'completed'} >
                             <option value='' disabled hidden>Select</option>
@@ -215,7 +203,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                 if (question.type === 'text') {
                     return <div key={qIndex} className="bg-white flex-col justify-start items-start gap-2 flex">
                         <div className="self-stretch h-7 pb-1">
-                            <h6 className="self-stretch text-gray-900 text-base font-semibold leading-normal">{question.text}</h6>
+                            <h6 className="self-stretch text-gray-900 text-base font-medium leading-normal">{question.text}</h6>
                         </div>
                         <textarea
                             key={qIndex}
@@ -230,7 +218,7 @@ const DiagnosisRightBar: React.FC<DiagnosisRightBarProps> = (props) => {
                 if (question.type === 'string') {
                     return <div key={qIndex} className="bg-white flex-col justify-start items-start gap-2 flex">
                         <div className="self-stretch h-7 pb-1">
-                            <h6 className="self-stretch text-gray-900 text-base font-semibold leading-normal">{question.text}</h6>
+                            <h6 className="self-stretch text-gray-900 text-base font-medium leading-normal">{question.text}</h6>
                         </div>
                         <input
                             key={qIndex}

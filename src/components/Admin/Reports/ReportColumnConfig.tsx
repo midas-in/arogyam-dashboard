@@ -18,7 +18,7 @@ export const COLUMNS: Column[] = [
     id: 'meta.lastUpdated',
     name: 'Date of case registered',
     width: 200,
-    getValue: (data: any) => formatDate(data.meta.lastUpdated)
+    getValue: (data: any) => data.extension ? formatDate(data.extension[0]?.valueDateTime) : formatDate(data.meta.lastUpdated)
   },
   {
     id: 'username',
@@ -144,12 +144,18 @@ export const COLUMNS: Column[] = [
     width: 200,
     getValue: (data: any) => data.habitHistory ? data.oralExaminations['Lesion/Patch'] : '-'
   },
-  // {
-  //   id: 'specialist-diagnosis',
-  //   name: 'Specialist diagnosis',
-  //   width: 200,
-  //   getValue: (data: any) => data.meta.lastUpdated
-  // },
+  {
+    id: 'specialist-diagnosis',
+    name: 'Specialist diagnosis',
+    width: 200,
+    getValue: (data: any) => data.provisionalDiagnosis
+  },
+  {
+    id: 'specialist-recommendation',
+    name: 'Specialist recommendation',
+    width: 200,
+    getValue: (data: any) => data.recommendation
+  },
   {
     id: 'image-1',
     name: 'Image 1',
