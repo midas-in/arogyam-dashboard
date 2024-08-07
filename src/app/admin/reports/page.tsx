@@ -198,7 +198,6 @@ export default function Reports() {
       setIsDownloading(false);
     }
   };
-  console.log(startDate, endDate);
 
   return <div className="w-full flex flex-col gap-8">
     <div className="py-3 border-b border-gray-100 flex justify-start items-start ">
