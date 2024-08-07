@@ -62,10 +62,10 @@ export default function Reports() {
     const commonParams = {
       ...filter,
       _revinclude: 'QuestionnaireResponse:subject',
-      _sort: '-_lastUpdated',
+      _sort: '-registration-date',
     }
     if (startDate && endDate) {
-      commonParams['_lastUpdated'] = [`gt${new Date(startDate).toISOString().split('T')[0]}`, `lt${new Date(endDate).toISOString().split('T')[0]}`]
+      commonParams['registration-date'] = [`gt${new Date(startDate).toISOString()}`, `le${new Date(endDate).toISOString()}`]
     }
     return commonParams;
   }
