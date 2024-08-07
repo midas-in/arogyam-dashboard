@@ -65,7 +65,7 @@ export default function Reports() {
       _sort: '-registration-date',
     }
     if (startDate && endDate) {
-      commonParams['registration-date'] = [`gt${new Date(startDate).toISOString().split('T')[0]}`, `lt${new Date(endDate).toISOString().split('T')[0]}`]
+      commonParams['registration-date'] = [`gt${new Date(startDate).toISOString()}`, `le${new Date(endDate).toISOString()}`]
     }
     return commonParams;
   }
@@ -198,6 +198,7 @@ export default function Reports() {
       setIsDownloading(false);
     }
   };
+  console.log(startDate, endDate);
 
   return <div className="w-full flex flex-col gap-8">
     <div className="py-3 border-b border-gray-100 flex justify-start items-start ">
