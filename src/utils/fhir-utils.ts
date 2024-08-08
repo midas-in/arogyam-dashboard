@@ -156,3 +156,16 @@ export const OBSERVATION_CODE_LABEL_MAPPING_REVERSE: { [key: string]: string } =
     'Able to open mouth?': 'LP232821-1',
     'Lesion/Patch': '62596-2'
 }
+
+export const DIAGNOSIS_RESULTS_MAPPING: { [key: string]: { risk: string, isSuspicious: boolean } } = {
+    'oral cavity normal': { risk: 'Low', isSuspicious: false },
+    'benign': { risk: 'Low', isSuspicious: false },
+    'smokeless tobacco keratosis': { risk: 'Low', isSuspicious: true },
+    'homogenous Oral leukoplakia': { risk: 'Low', isSuspicious: true },
+    'oral lichen planus': { risk: 'Low', isSuspicious: true },
+    'speckled oral leukoplakia': { risk: 'High', isSuspicious: true },
+    'erythroplakia': { risk: 'High', isSuspicious: true },
+    'verrucous oral leukoplakia': { risk: 'High', isSuspicious: true },
+    'proliferative verrucous oral leukoplakia': { risk: 'High', isSuspicious: true },
+    'squamous cell carcinoma of oral mucous membrane': { risk: 'High', isSuspicious: true },
+}

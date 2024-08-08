@@ -69,7 +69,7 @@ export function DiagnosisImage({ medias, activeMediaIndex = 0, setActiveMediaInd
             </svg>
           </div>
         </div>
-        <TransformComponent wrapperClass='!h-[calc(100vh-185px)] !w-full cursor-grab' contentClass='!h-full'>
+        <TransformComponent wrapperClass='!h-[calc(100vh-173px)] !w-full cursor-grab' contentClass='!h-full'>
           <NextImage
             width={700}
             height={700}
