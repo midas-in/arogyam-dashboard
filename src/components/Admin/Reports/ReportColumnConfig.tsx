@@ -153,7 +153,7 @@ export const COLUMNS: Column[] = [
   {
     id: 'specialist-recommendation',
     name: 'Specialist recommendation',
-    width: 200,
+    width: 240,
     getValue: (data: any) => data.recommendation
   },
   {

@@ -19,8 +19,32 @@ export const getUrlOrigin = (url: string) => {
         return '';
     }
 }
-export const formatDate = (date?: Date | string) => {
-    return date ? new Date(date).toLocaleString('en-In', { timeZone: 'Asia/Kolkata' }).split(',')[0].replaceAll('/', '-') : ''
+export const formatDate = (date?: Date | string | null, separator: string = '-') => {
+    return date ? new Date(date).toLocaleString('en-In', { timeZone: 'Asia/Kolkata' }).split(',')[0].replaceAll('/', separator) : ''
+}
+
+export const formatDateTime = (dateTime?: Date | string | null) => {
+    if (!dateTime) {
+        return '';
+    }
+    const date = new Date(dateTime);
+
+    const day = date.getDate();
+    const month = date.getMonth() + 1; // Months are zero-based
+    const year = date.getFullYear();
+
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    hours = hours % 12;
+    hours = hours ? hours : 12; // If hour is 0, set it to 12 (midnight or noon)
+    const paddedHours = (hours).toString().padStart(2, '0');
+
+    const formattedTime = `${paddedHours}:${minutes} ${ampm}`;
+    const formattedDate = `${day}/${month}/${year} - ${formattedTime}`;
+
+    return formattedDate;
 }
 
 /**
