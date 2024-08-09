@@ -137,6 +137,14 @@ body:has(.no-scroll) {
   box-shadow: 4px 0 4px -2px rgba(0, 0, 0, 0.25);
 }
 
+/* Date range picker - hide date inputs */
+.rdrDateRangePickerWrapper .rdrDateDisplayWrapper {
+  display: none;
+}
+.rdrDateRangePickerWrapper .rdrDefinedRangesWrapper .rdrInputRanges {
+  display: none;
+}
+
 /* width */
 ::-webkit-scrollbar {
   width: 4px;

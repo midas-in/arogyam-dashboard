@@ -21,7 +21,7 @@ export async function middleware(req: NextRequest) {
         }
     }
 
-    if (pathname.startsWith('/admin/user')) {
+    if (pathname.startsWith('/admin/user') || pathname.startsWith('/admin/flw-performance')) {
         if (!session || ![SITE_COORDINATOR_USER_TYPE_CODE].includes(session.userType as string)) {
             return NextResponse.redirect(new URL('/dashboard', req.url));
         }
