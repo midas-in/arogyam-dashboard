@@ -106,7 +106,7 @@ const DiagnosisLeftBar: React.FC<DiagnosisLeftBarProps> = (props) => {
             <div className="justify-start items-start gap-2 inline-flex">
               <p className="text-gray-900 text-sm font-semibold leading-tight" style={{ width: (width / 2) - 32 }}>Captured on</p>
               <p className="text-gray-900 text-sm font-normal leading-tight">:</p>
-              <p className="text-gray-900 text-sm font-normal leading-tight">{encounter?.period?.end ? formatDate(encounter?.period?.end) : '-'}</p>
+              <p className="text-gray-900 text-sm font-normal leading-tight">{patient?.extension && patient.extension[0]?.valueDateTime ? formatDate(patient?.extension[0]?.valueDateTime) : '-'}</p>
             </div>
             <div className="justify-start items-start gap-2 inline-flex">
               <p className="text-gray-900 text-sm font-semibold leading-tight" style={{ width: (width / 2) - 32 }}>State</p>
