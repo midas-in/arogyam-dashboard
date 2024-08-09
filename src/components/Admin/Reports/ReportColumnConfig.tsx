@@ -11,7 +11,7 @@ export const COLUMNS: Column[] = [
   {
     id: 'id',
     name: 'Unique case ID',
-    width: 240,
+    width: 200,
     getValue: (data: any) => data.id
   },
   {
@@ -50,7 +50,7 @@ export const COLUMNS: Column[] = [
   {
     id: 'age',
     name: 'Age',
-    width: 100,
+    width: 200,
     getValue: (data: any) => data.birthDate ? getAge(data?.birthDate) : '-'
   },
   {
