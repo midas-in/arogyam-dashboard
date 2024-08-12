@@ -57,7 +57,7 @@ const TaskTable = (props: TaskTableProps) => {
                                 <span className="flex-1 font-normal text-gray-900 text-base">{task?.for?.reference?.split('/')[1]}</span>
                                 <span className="w-[140px] font-normal text-gray-900 text-base">{task?.patient?.birthDate ? getAge(task?.patient?.birthDate) : '-'}</span>
                                 <span className="w-[140px] font-normal text-gray-900 text-base capitalize">{task?.patient?.gender ?? '-'}</span>
-                                <span className="w-[140px] font-normal text-gray-900 text-base">{task?.encounterData?.period?.end ? formatDate(task?.encounterData?.period?.end) : '-'}</span>
+                                <span className="w-[140px] font-normal text-gray-900 text-base">{task?.patient?.extension && task?.patient.extension[0]?.valueDateTime ? formatDate(task.patient.extension[0]?.valueDateTime) : '-'}</span>
                                 {showLabelledOn && <span className="w-[200px] font-normal text-gray-900 text-base">-</span>}
                                 <div className='w-[100px]'>
                                     <button onClick={() => { onClick(task.id as string); }} className="ml-1 bg-primary-400 text-white text-sm font-semilight py-1 px-4 rounded">
