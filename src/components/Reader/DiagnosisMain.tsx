@@ -25,9 +25,10 @@ import { getResourcesFromBundle } from '@/utils/fhir-utils';
 
 interface QueryParams {
     sort: string;
+    dateAt?: string | Date;
     dateAfter?: string | Date;
     dateBefore?: string | Date;
-    limit: number;
+    limit?: number;
 }
 
 export default function ReaderDiagnosis() {
@@ -39,7 +40,7 @@ export default function ReaderDiagnosis() {
     const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState<ITask[]>([]);
     const [taskCount, setTaskCount] = useState<number>(0);
-    const [activeTask, setActiveTask] = useState<ITask>();
+    const [task, setTask] = useState<ITask>();
     const [activeTaskIndex, setActiveTaskIndex] = useState<number>(0);
     const [nextTaskId, setNextTaskId] = useState<string | null>(null);
     const [prevTaskId, setPrevTaskId] = useState<string | null>(null);
@@ -63,7 +64,6 @@ export default function ReaderDiagnosis() {
                     owner: `Practitioner/${session?.resourceId}`,
                     status: searchParams.get('status') ?? 'requested',
                     _sort: 'authored-on,_lastUpdated',
-                    _count: 1,
                     _summary: 'count',
                 }
             }
@@ -75,18 +75,32 @@ export default function ReaderDiagnosis() {
                 .finally(() => setLoading(false));
 
             // Get number of tasks before the current task
-            if (task?.authoredOn) {
-                params.query['authored-on'] = `lt${new Date(task?.authoredOn).toISOString()}`;
-            }
-            fetchFhirResource(session.accessToken, params)
-                .then((indexData: IBundle) => {
-                    const tasksBeforeCurrent = indexData.total ?? 0;
+            try {
+                if (task?.authoredOn) {
+                    params.query['authored-on'] = `lt${new Date(task?.authoredOn).toISOString()}`;
+                }
+                const indexData: IBundle = await fetchFhirResource(session.accessToken, params)
+                const tasksBeforeCurrent = indexData.total ?? 0;
 
-                    // Calculate current index (add 1 because index is 0-based)
-                    setActiveTaskIndex(tasksBeforeCurrent + 1);
-                })
-                .catch((error: any) => { console.log(error); message.error('Error fetching Tasks count') })
-                .finally(() => setLoading(false));
+                // Fetch tasks authored at same time
+                if (task?.authoredOn) {
+                    params.query['authored-on'] = `${new Date(task?.authoredOn).toISOString()}`;
+                }
+                delete params.query._summary;
+                const data: IBundle = await fetchFhirResource(session.accessToken, params)
+                const tasksAuthoredAtSameTime = getResourcesFromBundle<ITask>(data);
+                const index = tasksAuthoredAtSameTime.findIndex(t => t.id === task.id);
+
+                // Calculate current index (add 1 because index is 0-based)
+                setActiveTaskIndex(tasksBeforeCurrent + index + 1);
+            }
+            catch (error: any) {
+                console.log(error);
+                message.error('Error fetching Tasks count');
+            }
+            finally {
+                setLoading(false)
+            }
         }
     }
 
@@ -98,7 +112,7 @@ export default function ReaderDiagnosis() {
                     id: taskId
                 }
                 const taskData: ITask = await fetchFhirSingleResource(session?.accessToken, payload)
-                setActiveTask(taskData);
+                setTask(taskData);
                 fetchTaskIndex(taskData)
                 return taskData;
             }
@@ -113,18 +127,38 @@ export default function ReaderDiagnosis() {
         const currentTask = await fetchTask(taskId);
 
         if (currentTask) {
-            const prevTask = await searchTasks({
-                sort: '-authored-on,-_lastUpdated',
-                dateBefore: currentTask.authoredOn,
-                limit: 1
-            });
-            const nextTask = await searchTasks({
+            // Get tasks authored on the same time and find previous next from it
+            const sameTimeAuthoredTasks = await searchTasks({
                 sort: 'authored-on,_lastUpdated',
-                dateAfter: currentTask.authoredOn,
-                limit: 1
+                dateAt: currentTask.authoredOn,
             });
-            setNextTaskId(nextTask && nextTask[0]?.id || null);
-            setPrevTaskId(prevTask && prevTask[0]?.id || null);
+            const currentTaskIndex = sameTimeAuthoredTasks?.findIndex(t => t.id === taskId) ?? -1;
+
+            let updatedPrevTaskId, updatedNextTaskId
+            if (sameTimeAuthoredTasks?.length && currentTaskIndex >= 0) {
+                updatedPrevTaskId = sameTimeAuthoredTasks[currentTaskIndex - 1]?.id || null;
+                updatedNextTaskId = sameTimeAuthoredTasks[currentTaskIndex + 1]?.id || null;
+                setPrevTaskId(updatedPrevTaskId || null);
+                setNextTaskId(updatedNextTaskId || null);
+            }
+            // If prev task not found from same authored date tasks, then find with date less than current task
+            if (updatedPrevTaskId === null) {
+                const prevTask = await searchTasks({
+                    sort: '-authored-on,-_lastUpdated',
+                    dateBefore: currentTask.authoredOn,
+                    limit: 1
+                });
+                setPrevTaskId(prevTask && prevTask[0]?.id || null);
+            }
+            // If next task not found from same authored date tasks, then find with date greater than current task
+            if (updatedNextTaskId === null) {
+                const nextTask = await searchTasks({
+                    sort: 'authored-on,_lastUpdated',
+                    dateAfter: currentTask.authoredOn,
+                    limit: 1
+                });
+                setNextTaskId(nextTask && nextTask[0]?.id || null);
+            }
         }
     }
 
@@ -135,9 +169,12 @@ export default function ReaderDiagnosis() {
                     owner: `Practitioner/${session?.resourceId}`,
                     status: searchParams.get('status') ?? 'requested',
                     _sort: params.sort,
-                    _count: params.limit.toString(),
                 };
+                if (params.limit) {
+                    queryParams._count = params.limit.toString();
+                }
 
+                if (params.dateAt) queryParams['authored-on'] = `${new Date(params.dateAt).toISOString()}`;
                 if (params.dateAfter) queryParams['authored-on'] = `gt${new Date(params.dateAfter).toISOString()}`;
                 if (params.dateBefore) queryParams['authored-on'] = `lt${new Date(params.dateBefore).toISOString()}`;
 
@@ -184,14 +221,14 @@ export default function ReaderDiagnosis() {
 
     useEffect(() => {
         // When id/index changes
-        if (session?.accessToken && activeTask?.id) {
-            if (activeTask && activeTask.input && activeTask.input.length > 0 && activeTask.input[0]) {
+        if (session?.accessToken && task?.id) {
+            if (task && task.input && task.input.length > 0 && task.input[0]) {
                 // Fetch media(images)
-                const [mediaResourceType, mediaId] = activeTask.input[0]?.valueReference?.reference?.split('/') ?? []
+                const [mediaResourceType, mediaId] = task.input[0]?.valueReference?.reference?.split('/') ?? []
                 // Fetch Questionnaire
-                const [questionnaireResourceType, questionnaireId] = activeTask.focus?.reference?.split('/') ?? []
+                const [questionnaireResourceType, questionnaireId] = task.focus?.reference?.split('/') ?? []
                 // Fetch patient as well
-                // const [patientResourceType, patientId] = activeTask.for?.reference?.split('/') ?? []
+                // const [patientResourceType, patientId] = task.for?.reference?.split('/') ?? []
 
                 Promise.all([
                     fetchFhirSingleResource(session?.accessToken, { resourceType: questionnaireResourceType, id: questionnaireId }),
@@ -208,12 +245,12 @@ export default function ReaderDiagnosis() {
                                 setQuestionResponse({ item: [{ ...mediaIdItem, answer: [{ valueString: `Media/${mda?.id}` }] }] });
                             }
                         }
-                        if (activeTask.status === 'completed' && ques && ques?.url) {
+                        if (task.status === 'completed' && ques && ques?.url) {
                             const qResponse = await fetchFhirResource(session?.accessToken as string, {
                                 resourceType: 'QuestionnaireResponse',
                                 query: {
                                     questionnaire: ques.url,
-                                    encounter: activeTask.encounter?.reference,
+                                    encounter: task.encounter?.reference,
                                     author: `Practitioner/${session?.resourceId}`,
                                 }
                             }).catch(e => console.log('Error fetching QuestionnaireResponse'));
@@ -228,7 +265,7 @@ export default function ReaderDiagnosis() {
                     });
             }
         }
-    }, [activeTask?.id])
+    }, [task?.id])
 
     // const onClickPrevious = () => {
     //     if (activeTaskIndex > 0) {
@@ -247,7 +284,6 @@ export default function ReaderDiagnosis() {
     // }
 
     const navigateToTask = (taskId: string): void => {
-        console.log('navigateToTask,', taskId);
         if (taskId) {
             const params = new URLSearchParams(searchParams.toString());
             router.push(`/diagnosis/${taskId}?${params.toString()}`);
@@ -255,7 +291,7 @@ export default function ReaderDiagnosis() {
     }
 
     const onSubmit = async (answers: { [key: string]: NonNullable<NonNullable<IQuestionnaire['item']>[number]['answerOption']>[number] }) => {
-        if (activeTask) {
+        if (task) {
             setSubmitting(true);
 
             try {
@@ -270,9 +306,9 @@ export default function ReaderDiagnosis() {
                     id: v4(),
                     questionnaire: questionnaire?.url,
                     status: 'completed',
-                    subject: activeTask.for,
-                    author: activeTask.owner,
-                    encounter: activeTask.encounter,
+                    subject: task.for,
+                    author: task.owner,
+                    encounter: task.encounter,
                     item,
                     authored: new Date().toISOString(),
                 }
@@ -295,7 +331,7 @@ export default function ReaderDiagnosis() {
                 });
                 // update status to completed
                 const taskPayload: ITask = {
-                    ...activeTask,
+                    ...task,
                     status: 'completed'
                 }
                 extractedResponse.entry?.push({
@@ -340,7 +376,7 @@ export default function ReaderDiagnosis() {
                     </div>
                     <div className="text-black text-base font-normal">Previous</div>
                 </button>
-                <p className="text-black text-base font-normal border-l border-r px-3 border-gray-100 inline-flex align-center justify-center align-bottom	leading-8">{activeTaskIndex}/{taskCount}</p>
+                <p className="min-w-[80px] text-black text-base font-normal border-l border-r px-3 border-gray-100 inline-flex align-center justify-center align-bottom	leading-8">{activeTaskIndex ? `${activeTaskIndex}/${taskCount}` : ' - '}</p>
                 <button className="w-[70px] h-8 p-1 bg-gray-25 rounded justify-start items-center gap-1 inline-flex disabled:opacity-50" onClick={() => nextTaskId && navigateToTask(nextTaskId)} disabled={activeTaskIndex === (taskCount ?? 0)}>
                     <div className="text-black text-base font-normal">Next</div>
                     <div className="w-6 h-6 relative">
@@ -361,7 +397,7 @@ export default function ReaderDiagnosis() {
                         id={id as string}
                         questionnaire={questionnaire}
                         questionResponse={questionResponse}
-                        status={(activeTask?.status ?? '') as IQuestionnaire['status'] | 'completed' | ''}
+                        status={(task?.status ?? '') as IQuestionnaire['status'] | 'completed' | ''}
                         onSubmit={onSubmit}
                     />
                 </>

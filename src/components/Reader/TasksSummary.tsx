@@ -25,7 +25,7 @@ const TaskSummary = () => {
                     query: {
                         owner: `Practitioner/${session?.resourceId}`,
                         status: st,
-                        'modified': date ? `ge${new Date(date).toISOString().split('T')[0]}` : '',
+                        'modified': date ? `ge${new Date(date).toISOString().split('T')[0]}` : null,
                         _summary: 'count'
                     }
                 })),

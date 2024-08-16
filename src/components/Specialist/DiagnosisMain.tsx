@@ -28,9 +28,10 @@ import { getResourcesFromBundle, REMOTE_SPECIALIST_USER_TYPE_CODE } from '@/util
 
 interface QueryParams {
     sort: string;
+    dateAt?: string | Date;
     dateAfter?: string | Date;
     dateBefore?: string | Date;
-    limit: number;
+    limit?: number;
 }
 
 export default function RemoteSpecialistDiagnosis() {
@@ -42,7 +43,7 @@ export default function RemoteSpecialistDiagnosis() {
     const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState<ITask[]>([]);
     const [taskCount, setTaskCount] = useState<number>(0);
-    const [activeTask, setActiveTask] = useState<ITask>();
+    const [task, setTask] = useState<ITask>();
     const [activeTaskIndex, setActiveTaskIndex] = useState<number>(0);
     const [nextTaskId, setNextTaskId] = useState<string | null>(null);
     const [prevTaskId, setPrevTaskId] = useState<string | null>(null);
@@ -81,18 +82,32 @@ export default function RemoteSpecialistDiagnosis() {
                 .finally(() => setLoading(false));
 
             // Get number of tasks before the current task
-            if (task?.authoredOn) {
-                params.query['authored-on'] = `lt${new Date(task?.authoredOn).toISOString()}`;
-            }
-            fetchFhirResource(session.accessToken, params)
-                .then((indexData: IBundle) => {
-                    const tasksBeforeCurrent = indexData.total ?? 0;
+            try {
+                if (task?.authoredOn) {
+                    params.query['authored-on'] = `lt${new Date(task?.authoredOn).toISOString()}`;
+                }
+                const indexData: IBundle = await fetchFhirResource(session.accessToken, params)
+                const tasksBeforeCurrent = indexData.total ?? 0;
 
-                    // Calculate current index (add 1 because index is 0-based)
-                    setActiveTaskIndex(tasksBeforeCurrent + 1);
-                })
-                .catch((error: any) => { console.log(error); message.error('Error fetching Tasks count') })
-                .finally(() => setLoading(false));
+                // Fetch tasks authored at same time
+                if (task?.authoredOn) {
+                    params.query['authored-on'] = `${new Date(task?.authoredOn).toISOString()}`;
+                }
+                delete params.query._summary;
+                const data: IBundle = await fetchFhirResource(session.accessToken, params)
+                const tasksAuthoredAtSameTime = getResourcesFromBundle<ITask>(data);
+                const index = tasksAuthoredAtSameTime.findIndex(t => t.id === task.id);
+
+                // Calculate current index (add 1 because index is 0-based)
+                setActiveTaskIndex(tasksBeforeCurrent + index + 1);
+            }
+            catch (error: any) {
+                console.log(error);
+                message.error('Error fetching Tasks count');
+            }
+            finally {
+                setLoading(false)
+            }
         }
     }
 
@@ -104,7 +119,7 @@ export default function RemoteSpecialistDiagnosis() {
                     id: taskId
                 }
                 const taskData: ITask = await fetchFhirSingleResource(session?.accessToken, payload)
-                setActiveTask(taskData);
+                setTask(taskData);
                 fetchTaskIndex(taskData)
                 return taskData;
             }
@@ -119,20 +134,38 @@ export default function RemoteSpecialistDiagnosis() {
         const currentTask = await fetchTask(taskId);
 
         if (currentTask) {
-            const nextTask = await searchTasks({
+            // Get tasks authored on the same time and find previous next from it
+            const sameTimeAuthoredTasks = await searchTasks({
                 sort: 'authored-on,_lastUpdated',
-                dateAfter: currentTask.authoredOn,
-                limit: 1
+                dateAt: currentTask.authoredOn,
             });
+            const currentTaskIndex = sameTimeAuthoredTasks?.findIndex(t => t.id === taskId) ?? -1;
 
-            const prevTask = await searchTasks({
-                sort: '-authored-on,-_lastUpdated',
-                dateBefore: currentTask.authoredOn,
-                limit: 1
-            });
-
-            setNextTaskId(nextTask && nextTask[0]?.id || null);
-            setPrevTaskId(prevTask && prevTask[0]?.id || null);
+            let updatedPrevTaskId, updatedNextTaskId
+            if (sameTimeAuthoredTasks?.length && currentTaskIndex >= 0) {
+                updatedPrevTaskId = sameTimeAuthoredTasks[currentTaskIndex - 1]?.id || null;
+                updatedNextTaskId = sameTimeAuthoredTasks[currentTaskIndex + 1]?.id || null;
+                setPrevTaskId(updatedPrevTaskId || null);
+                setNextTaskId(updatedNextTaskId || null);
+            }
+            // If prev task not found from same authored date tasks, then find with date less than current task
+            if (updatedPrevTaskId === null) {
+                const prevTask = await searchTasks({
+                    sort: '-authored-on,-_lastUpdated',
+                    dateBefore: currentTask.authoredOn,
+                    limit: 1
+                });
+                setPrevTaskId(prevTask && prevTask[0]?.id || null);
+            }
+            // If next task not found from same authored date tasks, then find with date greater than current task
+            if (updatedNextTaskId === null) {
+                const nextTask = await searchTasks({
+                    sort: 'authored-on,_lastUpdated',
+                    dateAfter: currentTask.authoredOn,
+                    limit: 1
+                });
+                setNextTaskId(nextTask && nextTask[0]?.id || null);
+            }
         }
     }
 
@@ -143,9 +176,12 @@ export default function RemoteSpecialistDiagnosis() {
                     owner: `Practitioner/${session?.resourceId}`,
                     status: searchParams.get('status') ?? 'requested',
                     _sort: params.sort,
-                    _count: params.limit.toString(),
                 };
+                if (params.limit) {
+                    queryParams._count = params.limit.toString();
+                }
 
+                if (params.dateAt) queryParams['authored-on'] = `${new Date(params.dateAt).toISOString()}`;
                 if (params.dateAfter) queryParams['authored-on'] = `gt${new Date(params.dateAfter).toISOString()}`;
                 if (params.dateBefore) queryParams['authored-on'] = `lt${new Date(params.dateBefore).toISOString()}`;
 
@@ -158,7 +194,6 @@ export default function RemoteSpecialistDiagnosis() {
             }
         }
     }
-
     // useEffect(() => {
     //     if (session?.accessToken && !tasks?.length) {
     //         const params = {
@@ -195,10 +230,10 @@ export default function RemoteSpecialistDiagnosis() {
 
     useEffect(() => {
         // When id/index changes
-        if (session?.accessToken && activeTask?.id) {
+        if (session?.accessToken && task?.id) {
             // Fetch encounter
-            const [encounterResourceType, encounterId] = activeTask?.encounter?.reference?.split('/') ?? []
-            const [questionnaireResourceType, questionnaireId] = activeTask?.focus?.reference?.split('/') ?? []
+            const [encounterResourceType, encounterId] = task?.encounter?.reference?.split('/') ?? []
+            const [questionnaireResourceType, questionnaireId] = task?.focus?.reference?.split('/') ?? []
 
             Promise.all([
                 fetchFhirResourceEverything(session?.accessToken, { resourceType: encounterResourceType, id: encounterId }),
@@ -215,13 +250,13 @@ export default function RemoteSpecialistDiagnosis() {
                     setQuestionnaire(ques);
                     setPatient(bundledData.filter(bd => bd.resourceType === 'Patient')[0]);
                     // Get the submitted question response as well when the task is completed
-                    if (activeTask.status === 'completed' && ques?.url) {
+                    if (task.status === 'completed' && ques?.url) {
 
                         const qResponse = await fetchFhirResource(session?.accessToken as string, {
                             resourceType: 'QuestionnaireResponse',
                             query: {
                                 questionnaire: ques.url,
-                                encounter: activeTask.encounter?.reference,
+                                encounter: task.encounter?.reference,
                                 author: `Practitioner/${session?.resourceId}`,
                             }
                         }).catch(e => console.log('Error fetching QuestionnaireResponse'));
@@ -234,7 +269,7 @@ export default function RemoteSpecialistDiagnosis() {
                 })
                 .finally(() => setLoading(false));
         }
-    }, [activeTask?.id])
+    }, [task?.id])
 
     // const onClickPrevious = () => {
     //     if (activeTaskIndex > 0) {
@@ -291,10 +326,10 @@ export default function RemoteSpecialistDiagnosis() {
                 message.error('There are no senior specialist available for the second opinion');
             }
             else {
-                if (activeTask) {
+                if (task) {
                     // update status to completed
                     const taskPayload: ITask = {
-                        ...activeTask,
+                        ...task,
                         owner: foundParameter.valueReference
                     }
                     await updateFhirResource(session?.accessToken as string, taskPayload);
@@ -313,7 +348,7 @@ export default function RemoteSpecialistDiagnosis() {
     }
 
     const onSubmit = async (answers: { [key: string]: NonNullable<NonNullable<IQuestionnaire['item']>[number]['answerOption']>[number] }) => {
-        if (activeTask) {
+        if (task) {
             setSubmitting(true);
 
             try {
@@ -328,9 +363,9 @@ export default function RemoteSpecialistDiagnosis() {
                     id: v4(),
                     questionnaire: questionnaire?.url,
                     status: 'completed',
-                    subject: activeTask.for,
-                    author: activeTask.owner,
-                    encounter: activeTask.encounter,
+                    subject: task.for,
+                    author: task.owner,
+                    encounter: task.encounter,
                     item,
                     authored: new Date().toISOString(),
                 }
@@ -368,7 +403,7 @@ export default function RemoteSpecialistDiagnosis() {
                 });
                 // update status to completed
                 const taskPayload: ITask = {
-                    ...activeTask,
+                    ...task,
                     status: 'completed'
                 }
 
@@ -414,7 +449,7 @@ export default function RemoteSpecialistDiagnosis() {
                     </div>
                     <div className="text-black text-base font-normal">Previous</div>
                 </button>
-                <p className="text-black text-base font-normal border-l border-r px-3 border-gray-100 inline-flex align-center justify-center align-bottom	leading-8">Case {activeTaskIndex}/{taskCount}</p>
+                <p className="min-w-[110px] text-black text-base font-normal border-l border-r px-3 border-gray-100 inline-flex align-center justify-center align-bottom leading-8">Case {activeTaskIndex ? `${activeTaskIndex}/${taskCount}` : ' - '}</p>
                 <button className="w-[70px] h-8 p-1 bg-gray-25 rounded justify-start items-center gap-1 inline-flex disabled:opacity-50" onClick={() => nextTaskId && navigateToTask(nextTaskId)} disabled={activeTaskIndex === (taskCount ?? 0)}>
                     <div className="text-black text-base font-normal">Next</div>
                     <div className="w-6 h-6 relative">
@@ -447,7 +482,7 @@ export default function RemoteSpecialistDiagnosis() {
                         id={id as string}
                         questionnaire={questionnaire}
                         questionResponse={questionResponse}
-                        status={(activeTask?.status ?? '') as IQuestionnaire['status'] | 'completed' | ''}
+                        status={(task?.status ?? '') as IQuestionnaire['status'] | 'completed' | ''}
                         onSubmit={onSubmit}
                         sendForSecondOpinion={sendForSecondOpinion}
                         allowSecondOpinion={session?.userType === REMOTE_SPECIALIST_USER_TYPE_CODE}
