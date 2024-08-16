@@ -68,7 +68,7 @@ export default function RemoteSpecialistDiagnosis() {
                 query: {
                     owner: `Practitioner/${session?.resourceId}`,
                     status: searchParams.get('status') ?? 'requested',
-                    _sort: 'authored-on,_id',
+                    _sort: 'authored-on,_lastUpdated',
                     _count: '1',
                     _summary: 'count',
                 }
@@ -120,13 +120,13 @@ export default function RemoteSpecialistDiagnosis() {
 
         if (currentTask) {
             const nextTask = await searchTasks({
-                sort: 'authored-on,_id',
+                sort: 'authored-on,_lastUpdated',
                 dateAfter: currentTask.authoredOn,
                 limit: 1
             });
 
             const prevTask = await searchTasks({
-                sort: '-authored-on,-_id',
+                sort: '-authored-on,-_lastUpdated',
                 dateBefore: currentTask.authoredOn,
                 limit: 1
             });

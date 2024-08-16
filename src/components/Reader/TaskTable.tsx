@@ -41,7 +41,10 @@ const TaskTable = ({ loading, data, currentPage, itemsPerPage, totalItems, onPag
                     : data && data?.length > 0
                         ? data?.map((task, i) => (
                             <li key={i} className="flex items-center justify-between mb-2 border-b last:border-b-0 border-gray-3 py-2 px-4">
+                                <span className="font-normal text-gray-900 text-base">{i + 1}</span>
                                 <span className="font-normal text-gray-900 text-base">{task?.id}</span>
+                                <span className="font-normal text-gray-900 text-base">{task?.authoredOn}</span>
+                                <span className="font-normal text-gray-900 text-base">{task?.meta?.lastUpdated}</span>
                                 <div className='w-[100px]'>
                                     <button onClick={() => { onClick(task.id as string); }} className="bg-primary-400 text-white text-sm font-semilight py-1 px-4 rounded">
                                         View
