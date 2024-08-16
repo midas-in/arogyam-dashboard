@@ -62,7 +62,7 @@ export default function ReaderDiagnosis() {
                 query: {
                     owner: `Practitioner/${session?.resourceId}`,
                     status: searchParams.get('status') ?? 'requested',
-                    _sort: 'authored-on,_id',
+                    _sort: 'authored-on,_lastUpdated',
                     _count: 1,
                     _summary: 'count',
                 }
@@ -118,13 +118,11 @@ export default function ReaderDiagnosis() {
                 dateBefore: currentTask.authoredOn,
                 limit: 1
             });
-            console.log('prevTask', prevTask);
             const nextTask = await searchTasks({
                 sort: 'authored-on,_lastUpdated',
                 dateAfter: currentTask.authoredOn,
                 limit: 1
             });
-            console.log('nextTask', nextTask);
             setNextTaskId(nextTask && nextTask[0]?.id || null);
             setPrevTaskId(prevTask && prevTask[0]?.id || null);
         }
@@ -140,8 +138,8 @@ export default function ReaderDiagnosis() {
                     _count: params.limit.toString(),
                 };
 
-                if (params.dateAfter) queryParams['authored-on'] = `ge${new Date(params.dateAfter).toISOString()}`;
-                if (params.dateBefore) queryParams['authored-on'] = `le${new Date(params.dateBefore).toISOString()}`;
+                if (params.dateAfter) queryParams['authored-on'] = `gt${new Date(params.dateAfter).toISOString()}`;
+                if (params.dateBefore) queryParams['authored-on'] = `lt${new Date(params.dateBefore).toISOString()}`;
 
                 const data = await fetchFhirResource(session.accessToken, { resourceType: 'Task', query: queryParams });
                 return getResourcesFromBundle<ITask>(data);

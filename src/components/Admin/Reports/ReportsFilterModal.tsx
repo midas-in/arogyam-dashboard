@@ -64,7 +64,7 @@ const ReportsFilterModal = ({ setFilter }: { setFilter: (params: any) => void })
   }
 
   useEffect(() => {
-    if (!filterQuestionnaire?.length && session?.accessToken) {
+    if (session?.accessToken) {
       fetchFilterOptions();
     }
   }, [session?.accessToken])
