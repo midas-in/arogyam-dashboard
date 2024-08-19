@@ -30,6 +30,7 @@ export default function ReaderTasks() {
                 query: {
                     owner: `Practitioner/${session?.resourceId}`,
                     status: ['requested', 'completed'][activeTabIndex],
+                    _sort: 'authored-on,_lastUpdated',
                     _count: limit,
                     _getpagesoffset: (currentPage - 1) * limit,
                 }
